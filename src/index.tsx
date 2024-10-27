@@ -1,34 +1,14 @@
 import React, { useEffect, useState } from 'react';
 
 export interface CustomCursorProps {
-  /**
-   * Custom content to be rendered as cursor
-   */
   children?: React.ReactNode;
-  /**
-   * Additional CSS classes
-   */
   className?: string;
-  /**
-   * Custom styles to apply to cursor container
-   */
   style?: React.CSSProperties;
-  /**
-   * Offset X position from actual cursor (in pixels)
-   */
   offsetX?: number;
-  /**
-   * Offset Y position from actual cursor (in pixels)
-   */
   offsetY?: number;
-  /**
-   * Z-index for the cursor element
-   */
   zIndex?: number;
-  /**
-   * Smooth factor for cursor movement (1 = instant, higher = smoother)
-   */
   smoothFactor?: number;
+  containerRef?: React.RefObject<HTMLElement>;
 }
 
 export const CustomCursor: React.FC<CustomCursorProps> = ({
@@ -39,21 +19,64 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
   offsetY = 0,
   zIndex = 9999,
   smoothFactor = 1,
+  containerRef,
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [targetPosition, setTargetPosition] = useState({ x: 0, y: 0 });
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const updateTargetPosition = (e: MouseEvent) => {
-      setTargetPosition({ 
-        x: e.clientX + offsetX, 
-        y: e.clientY + offsetY 
-      });
+      if (containerRef?.current) {
+        // Get container's bounding rect
+        const rect = containerRef.current.getBoundingClientRect();
+        
+        // Check if mouse is inside the container
+        const isInside = 
+          e.clientX >= rect.left &&
+          e.clientX <= rect.right &&
+          e.clientY >= rect.top &&
+          e.clientY <= rect.bottom;
+
+        setIsVisible(isInside);
+        
+        if (isInside) {
+          // Calculate position relative to container
+          setTargetPosition({
+            x: e.clientX - rect.left + offsetX,
+            y: e.clientY - rect.top + offsetY,
+          });
+        }
+      } else {
+        // Global positioning
+        setIsVisible(true);
+        setTargetPosition({
+          x: e.clientX + offsetX,
+          y: e.clientY + offsetY,
+        });
+      }
     };
 
-    document.addEventListener('mousemove', updateTargetPosition);
-    return () => document.removeEventListener('mousemove', updateTargetPosition);
-  }, [offsetX, offsetY]);
+    const handleMouseLeave = () => {
+      if (containerRef?.current) {
+        setIsVisible(false);
+      }
+    };
+
+    const element = containerRef?.current || document;
+    element.addEventListener('mousemove', updateTargetPosition as EventListener);
+    
+    if (containerRef?.current) {
+      containerRef.current.addEventListener('mouseleave', handleMouseLeave);
+    }
+
+    return () => {
+      element.removeEventListener('mousemove', updateTargetPosition as EventListener);
+      if (containerRef?.current) {
+        containerRef.current.removeEventListener('mouseleave', handleMouseLeave);
+      }
+    };
+  }, [containerRef, offsetX, offsetY]);
 
   useEffect(() => {
     if (smoothFactor === 1) {
@@ -74,10 +97,12 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
     return () => cancelAnimationFrame(animationFrameId);
   }, [targetPosition, smoothFactor]);
 
+  if (!isVisible) return null;
+
   return (
     <div
       style={{
-        position: 'fixed',
+        position: containerRef ? 'absolute' : 'fixed',
         top: 0,
         left: 0,
         transform: `translate(${position.x}px, ${position.y}px)`,
@@ -89,19 +114,9 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
       className={className}
       aria-hidden="true"
     >
-      <div className='random-comp'      style={{
-        width: '20px',
-        height: '20px',
-        backgroundColor: '#3b82f6',
-        borderRadius: '50%',
-        transform: 'translate(-50%, -50%)'
-      }}>
-
-      </div>
       {children}
     </div>
   );
 };
 
-// Export the default component
 export default CustomCursor;
