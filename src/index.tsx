@@ -97,20 +97,40 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
     return () => cancelAnimationFrame(animationFrameId);
   }, [targetPosition, smoothFactor]);
 
+  // Add a CSS class for the animation
+  const cursorStyle: React.CSSProperties = {
+    position: containerRef ? 'absolute' : 'fixed',
+    top: 0,
+    left: 0,
+    transform: `translate(${position.x}px, ${position.y}px)`,
+    pointerEvents: 'none' as const, // Type assertion to fix the error
+    zIndex,
+    opacity: 1,
+    animation: 'cursorFadeIn 0.3s ease-out',
+    ...style,
+  };
+
+  // Add the keyframes animation
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = `
+    @keyframes cursorFadeIn {
+      from {
+        opacity: 0;
+        transform: translate(${position.x}px, ${position.y}px) scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: translate(${position.x}px, ${position.y}px) scale(1);
+      }
+    }
+  `;
+  document.head.appendChild(styleSheet);
+
   if (!isVisible) return null;
 
   return (
     <div
-      style={{
-        position: containerRef ? 'absolute' : 'fixed',
-        top: 0,
-        left: 0,
-        transform: `translate(${position.x}px, ${position.y}px)`,
-        pointerEvents: 'none',
-        zIndex,
-        transition: smoothFactor === 1 ? 'none' : undefined,
-        ...style,
-      }}
+      style={cursorStyle}
       className={className}
       aria-hidden="true"
     >
