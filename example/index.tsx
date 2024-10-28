@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 import { CustomCursor } from '../src';
-
+console.log('CustomCursor example');
 const CustomCursorButton: React.FC<{ text: string }> = ({ text }) => {
   return (
     <div 
@@ -22,11 +22,38 @@ const CustomCursorButton: React.FC<{ text: string }> = ({ text }) => {
 };
 
 const App = () => {
-  const [cursorMode, setCursorMode] = useState<'simple' | 'button' | 'hover'>('simple');
+  // Separate global and container cursor modes
+  const [globalCursorMode, setGlobalCursorMode] = useState<'simple' | 'button' | 'hover'>('simple');
+  const [containerCursorMode, setContainerCursorMode] = useState<'simple' | 'button' | 'hover'>('simple');
   const mainContainerRef = useRef<HTMLDivElement>(null);
   const secondContainerRef = useRef<HTMLDivElement>(null);
   const [useContainer, setUseContainer] = useState(false);
   const [hoveredSecond, setHoveredSecond] = useState(false);
+
+  // Add debug states
+  const [isMouseInContainer1, setIsMouseInContainer1] = useState(false);
+  const [cursor1Position, setCursor1Position] = useState({ x: 0, y: 0 });
+  const [lastGlobalPosition, setLastGlobalPosition] = useState({ x: 0, y: 0 });
+
+  // Throttle the debug position updates to prevent infinite loops
+  const updateDebugPosition = useCallback((x: number, y: number) => {
+    // Only update if values have changed significantly (e.g., by 1 pixel)
+    setCursor1Position(prev => {
+      if (Math.abs(prev.x - x) < 1 && Math.abs(prev.y - y) < 1) {
+        return prev;
+      }
+      return { x: Math.round(x), y: Math.round(y) };
+    });
+  }, []);
+
+  const updateGlobalPosition = useCallback((x: number, y: number) => {
+    setLastGlobalPosition(prev => {
+      if (Math.abs(prev.x - x) < 1 && Math.abs(prev.y - y) < 1) {
+        return prev;
+      }
+      return { x: Math.round(x), y: Math.round(y) };
+    });
+  }, []);
 
   const renderCursor = (type: 'simple' | 'button' | 'hover', text?: string) => {
     switch(type) {
@@ -56,17 +83,48 @@ const App = () => {
     }
   };
 
+  // Debug info component
+  const DebugInfo = () => (
+    <div style={{ 
+      position: 'fixed', 
+      top: 10, 
+      right: 10, 
+      background: 'rgba(0,0,0,0.8)', 
+      color: 'white', 
+      padding: '1rem',
+      borderRadius: '0.5rem',
+      fontSize: '12px',
+      zIndex: 10000
+    }}>
+      <pre>
+        {JSON.stringify({
+          mode: useContainer ? 'Container' : 'Global',
+          isMouseInContainer1,
+          cursor1Position,
+          lastGlobalPosition,
+          globalCursorMode,
+          containerCursorMode
+        }, null, 2)}
+      </pre>
+    </div>
+  );
+
   return (
     <div style={{ 
-      cursor: useContainer ? 'default' : 'none',
+      cursor: 'none',
       height: '100vh',
       background: 'linear-gradient(45deg, #f3f4f6, #e5e7eb)',
       padding: '2rem'
     }}>
-      {/* Global cursor only when not using containers */}
-      {!useContainer && (
-        <CustomCursor smoothFactor={2}>
-          {renderCursor(cursorMode)}
+      <DebugInfo />
+      
+      {/* Global cursor */}
+      {!useContainer && !isMouseInContainer1 && (
+        <CustomCursor 
+          smoothFactor={2}
+          onMove={updateGlobalPosition}
+        >
+          {renderCursor(globalCursorMode)}
         </CustomCursor>
       )}
 
@@ -74,14 +132,17 @@ const App = () => {
       <p>This demo shows how you can use any React component as a cursor!</p>
       
       {/* Control Buttons */}
-      <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+      <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem', marginBottom: '2rem' }}>
         <button 
-          onClick={() => setCursorMode('simple')}
+          onClick={() => {
+            setGlobalCursorMode('simple');
+            setContainerCursorMode('simple');
+          }}
           style={{
             padding: '1rem 2rem',
             border: 'none',
             borderRadius: '0.5rem',
-            backgroundColor: cursorMode === 'simple' ? '#3b82f6' : '#94a3b8',
+            backgroundColor: globalCursorMode === 'simple' ? '#3b82f6' : '#94a3b8',
             color: 'white',
             cursor: 'pointer',
             transition: 'all 0.2s ease'
@@ -91,12 +152,15 @@ const App = () => {
         </button>
         
         <button 
-          onClick={() => setCursorMode('button')}
+          onClick={() => {
+            setGlobalCursorMode('button');
+            setContainerCursorMode('button');
+          }}
           style={{
             padding: '1rem 2rem',
             border: 'none',
             borderRadius: '0.5rem',
-            backgroundColor: cursorMode === 'button' ? '#3b82f6' : '#94a3b8',
+            backgroundColor: globalCursorMode === 'button' ? '#3b82f6' : '#94a3b8',
             color: 'white',
             cursor: 'pointer',
             transition: 'all 0.2s ease'
@@ -122,35 +186,37 @@ const App = () => {
       </div>
 
       {/* Container Demo Section */}
-      <div 
-        style={{ 
-          display: 'flex',
-          gap: '2rem',
-          marginTop: '2rem'
-        }}
-      >
+      <div style={{ 
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '2rem'
+      }}>
         {/* First Container */}
         <div 
           ref={mainContainerRef}
+          onMouseEnter={() => setIsMouseInContainer1(true)}
+          onMouseLeave={() => setIsMouseInContainer1(false)}
           style={{ 
-            flex: 1,
             position: 'relative',
             padding: '2rem',
             backgroundColor: 'white',
             borderRadius: '1rem',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            cursor: useContainer ? 'none' : 'default'
+            cursor: 'none',
+            marginTop: '2rem'
           }}
         >
-          {useContainer && (
+          {/* Container cursor */}
+          {(useContainer || isMouseInContainer1) && (
             <CustomCursor 
               containerRef={mainContainerRef} 
               smoothFactor={2}
+              onMove={updateDebugPosition}
             >
-              {renderCursor(cursorMode, "Container 1!")}
+              {renderCursor(containerCursorMode, "Container 1!")}
             </CustomCursor>
           )}
-
+          
           <h2>First Container</h2>
           <p>This container follows the global cursor mode!</p>
           
@@ -162,8 +228,8 @@ const App = () => {
               borderRadius: '0.5rem',
               cursor: 'none'
             }}
-            onMouseEnter={() => setCursorMode('hover')}
-            onMouseLeave={() => setCursorMode('simple')}
+            onMouseEnter={() => setContainerCursorMode('hover')}
+            onMouseLeave={() => setContainerCursorMode('simple')}
           >
             <h3>Interactive Area</h3>
             <p>Hover over me to see the cursor change!</p>
@@ -174,13 +240,13 @@ const App = () => {
         <div 
           ref={secondContainerRef}
           style={{ 
-            flex: 1,
             position: 'relative',
             padding: '2rem',
             backgroundColor: 'white',
             borderRadius: '1rem',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            cursor: 'none'
+            cursor: 'none',
+            marginTop: '2rem'
           }}
         >
           <CustomCursor 
@@ -192,7 +258,6 @@ const App = () => {
               height: '40px',
               border: '2px solid #ef4444',
               borderRadius: '50%',
-              // Combine transform properties to maintain centering while scaling
               transform: `translate(-50%, -50%) scale(${hoveredSecond ? 1.5 : 1})`,
               transition: 'all 0.2s ease',
             }} />

@@ -9,6 +9,7 @@ export interface CustomCursorProps {
   zIndex?: number;
   smoothFactor?: number;
   containerRef?: React.RefObject<HTMLElement>;
+  onMove?: (x: number, y: number) => void;
 }
 
 export const CustomCursor: React.FC<CustomCursorProps> = ({
@@ -20,6 +21,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
   zIndex = 9999,
   smoothFactor = 1,
   containerRef,
+  onMove,
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [targetPosition, setTargetPosition] = useState({ x: 0, y: 0 });
@@ -79,52 +81,83 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
   }, [containerRef, offsetX, offsetY]);
 
   useEffect(() => {
+    let animationFrameId: number;
+
     if (smoothFactor === 1) {
       setPosition(targetPosition);
       return;
     }
 
     const smoothing = () => {
-      setPosition(prev => ({
-        x: prev.x + (targetPosition.x - prev.x) / smoothFactor,
-        y: prev.y + (targetPosition.y - prev.y) / smoothFactor
-      }));
+      setPosition(prev => {
+        // Only update if the difference is significant
+        const dx = targetPosition.x - prev.x;
+        const dy = targetPosition.y - prev.y;
+        
+        if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) {
+          return prev;
+        }
+
+        return {
+          x: prev.x + dx / smoothFactor,
+          y: prev.y + dy / smoothFactor
+        };
+      });
 
       animationFrameId = requestAnimationFrame(smoothing);
     };
 
-    let animationFrameId = requestAnimationFrame(smoothing);
-    return () => cancelAnimationFrame(animationFrameId);
+    animationFrameId = requestAnimationFrame(smoothing);
+
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
   }, [targetPosition, smoothFactor]);
 
-  // Add a CSS class for the animation
+  // Create keyframes animation only once when component mounts
+  useEffect(() => {
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = `
+      @keyframes cursorFadeIn {
+        from {
+          opacity: 0;
+          transform: translate(var(--cursor-x), var(--cursor-y)) scale(0.8);
+        }
+        to {
+          opacity: 1;
+          transform: translate(var(--cursor-x), var(--cursor-y)) scale(1);
+        }
+      }
+    `;
+    document.head.appendChild(styleSheet);
+
+    return () => {
+      document.head.removeChild(styleSheet);
+    };
+  }, []); // Empty dependency array - runs once on mount
+
+  // Update the cursor style to use CSS variables
   const cursorStyle: React.CSSProperties = {
     position: containerRef ? 'absolute' : 'fixed',
     top: 0,
     left: 0,
     transform: `translate(${position.x}px, ${position.y}px)`,
-    pointerEvents: 'none' as const, // Type assertion to fix the error
+    pointerEvents: 'none',
     zIndex,
     opacity: 1,
     animation: 'cursorFadeIn 0.3s ease-out',
+    '--cursor-x': `${position.x}px`,
+    '--cursor-y': `${position.y}px`,
     ...style,
-  };
+  } as React.CSSProperties; // Type assertion needed for CSS variables
 
-  // Add the keyframes animation
-  const styleSheet = document.createElement('style');
-  styleSheet.textContent = `
-    @keyframes cursorFadeIn {
-      from {
-        opacity: 0;
-        transform: translate(${position.x}px, ${position.y}px) scale(0.8);
-      }
-      to {
-        opacity: 1;
-        transform: translate(${position.x}px, ${position.y}px) scale(1);
-      }
+  useEffect(() => {
+    if (onMove) {
+      onMove(position.x, position.y);
     }
-  `;
-  document.head.appendChild(styleSheet);
+  }, [position, onMove]);
 
   if (!isVisible) return null;
 
