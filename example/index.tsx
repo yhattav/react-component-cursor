@@ -22,23 +22,38 @@ const CustomCursorButton: React.FC<{ text: string }> = ({ text }) => {
 };
 
 const App = () => {
-  const [cursorMode, setCursorMode] = useState<'simple' | 'button'>('simple');
+  const [cursorMode, setCursorMode] = useState<'simple' | 'button' | 'hover'>('simple');
   const mainContainerRef = useRef<HTMLDivElement>(null);
   const secondContainerRef = useRef<HTMLDivElement>(null);
   const [useContainer, setUseContainer] = useState(false);
+  const [hoveredSecond, setHoveredSecond] = useState(false);
 
-  const renderCursor = (type: 'simple' | 'button', text?: string) => {
-    return type === 'simple' ? (
-      <div style={{
-        width: '20px',
-        height: '20px',
-        backgroundColor: '#3b82f6',
-        borderRadius: '50%',
-        transform: 'translate(-50%, -50%)'
-      }} />
-    ) : (
-      <CustomCursorButton text={text || "Click me!"} />
-    );
+  const renderCursor = (type: 'simple' | 'button' | 'hover', text?: string) => {
+    switch(type) {
+      case 'button':
+        return <CustomCursorButton text={text || "Click me!"} />;
+      case 'hover':
+        return (
+          <div style={{
+            width: '60px',
+            height: '60px',
+            border: '2px solid #3b82f6',
+            borderRadius: '50%',
+            transform: 'translate(-50%, -50%)',
+            transition: 'all 0.2s ease'
+          }} />
+        );
+      default:
+        return (
+          <div style={{
+            width: '20px',
+            height: '20px',
+            backgroundColor: '#3b82f6',
+            borderRadius: '50%',
+            transform: 'translate(-50%, -50%)'
+          }} />
+        );
+    }
   };
 
   return (
@@ -139,15 +154,19 @@ const App = () => {
           <h2>First Container</h2>
           <p>This container follows the global cursor mode!</p>
           
-          <div style={{ 
-            marginTop: '1rem',
-            padding: '1.5rem',
-            backgroundColor: '#f8fafc',
-            borderRadius: '0.5rem',
-            cursor: 'none'
-          }}>
+          <div 
+            style={{ 
+              marginTop: '1rem',
+              padding: '1.5rem',
+              backgroundColor: '#f8fafc',
+              borderRadius: '0.5rem',
+              cursor: 'none'
+            }}
+            onMouseEnter={() => setCursorMode('hover')}
+            onMouseLeave={() => setCursorMode('simple')}
+          >
             <h3>Interactive Area</h3>
-            <p>Try moving your cursor here!</p>
+            <p>Hover over me to see the cursor change!</p>
           </div>
         </div>
 
@@ -173,22 +192,28 @@ const App = () => {
               height: '40px',
               border: '2px solid #ef4444',
               borderRadius: '50%',
-              transform: 'translate(-50%, -50%)'
+              // Combine transform properties to maintain centering while scaling
+              transform: `translate(-50%, -50%) scale(${hoveredSecond ? 1.5 : 1})`,
+              transition: 'all 0.2s ease',
             }} />
           </CustomCursor>
 
           <h2>Second Container</h2>
-          <p>This container always has its own cursor!</p>
+          <p>This container has its own independent cursor!</p>
           
-          <div style={{ 
-            marginTop: '1rem',
-            padding: '1.5rem',
-            backgroundColor: '#f8fafc',
-            borderRadius: '0.5rem',
-            cursor: 'none'
-          }}>
-            <h3>Hover me!</h3>
-            <p>I have a different cursor style</p>
+          <div 
+            style={{ 
+              marginTop: '1rem',
+              padding: '1.5rem',
+              backgroundColor: '#f8fafc',
+              borderRadius: '0.5rem',
+              cursor: 'none'
+            }}
+            onMouseEnter={() => setHoveredSecond(true)}
+            onMouseLeave={() => setHoveredSecond(false)}
+          >
+            <h3>Hover Effect</h3>
+            <p>Watch the cursor scale up when hovering here!</p>
           </div>
         </div>
       </div>
