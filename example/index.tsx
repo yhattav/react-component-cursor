@@ -111,14 +111,15 @@ const App = () => {
 
   return (
     <div style={{ 
-      cursor: 'none',
+      // Only hide the cursor globally when NOT in container mode
+      cursor: useContainer ? 'default' : 'none',
       height: '100vh',
       background: 'linear-gradient(45deg, #f3f4f6, #e5e7eb)',
       padding: '2rem'
     }}>
       <DebugInfo />
       
-      {/* Global cursor */}
+      {/* Global cursor - only show when not in container mode */}
       {!useContainer && !isMouseInContainer1 && (
         <CustomCursor 
           smoothFactor={2}
@@ -202,7 +203,8 @@ const App = () => {
             backgroundColor: 'white',
             borderRadius: '1rem',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            cursor: 'none',
+            // Only hide cursor in container when in container mode or when global cursor is active
+            cursor: useContainer || !isMouseInContainer1 ? 'none' : 'default',
             marginTop: '2rem'
           }}
         >
@@ -245,7 +247,8 @@ const App = () => {
             backgroundColor: 'white',
             borderRadius: '1rem',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            cursor: 'none',
+            // Only hide cursor in container when in container mode
+            cursor: useContainer ? 'none' : 'default',
             marginTop: '2rem'
           }}
         >
