@@ -35,16 +35,16 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "react-cursor-component",
+  "name": "react-component-cursor",
   "author": "yhattav",
-  "module": "dist/react-cursor-component.esm.js",
+  "module": "dist/react-component-cursor.esm.js",
   "size-limit": [
     {
-      "path": "dist/react-cursor-component.cjs.production.min.js",
+      "path": "dist/react-component-cursor.cjs.production.min.js",
       "limit": "10 KB"
     },
     {
-      "path": "dist/react-cursor-component.esm.js",
+      "path": "dist/react-component-cursor.esm.js",
       "limit": "10 KB"
     }
   ],
