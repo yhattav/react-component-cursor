@@ -14,19 +14,22 @@
     "start": "tsdx watch",
     "build": "tsdx build",
     "test": "tsdx test --passWithNoTests",
-    "lint": "tsdx lint",
+    "lint": "tsdx lint src",
+    "lint-fix": "tsdx lint src --fix",
     "prepare": "tsdx build",
     "size": "size-limit",
     "analyze": "size-limit --why",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "type-check": "tsc --noEmit",
+    "pre-commit": "npm run lint-fix && npm run type-check"
   },
   "peerDependencies": {
     "react": ">=16"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "tsdx lint"
+      "pre-commit": "npm run pre-commit"
     }
   },
   "prettier": {
@@ -62,8 +65,13 @@
     "@storybook/react": "^8.3.6",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
     "babel-loader": "^9.2.1",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^8.10.0",
     "husky": "^9.1.6",
+    "prettier": "^2.8.8",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-is": "^18.3.1",

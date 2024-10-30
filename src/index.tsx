@@ -23,7 +23,10 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
   containerRef,
   onMove,
 }) => {
-  const [position, setPosition] = useState<{ x: number | null; y: number | null }>({ x: null, y: null });
+  const [position, setPosition] = useState<{
+    x: number | null;
+    y: number | null;
+  }>({ x: null, y: null });
   const [targetPosition, setTargetPosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
 
@@ -31,14 +34,14 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
     const updateTargetPosition = (e: MouseEvent) => {
       if (containerRef?.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        const isInside = 
+        const isInside =
           e.clientX >= rect.left &&
           e.clientX <= rect.right &&
           e.clientY >= rect.top &&
           e.clientY <= rect.bottom;
 
         setIsVisible(isInside);
-        
+
         if (isInside) {
           const newPosition = {
             x: e.clientX - rect.left + offsetX,
@@ -69,16 +72,25 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
     };
 
     const element = containerRef?.current || document;
-    element.addEventListener('mousemove', updateTargetPosition as EventListener);
-    
+    element.addEventListener(
+      'mousemove',
+      updateTargetPosition as EventListener
+    );
+
     if (containerRef?.current) {
       containerRef.current.addEventListener('mouseleave', handleMouseLeave);
     }
 
     return () => {
-      element.removeEventListener('mousemove', updateTargetPosition as EventListener);
+      element.removeEventListener(
+        'mousemove',
+        updateTargetPosition as EventListener
+      );
       if (containerRef?.current) {
-        containerRef.current.removeEventListener('mouseleave', handleMouseLeave);
+        containerRef.current.removeEventListener(
+          'mouseleave',
+          handleMouseLeave
+        );
       }
     };
   }, [containerRef, offsetX, offsetY, position.x, position.y]);
@@ -94,19 +106,19 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
     }
 
     const smoothing = () => {
-      setPosition(prev => {
+      setPosition((prev) => {
         if (prev.x === null || prev.y === null) return prev;
-        
+
         const dx = targetPosition.x - prev.x;
         const dy = targetPosition.y - prev.y;
-        
+
         if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) {
           return prev;
         }
 
         return {
           x: prev.x + dx / smoothFactor,
-          y: prev.y + dy / smoothFactor
+          y: prev.y + dy / smoothFactor,
         };
       });
 
@@ -166,11 +178,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
   } as React.CSSProperties;
 
   return (
-    <div
-      style={cursorStyle}
-      className={className}
-      aria-hidden="true"
-    >
+    <div style={cursorStyle} className={className} aria-hidden="true">
       {children}
     </div>
   );
