@@ -1,181 +1,137 @@
-# TSDX React w/ Storybook User Guide
+# React Component Cursor
 
-Congrats! You just saved yourself hours of work by bootstrapping this project with TSDX. Let’s get you oriented with what’s here and how to use it.
+A flexible and customizable React component for creating smooth, interactive custom cursors. This library allows you to replace the default cursor with any React component, supporting both global and container-specific cursor behaviors.
 
-> This TSDX setup is meant for developing React component libraries (not apps!) that can be published to NPM. If you’re looking to build a React-based app, you should use `create-react-app`, `razzle`, `nextjs`, `gatsby`, or `react-static`.
+## Features
 
-> If you’re new to TypeScript and React, checkout [this handy cheatsheet](https://github.com/sw-yx/react-typescript-cheatsheet/)
+- 🎯 Use any React component as a cursor
+- 🔄 Smooth cursor movement with configurable smoothing
+- 📦 Container-specific cursors
+- 🎨 Fully customizable styling
+- ⚡ Lightweight (<10KB)
+- 🔧 TypeScript support
+- 📱 Zero dependencies (except React)
 
-## Commands
-
-TSDX scaffolds your new library inside `/src`, and also sets up a [Parcel-based](https://parceljs.org) playground for it inside `/example`.
-
-The recommended workflow is to run TSDX in one terminal:
-
-```bash
-npm start # or yarn start
-```
-
-This builds to `/dist` and runs the project in watch mode so any edits you save inside `src` causes a rebuild to `/dist`.
-
-Then run either Storybook or the example playground:
-
-### Storybook
-
-Run inside another terminal:
+## Installation
 
 ```bash
-yarn storybook
+npm install react-component-cursor
+or
+yarn add react-component-cursor
 ```
+## Basic Usage
 
-This loads the stories from `./stories`.
 
-> NOTE: Stories should reference the components as if using the library, similar to the example playground. This means importing from the root project directory. This has been aliased in the tsconfig and the storybook webpack config as a helper.
-
-### Example
-
-Then run the example inside another:
-
-```bash
-cd example
-npm i # or yarn to install dependencies
-npm start # or yarn start
+```tsx
+import { CustomCursor } from 'react-component-cursor';
+function App() {
+return (
+<div style={{ cursor: 'none' }}>
+<CustomCursor>
+<div style={{
+width: '20px',
+height: '20px',
+backgroundColor: '#3b82f6',
+borderRadius: '50%',
+transform: 'translate(-50%, -50%)'
+}} />
+</CustomCursor>
+{/ Your app content /}
+</div>
+);
+}
 ```
+## Props
 
-The default example imports and live reloads whatever is in `/dist`, so if you are seeing an out of date component, make sure TSDX is running in watch mode like we recommend above. **No symlinking required**, we use [Parcel's aliasing](https://parceljs.org/module_resolution.html#aliases).
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The component to use as cursor |
+| `className` | `string` | `''` | Additional CSS classes |
+| `style` | `CSSProperties` | `{}` | Additional inline styles |
+| `offsetX` | `number` | `0` | Horizontal offset from cursor position |
+| `offsetY` | `number` | `0` | Vertical offset from cursor position |
+| `zIndex` | `number` | `9999` | Z-index of the cursor element |
+| `smoothFactor` | `number` | `1` | Movement smoothing (1 = no smoothing, higher = smoother) |
+| `containerRef` | `RefObject<HTMLElement>` | - | Reference to container element for bounded cursor |
+| `onMove` | `(x: number, y: number) => void` | - | Callback fired on cursor movement |
 
-To do a one-off build, use `npm run build` or `yarn build`.
+## Advanced Usage
 
-To run tests, use `npm test` or `yarn test`.
+### Container-Specific Cursor
 
-## Configuration
-
-Code quality is set up for you with `prettier`, `husky`, and `lint-staged`. Adjust the respective fields in `package.json` accordingly.
-
-### Jest
-
-Jest tests are set up to run with `npm test` or `yarn test`.
-
-### Bundle analysis
-
-Calculates the real cost of your library using [size-limit](https://github.com/ai/size-limit) with `npm run size` and visulize it with `npm run analyze`.
-
-#### Setup Files
-
-This is the folder structure we set up for you:
-
-```txt
-/example
-  index.html
-  index.tsx       # test your component here in a demo app
-  package.json
-  tsconfig.json
-/src
-  index.tsx       # EDIT THIS
-/test
-  blah.test.tsx   # EDIT THIS
-/stories
-  Thing.stories.tsx # EDIT THIS
-/.storybook
-  main.js
-  preview.js
-.gitignore
-package.json
-README.md         # EDIT THIS
-tsconfig.json
-```
-
-#### React Testing Library
-
-We do not set up `react-testing-library` for you yet, we welcome contributions and documentation on this.
-
-### Rollup
-
-TSDX uses [Rollup](https://rollupjs.org) as a bundler and generates multiple rollup configs for various module formats and build settings. See [Optimizations](#optimizations) for details.
-
-### TypeScript
-
-`tsconfig.json` is set up to interpret `dom` and `esnext` types, as well as `react` for `jsx`. Adjust according to your needs.
-
-## Continuous Integration
-
-### GitHub Actions
-
-Two actions are added by default:
-
-- `main` which installs deps w/ cache, lints, tests, and builds on all pushes against a Node and OS matrix
-- `size` which comments cost comparison of your library on every pull request using [size-limit](https://github.com/ai/size-limit)
-
-## Optimizations
-
-Please see the main `tsdx` [optimizations docs](https://github.com/palmerhq/tsdx#optimizations). In particular, know that you can take advantage of development-only optimizations:
-
-```js
-// ./types/index.d.ts
-declare var __DEV__: boolean;
-
-// inside your code...
-if (__DEV__) {
-  console.log('foo');
+```tsx
+function ContainerExample() {
+const containerRef = useRef<HTMLDivElement>(null);
+return (
+<div
+ref={containerRef}
+style={{
+position: 'relative',
+cursor: 'none'
+}}
+>
+<CustomCursor
+containerRef={containerRef}
+smoothFactor={2}
+>
+<div style={{
+width: '40px',
+height: '40px',
+border: '2px solid #ef4444',
+borderRadius: '50%',
+transform: 'translate(-50%, -50%)'
+}} />
+</CustomCursor>
+{/ Container content /}
+</div>
+);
 }
 ```
 
-You can also choose to install and use [invariant](https://github.com/palmerhq/tsdx#invariant) and [warning](https://github.com/palmerhq/tsdx#warning) functions.
+### Interactive Cursor
 
-## Module Formats
+```tsx
+function InteractiveCursor() {
+const [isHovered, setIsHovered] = useState(false);
+return (
+<div style={{ cursor: 'none' }}>
+<CustomCursor>
+<div style={{
+width: isHovered ? '60px' : '20px',
+height: isHovered ? '60px' : '20px',
+backgroundColor: '#3b82f6',
+borderRadius: '50%',
+transform: 'translate(-50%, -50%)',
+transition: 'all 0.2s ease'
+}} />
+</CustomCursor>
+<button
+onMouseEnter={() => setIsHovered(true)}
+onMouseLeave={() => setIsHovered(false)}
+>
+Hover me!
+</button>
+</div>
+);
+}
+```
 
-CJS, ESModules, and UMD module formats are supported.
+## Development
 
-The appropriate paths are configured in `package.json` and `dist/index.js` accordingly. Please report if any issues are found.
-
-## Deploying the Example Playground
-
-The Playground is just a simple [Parcel](https://parceljs.org) app, you can deploy it anywhere you would normally deploy that. Here are some guidelines for **manually** deploying with the Netlify CLI (`npm i -g netlify-cli`):
+This project was bootstrapped with [TSDX](https://github.com/jaredpalmer/tsdx).
 
 ```bash
-cd example # if not already in the example folder
-npm run build # builds to dist
-netlify deploy # deploy the dist folder
+Install dependencies
+npm install
+Start development server
+npm start
+Run tests
+npm test
+Build for production
+npm run build
+Run Storybook
+npm run storybook
 ```
+## License
 
-Alternatively, if you already have a git repo connected, you can set up continuous deployment with Netlify:
-
-```bash
-netlify init
-# build command: yarn build && cd example && yarn && yarn build
-# directory to deploy: example/dist
-# pick yes for netlify.toml
-```
-
-## Named Exports
-
-Per Palmer Group guidelines, [always use named exports.](https://github.com/palmerhq/typescript#exports) Code split inside your React app instead of your React library.
-
-## Including Styles
-
-There are many ways to ship styles, including with CSS-in-JS. TSDX has no opinion on this, configure how you like.
-
-For vanilla CSS, you can include it at the root directory and add it to the `files` section in your `package.json`, so that it can be imported separately by your users and run through their bundler's loader.
-
-## Publishing to NPM
-
-We recommend using [np](https://github.com/sindresorhus/np).
-
-## Usage with Lerna
-
-When creating a new package with TSDX within a project set up with Lerna, you might encounter a `Cannot resolve dependency` error when trying to run the `example` project. To fix that you will need to make changes to the `package.json` file _inside the `example` directory_.
-
-The problem is that due to the nature of how dependencies are installed in Lerna projects, the aliases in the example project's `package.json` might not point to the right place, as those dependencies might have been installed in the root of your Lerna project.
-
-Change the `alias` to point to where those packages are actually installed. This depends on the directory structure of your Lerna project, so the actual path might be different from the diff below.
-
-```diff
-   "alias": {
--    "react": "../node_modules/react",
--    "react-dom": "../node_modules/react-dom"
-+    "react": "../../../node_modules/react",
-+    "react-dom": "../../../node_modules/react-dom"
-   },
-```
-
-An alternative to fixing this problem would be to remove aliases altogether and define the dependencies referenced as aliases as dev dependencies instead. [However, that might cause other problems.](https://github.com/palmerhq/tsdx/issues/64)
+MIT © [yhattav](https://github.com/yhattav)
