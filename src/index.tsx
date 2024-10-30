@@ -23,17 +23,14 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
   containerRef,
   onMove,
 }) => {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState<{ x: number | null; y: number | null }>({ x: null, y: null });
   const [targetPosition, setTargetPosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const updateTargetPosition = (e: MouseEvent) => {
       if (containerRef?.current) {
-        // Get container's bounding rect
         const rect = containerRef.current.getBoundingClientRect();
-        
-        // Check if mouse is inside the container
         const isInside = 
           e.clientX >= rect.left &&
           e.clientX <= rect.right &&
@@ -43,19 +40,25 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
         setIsVisible(isInside);
         
         if (isInside) {
-          // Calculate position relative to container
-          setTargetPosition({
+          const newPosition = {
             x: e.clientX - rect.left + offsetX,
             y: e.clientY - rect.top + offsetY,
-          });
+          };
+          setTargetPosition(newPosition);
+          if (position.x === null || position.y === null) {
+            setPosition(newPosition);
+          }
         }
       } else {
-        // Global positioning
         setIsVisible(true);
-        setTargetPosition({
+        const newPosition = {
           x: e.clientX + offsetX,
           y: e.clientY + offsetY,
-        });
+        };
+        setTargetPosition(newPosition);
+        if (position.x === null || position.y === null) {
+          setPosition(newPosition);
+        }
       }
     };
 
@@ -78,9 +81,11 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
         containerRef.current.removeEventListener('mouseleave', handleMouseLeave);
       }
     };
-  }, [containerRef, offsetX, offsetY]);
+  }, [containerRef, offsetX, offsetY, position.x, position.y]);
 
   useEffect(() => {
+    if (position.x === null || position.y === null) return;
+
     let animationFrameId: number;
 
     if (smoothFactor === 1) {
@@ -90,7 +95,8 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
 
     const smoothing = () => {
       setPosition(prev => {
-        // Only update if the difference is significant
+        if (prev.x === null || prev.y === null) return prev;
+        
         const dx = targetPosition.x - prev.x;
         const dy = targetPosition.y - prev.y;
         
@@ -116,7 +122,6 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
     };
   }, [targetPosition, smoothFactor]);
 
-  // Create keyframes animation only once when component mounts
   useEffect(() => {
     const styleSheet = document.createElement('style');
     styleSheet.textContent = `
@@ -136,9 +141,16 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
     return () => {
       document.head.removeChild(styleSheet);
     };
-  }, []); // Empty dependency array - runs once on mount
+  }, []);
 
-  // Update the cursor style to use CSS variables
+  useEffect(() => {
+    if (onMove && position.x !== null && position.y !== null) {
+      onMove(position.x, position.y);
+    }
+  }, [position, onMove]);
+
+  if (!isVisible || position.x === null || position.y === null) return null;
+
   const cursorStyle: React.CSSProperties = {
     position: containerRef ? 'absolute' : 'fixed',
     top: 0,
@@ -151,15 +163,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
     '--cursor-x': `${position.x}px`,
     '--cursor-y': `${position.y}px`,
     ...style,
-  } as React.CSSProperties; // Type assertion needed for CSS variables
-
-  useEffect(() => {
-    if (onMove) {
-      onMove(position.x, position.y);
-    }
-  }, [position, onMove]);
-
-  if (!isVisible) return null;
+  } as React.CSSProperties;
 
   return (
     <div
