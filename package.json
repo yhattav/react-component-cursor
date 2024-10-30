@@ -35,7 +35,11 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "react-component-cursor",
+  "name": "@yhattav/react-component-cursor",
+  "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "author": "yhattav",
   "module": "dist/react-component-cursor.esm.js",
   "size-limit": [
