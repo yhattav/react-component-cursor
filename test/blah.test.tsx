@@ -1,11 +1,32 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import * as ReactDOM from 'react-dom';
-import { Default as Thing } from '../stories/Thing.stories';
+import { CustomCursor } from '../src';
 
-describe('Thing', () => {
-  it('renders without crashing', () => {
-    const div = document.createElement('div');
-    ReactDOM.render(<Thing />, div);
-    ReactDOM.unmountComponentAtNode(div);
+describe('CustomCursor', () => {
+  let container: HTMLDivElement;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  it('renders without crashing', async () => {
+    await act(async () => {
+      ReactDOM.render(<CustomCursor />, container);
+    });
+
+    // Wait for any effects to complete
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    });
+
+    await act(async () => {
+      ReactDOM.unmountComponentAtNode(container);
+    });
   });
 });
