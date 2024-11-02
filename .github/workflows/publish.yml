@@ -1,13 +1,17 @@
-name: Publish Beta to npm
+name: Publish Package
 
 on:
-  push:
+  workflow_run:
+    workflows: ['Build and Test'] # Name of your main build workflow
+    types:
+      - completed
     branches:
-      - main # or master, depending on your default branch
+      - main
 
 jobs:
-  publish-beta:
+  publish:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }} # Only run if build succeeded
     steps:
       - uses: actions/checkout@v4
         with:
