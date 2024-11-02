@@ -1,32 +1,16 @@
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import * as ReactDOM from 'react-dom';
+import { render, cleanup } from '@testing-library/react';
 import { CustomCursor } from '../src';
 
 describe('CustomCursor', () => {
-  let container: HTMLDivElement;
-
-  beforeEach(() => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-  });
-
   afterEach(() => {
-    document.body.removeChild(container);
+    cleanup();
   });
 
-  it('renders without crashing', async () => {
-    await act(async () => {
-      ReactDOM.render(<CustomCursor />, container);
-    });
-
-    // Wait for any effects to complete
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    });
-
-    await act(async () => {
-      ReactDOM.unmountComponentAtNode(container);
-    });
+  it('renders without crashing', () => {
+    render(<CustomCursor />);
+    // Add assertions as needed
   });
+
+  // Add more tests as needed
 });
