@@ -17,6 +17,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src", "example/src/components/DebugInfo.tsx"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }
