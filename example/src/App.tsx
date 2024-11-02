@@ -1,64 +1,42 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { createRoot } from 'react-dom/client';
-import { CustomCursor } from '../src';
-console.log('CustomCursor example');
-const CustomCursorButton: React.FC<{ text: string }> = ({ text }) => {
-  return (
-    <div
-      style={{
-        padding: '0.5rem 1rem',
-        backgroundColor: 'rgba(59, 130, 246, 0.9)',
-        color: 'white',
-        borderRadius: '1rem',
-        fontSize: '14px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-        transform: 'translate(-50%, -50%)',
-        whiteSpace: 'nowrap',
-      }}
-    >
-      {text} ✨
-    </div>
-  );
-};
+import { CustomCursor } from '@yhattav/react-component-cursor';
+import { CustomCursorButton } from './components/CustomCursorButton';
+import { DebugInfo } from './components/DebugInfo';
 
-const App = () => {
-  // Separate global and container cursor modes
+function App() {
+  // State definitions
   const [globalCursorMode, setGlobalCursorMode] = useState<
     'simple' | 'button' | 'hover'
   >('simple');
   const [containerCursorMode, setContainerCursorMode] = useState<
     'simple' | 'button' | 'hover'
   >('simple');
-  const mainContainerRef = useRef<HTMLDivElement>(null);
-  const secondContainerRef = useRef<HTMLDivElement>(null);
   const [useContainer, setUseContainer] = useState(false);
   const [hoveredSecond, setHoveredSecond] = useState(false);
-
-  // Add debug states
   const [isMouseInContainer1, setIsMouseInContainer1] = useState(false);
   const [cursor1Position, setCursor1Position] = useState({ x: 0, y: 0 });
   const [lastGlobalPosition, setLastGlobalPosition] = useState({ x: 0, y: 0 });
 
-  // Throttle the debug position updates to prevent infinite loops
+  // Refs
+  const mainContainerRef = useRef<HTMLDivElement>(null);
+  const secondContainerRef = useRef<HTMLDivElement>(null);
+
+  // Callbacks
   const updateDebugPosition = useCallback((x: number, y: number) => {
-    // Only update if values have changed significantly (e.g., by 1 pixel)
     setCursor1Position((prev) => {
-      if (Math.abs(prev.x - x) < 1 && Math.abs(prev.y - y) < 1) {
-        return prev;
-      }
+      if (Math.abs(prev.x - x) < 1 && Math.abs(prev.y - y) < 1) return prev;
       return { x: Math.round(x), y: Math.round(y) };
     });
   }, []);
 
   const updateGlobalPosition = useCallback((x: number, y: number) => {
     setLastGlobalPosition((prev) => {
-      if (Math.abs(prev.x - x) < 1 && Math.abs(prev.y - y) < 1) {
-        return prev;
-      }
+      if (Math.abs(prev.x - x) < 1 && Math.abs(prev.y - y) < 1) return prev;
       return { x: Math.round(x), y: Math.round(y) };
     });
   }, []);
 
+  // Cursor renderer
   const renderCursor = (type: 'simple' | 'button' | 'hover', text?: string) => {
     switch (type) {
       case 'button':
@@ -91,51 +69,28 @@ const App = () => {
     }
   };
 
-  // Debug info component
-  const DebugInfo = () => (
-    <div
-      style={{
-        position: 'fixed',
-        top: 10,
-        right: 10,
-        background: 'rgba(0,0,0,0.8)',
-        color: 'white',
-        padding: '1rem',
-        borderRadius: '0.5rem',
-        fontSize: '12px',
-        zIndex: 10000,
-      }}
-    >
-      <pre>
-        {JSON.stringify(
-          {
-            mode: useContainer ? 'Container' : 'Global',
-            isMouseInContainer1,
-            cursor1Position,
-            lastGlobalPosition,
-            globalCursorMode,
-            containerCursorMode,
-          },
-          null,
-          2
-        )}
-      </pre>
-    </div>
-  );
-
   return (
     <div
       style={{
-        // Only hide the cursor globally when NOT in container mode
         cursor: useContainer ? 'default' : 'none',
         height: '100vh',
         background: 'linear-gradient(45deg, #f3f4f6, #e5e7eb)',
         padding: '2rem',
       }}
     >
-      <DebugInfo />
+      {/* Using DebugInfo component */}
+      <DebugInfo
+        data={{
+          mode: useContainer ? 'Container' : 'Global',
+          isMouseInContainer1,
+          cursor1Position,
+          lastGlobalPosition,
+          globalCursorMode,
+          containerCursorMode,
+        }}
+      />
 
-      {/* Global cursor - only show when not in container mode */}
+      {/* Global cursor */}
       {!useContainer && !isMouseInContainer1 && (
         <CustomCursor smoothFactor={2} onMove={updateGlobalPosition}>
           {renderCursor(globalCursorMode)}
@@ -227,12 +182,10 @@ const App = () => {
             backgroundColor: 'white',
             borderRadius: '1rem',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            // Only hide cursor in container when in container mode or when global cursor is active
             cursor: useContainer || !isMouseInContainer1 ? 'none' : 'default',
             marginTop: '2rem',
           }}
         >
-          {/* Container cursor */}
           {(useContainer || isMouseInContainer1) && (
             <CustomCursor
               containerRef={mainContainerRef}
@@ -271,7 +224,6 @@ const App = () => {
             backgroundColor: 'white',
             borderRadius: '1rem',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            // Only hide cursor in container when in container mode
             cursor: useContainer ? 'none' : 'default',
             marginTop: '2rem',
           }}
@@ -312,14 +264,6 @@ const App = () => {
       </div>
     </div>
   );
-};
+}
 
-const container = document.getElementById('root');
-if (!container) throw new Error('Failed to find the root element');
-const root = createRoot(container);
-
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+export default App;
