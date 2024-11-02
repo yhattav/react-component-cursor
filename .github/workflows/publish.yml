@@ -35,17 +35,25 @@ jobs:
       - name: Get latest beta version
         id: get-version
         run: |
-          LATEST_VERSION=$(npm view ${{ github.event.repository.name }}@0.1.0-beta versions --json 2>/dev/null | jq -r '.[-1]' || echo "0.1.0-beta.0")
-          if [ "$LATEST_VERSION" = "null" ]; then
+          # Get all versions and filter for latest beta
+          LATEST_VERSION=$(npm view ${{ github.event.repository.name }}@beta version 2>/dev/null || echo "0.1.0-beta.0")
+          if [ -z "$LATEST_VERSION" ] || [ "$LATEST_VERSION" = "null" ]; then
             LATEST_VERSION="0.1.0-beta.0"
           fi
+          echo "Current version: $LATEST_VERSION"
+
+          # Extract the base version and beta number
+          BASE_VERSION=$(echo $LATEST_VERSION | cut -d'-' -f1)
           BETA_NUM=$(echo $LATEST_VERSION | grep -o 'beta\.[0-9]*' | cut -d'.' -f2)
           NEXT_BETA=$((BETA_NUM + 1))
-          NEXT_VERSION="0.1.0-beta.$NEXT_BETA"
+          NEXT_VERSION="${BASE_VERSION}-beta.${NEXT_BETA}"
+
+          echo "Next version will be: $NEXT_VERSION"
           echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
 
       - name: Update package.json version
-        run: npm version ${{ steps.get-version.outputs.next_version }} --no-git-tag-version
+        run: |
+          npm version ${{ steps.get-version.outputs.next_version }} --no-git-tag-version
 
       - name: Publish to npm
         run: |
