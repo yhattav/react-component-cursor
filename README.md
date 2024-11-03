@@ -15,45 +15,48 @@ A flexible and customizable React component for creating smooth, interactive cus
 ## Installation
 
 ```bash
-npm install react-component-cursor
+npm install @yhattav/react-component-cursor
 or
-yarn add react-component-cursor
+yarn add @yhattav/react-component-cursor
 ```
+
 ## Basic Usage
 
-
 ```tsx
-import { CustomCursor } from 'react-component-cursor';
+import { CustomCursor } from '@yhattav/react-component-cursor';
 function App() {
-return (
-<div style={{ cursor: 'none' }}>
-<CustomCursor>
-<div style={{
-width: '20px',
-height: '20px',
-backgroundColor: '#3b82f6',
-borderRadius: '50%',
-transform: 'translate(-50%, -50%)'
-}} />
-</CustomCursor>
-{/ Your app content /}
-</div>
-);
+  return (
+    <div style={{ cursor: 'none' }}>
+      <CustomCursor>
+        <div
+          style={{
+            width: '20px',
+            height: '20px',
+            backgroundColor: '#3b82f6',
+            borderRadius: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}
+        />
+      </CustomCursor>
+      {/ Your app content /}
+    </div>
+  );
 }
 ```
+
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `children` | `ReactNode` | - | The component to use as cursor |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Additional inline styles |
-| `offsetX` | `number` | `0` | Horizontal offset from cursor position |
-| `offsetY` | `number` | `0` | Vertical offset from cursor position |
-| `zIndex` | `number` | `9999` | Z-index of the cursor element |
-| `smoothFactor` | `number` | `1` | Movement smoothing (1 = no smoothing, higher = smoother) |
-| `containerRef` | `RefObject<HTMLElement>` | - | Reference to container element for bounded cursor |
-| `onMove` | `(x: number, y: number) => void` | - | Callback fired on cursor movement |
+| Prop           | Type                             | Default | Description                                              |
+| -------------- | -------------------------------- | ------- | -------------------------------------------------------- |
+| `children`     | `ReactNode`                      | -       | The component to use as cursor                           |
+| `className`    | `string`                         | `''`    | Additional CSS classes                                   |
+| `style`        | `CSSProperties`                  | `{}`    | Additional inline styles                                 |
+| `offsetX`      | `number`                         | `0`     | Horizontal offset from cursor position                   |
+| `offsetY`      | `number`                         | `0`     | Vertical offset from cursor position                     |
+| `zIndex`       | `number`                         | `9999`  | Z-index of the cursor element                            |
+| `smoothFactor` | `number`                         | `1`     | Movement smoothing (1 = no smoothing, higher = smoother) |
+| `containerRef` | `RefObject<HTMLElement>`         | -       | Reference to container element for bounded cursor        |
+| `onMove`       | `(x: number, y: number) => void` | -       | Callback fired on cursor movement                        |
 
 ## Advanced Usage
 
@@ -61,30 +64,29 @@ transform: 'translate(-50%, -50%)'
 
 ```tsx
 function ContainerExample() {
-const containerRef = useRef<HTMLDivElement>(null);
-return (
-<div
-ref={containerRef}
-style={{
-position: 'relative',
-cursor: 'none'
-}}
->
-<CustomCursor
-containerRef={containerRef}
-smoothFactor={2}
->
-<div style={{
-width: '40px',
-height: '40px',
-border: '2px solid #ef4444',
-borderRadius: '50%',
-transform: 'translate(-50%, -50%)'
-}} />
-</CustomCursor>
-{/ Container content /}
-</div>
-);
+  const containerRef = useRef<HTMLDivElement>(null);
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        position: 'relative',
+        cursor: 'none',
+      }}
+    >
+      <CustomCursor containerRef={containerRef} smoothFactor={2}>
+        <div
+          style={{
+            width: '40px',
+            height: '40px',
+            border: '2px solid #ef4444',
+            borderRadius: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}
+        />
+      </CustomCursor>
+      {/ Container content /}
+    </div>
+  );
 }
 ```
 
@@ -92,46 +94,80 @@ transform: 'translate(-50%, -50%)'
 
 ```tsx
 function InteractiveCursor() {
-const [isHovered, setIsHovered] = useState(false);
-return (
-<div style={{ cursor: 'none' }}>
-<CustomCursor>
-<div style={{
-width: isHovered ? '60px' : '20px',
-height: isHovered ? '60px' : '20px',
-backgroundColor: '#3b82f6',
-borderRadius: '50%',
-transform: 'translate(-50%, -50%)',
-transition: 'all 0.2s ease'
-}} />
-</CustomCursor>
-<button
-onMouseEnter={() => setIsHovered(true)}
-onMouseLeave={() => setIsHovered(false)}
->
-Hover me!
-</button>
-</div>
-);
+  const [isHovered, setIsHovered] = useState(false);
+  return (
+    <div style={{ cursor: 'none' }}>
+      <CustomCursor>
+        <div
+          style={{
+            width: isHovered ? '60px' : '20px',
+            height: isHovered ? '60px' : '20px',
+            backgroundColor: '#3b82f6',
+            borderRadius: '50%',
+            transform: 'translate(-50%, -50%)',
+            transition: 'all 0.2s ease',
+          }}
+        />
+      </CustomCursor>
+      <button
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        Hover me!
+      </button>
+    </div>
+  );
 }
 ```
 
 ## Development
 
-This project was bootstrapped with [TSDX](https://github.com/jaredpalmer/tsdx).
+To start development, you can run both the component and the example app concurrently using:
 
 ```bash
-Install dependencies
-npm install
-Start development server
-npm start
-Run tests
-npm test
-Build for production
-npm run build
-Run Storybook
-npm run storybook
+npm run dev
 ```
+
+This project is using [tsup](https://github.com/egoist/tsup) for building the library.
+
+This project was bootstrapped with [TSDX](https://github.com/jaredpalmer/tsdx). Unfortunately, I had to remove the TSDX configuration because it was causing issues with the build process, being unmaintained and not being compatible with the latest versions key packages.
+
 ## License
 
 MIT © [yhattav](https://github.com/yhattav)
+
+## TypeScript Support
+
+The library is written in TypeScript and includes built-in type definitions. No additional @types packages are required.
+
+Example with TypeScript:
+
+```tsx
+import {
+  CustomCursor,
+  CustomCursorProps,
+} from '@yhattav/react-component-cursor';
+
+// All props are properly typed
+const MyComponent: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <CustomCursor
+      containerRef={containerRef}
+      smoothFactor={2}
+      onMove={(x: number, y: number) => console.log(x, y)}
+    >
+      {/* Your cursor content */}
+    </CustomCursor>
+  );
+};
+```
+
+## Bundle Size
+
+The library is lightweight (<10KB) and is monitored using size-limit. You can check the current bundle size by running:
+
+```bash
+npm run size
+```
