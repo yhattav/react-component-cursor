@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { CustomCursor } from '@yhattav/react-component-cursor';
 import { CustomCursorButton } from '../components/CustomCursorButton';
 import { DebugInfo } from '../components/DebugInfo';
@@ -12,6 +12,7 @@ import {
 const { Title, Paragraph } = Typography;
 
 export const DemoSection: React.FC = () => {
+  console.log('DEMO');
   // State management
   const [useContainer, setUseContainer] = useState(false);
   const [isMouseInContainer1, setIsMouseInContainer1] = useState(false);
@@ -24,6 +25,32 @@ export const DemoSection: React.FC = () => {
   // Refs
   const mainContainerRef = useRef(null);
   const secondContainerRef = useRef(null);
+
+  // Memoized handlers
+  const handleGlobalCursorMove = useCallback((x: number, y: number) => {
+    setLastGlobalPosition({ x, y });
+  }, []);
+
+  const handleContainer1CursorMove = useCallback((x: number, y: number) => {
+    setCursor1Position({ x, y });
+  }, []);
+
+  const handleContainer1Enter = useCallback(() => {
+    setIsMouseInContainer1(true);
+  }, []);
+
+  const handleContainer1Leave = useCallback(() => {
+    setIsMouseInContainer1(false);
+  }, []);
+
+  const handleCursorModeChange = useCallback((mode: string) => {
+    setGlobalCursorMode(mode);
+    setContainerCursorMode(mode);
+  }, []);
+
+  const handleContainerHover = useCallback((isHovered: boolean) => {
+    setContainerCursorMode(isHovered ? 'hover' : 'simple');
+  }, []);
 
   // Cursor rendering helper
   const renderCursor = (mode: string) => {
@@ -60,7 +87,14 @@ export const DemoSection: React.FC = () => {
   };
 
   return (
-    <section style={{ padding: '2rem' }}>
+    <div
+      style={{
+        height: '100%',
+        padding: '2rem',
+        position: 'relative',
+        boxSizing: 'border-box',
+      }}
+    >
       <Typography>
         <Title>Custom Cursor Component Demo</Title>
         <Paragraph>
@@ -75,10 +109,7 @@ export const DemoSection: React.FC = () => {
         <Button
           type={globalCursorMode === 'simple' ? 'primary' : 'default'}
           icon={<AimOutlined />}
-          onClick={() => {
-            setGlobalCursorMode('simple');
-            setContainerCursorMode('simple');
-          }}
+          onClick={() => handleCursorModeChange('simple')}
         >
           Simple Cursor
         </Button>
@@ -86,10 +117,7 @@ export const DemoSection: React.FC = () => {
         <Button
           type={globalCursorMode === 'button' ? 'primary' : 'default'}
           icon={<ExperimentOutlined />}
-          onClick={() => {
-            setGlobalCursorMode('button');
-            setContainerCursorMode('button');
-          }}
+          onClick={() => handleCursorModeChange('button')}
         >
           Button Cursor
         </Button>
@@ -105,10 +133,7 @@ export const DemoSection: React.FC = () => {
 
       {/* Global Cursor */}
       {!useContainer && !isMouseInContainer1 && (
-        <CustomCursor
-          smoothFactor={2}
-          onMove={(x, y) => setLastGlobalPosition({ x, y })}
-        >
+        <CustomCursor smoothFactor={2} onMove={handleGlobalCursorMove}>
           {renderCursor(globalCursorMode)}
         </CustomCursor>
       )}
@@ -118,8 +143,8 @@ export const DemoSection: React.FC = () => {
         {/* First Container */}
         <Card
           ref={mainContainerRef}
-          onMouseEnter={() => setIsMouseInContainer1(true)}
-          onMouseLeave={() => setIsMouseInContainer1(false)}
+          onMouseEnter={handleContainer1Enter}
+          onMouseLeave={handleContainer1Leave}
           style={{
             cursor: useContainer || !isMouseInContainer1 ? 'none' : 'default',
           }}
@@ -128,7 +153,7 @@ export const DemoSection: React.FC = () => {
             <CustomCursor
               containerRef={mainContainerRef}
               smoothFactor={2}
-              onMove={(x, y) => setCursor1Position({ x, y })}
+              onMove={handleContainer1CursorMove}
             >
               {renderCursor(containerCursorMode)}
             </CustomCursor>
@@ -140,8 +165,8 @@ export const DemoSection: React.FC = () => {
           <Card
             type="inner"
             style={{ cursor: 'none' }}
-            onMouseEnter={() => setContainerCursorMode('hover')}
-            onMouseLeave={() => setContainerCursorMode('simple')}
+            onMouseEnter={() => handleContainerHover(true)}
+            onMouseLeave={() => handleContainerHover(false)}
           >
             <Title level={3}>Interactive Area</Title>
             <Paragraph>Hover over me to see the cursor change!</Paragraph>
@@ -191,6 +216,6 @@ export const DemoSection: React.FC = () => {
           containerCursorMode,
         }}
       />
-    </section>
+    </div>
   );
 };
