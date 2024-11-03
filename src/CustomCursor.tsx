@@ -218,7 +218,12 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
   } as React.CSSProperties;
 
   return (
-    <div style={cursorStyle} className={className} aria-hidden="true">
+    <div
+      id="custom-cursor"
+      style={cursorStyle}
+      className={className}
+      aria-hidden="true"
+    >
       {children}
     </div>
   );
