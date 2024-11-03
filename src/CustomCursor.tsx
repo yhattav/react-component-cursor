@@ -12,16 +12,27 @@ export interface CustomCursorProps {
   onMove?: (x: number, y: number) => void;
 }
 
+const ANIMATION_DURATION = '0.3s';
+const ANIMATION_NAME = 'cursorFadeIn';
+const SMOOTHING_THRESHOLD = 0.1;
+
+type Position = {
+  x: number | null;
+  y: number | null;
+};
+
+type TargetPosition = {
+  x: number;
+  y: number;
+};
+
 // New custom hook
 function useMousePosition(
   containerRef: React.RefObject<HTMLElement> | undefined,
   offsetX: number,
   offsetY: number
 ) {
-  const [position, setPosition] = useState<{
-    x: number | null;
-    y: number | null;
-  }>({ x: null, y: null });
+  const [position, setPosition] = useState<Position>({ x: null, y: null });
   const [targetPosition, setTargetPosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
 
@@ -94,12 +105,10 @@ function useMousePosition(
 }
 
 function useSmoothAnimation(
-  position: { x: number | null; y: number | null },
-  targetPosition: { x: number; y: number },
+  position: Position,
+  targetPosition: TargetPosition,
   smoothFactor: number,
-  setPosition: React.Dispatch<
-    React.SetStateAction<{ x: number | null; y: number | null }>
-  >
+  setPosition: React.Dispatch<React.SetStateAction<Position>>
 ) {
   useEffect(() => {
     if (position.x === null || position.y === null) return;
@@ -118,7 +127,10 @@ function useSmoothAnimation(
         const dx = targetPosition.x - prev.x;
         const dy = targetPosition.y - prev.y;
 
-        if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) {
+        if (
+          Math.abs(dx) < SMOOTHING_THRESHOLD &&
+          Math.abs(dy) < SMOOTHING_THRESHOLD
+        ) {
           return prev;
         }
 
@@ -165,7 +177,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
   useEffect(() => {
     const styleSheet = document.createElement('style');
     styleSheet.textContent = `
-      @keyframes cursorFadeIn {
+      @keyframes ${ANIMATION_NAME} {
         from {
           opacity: 0;
           transform: translate(var(--cursor-x), var(--cursor-y)) scale(0.8);
@@ -199,7 +211,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
     pointerEvents: 'none',
     zIndex,
     opacity: 1,
-    animation: 'cursorFadeIn 0.3s ease-out',
+    animation: `${ANIMATION_NAME} ${ANIMATION_DURATION} ease-out`,
     '--cursor-x': `${position.x}px`,
     '--cursor-y': `${position.y}px`,
     ...style,
