@@ -171,3 +171,38 @@ The library is lightweight (<10KB) and is monitored using size-limit. You can ch
 ```bash
 npm run size
 ```
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+## Code of Conduct
+
+Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
+
+## Testing
+
+```bash
+npm run test
+```
+
+We maintain 100% test coverage for all new features. Please ensure your contributions include appropriate tests.
+
+## Commit Convention
+
+We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification. This helps us automatically generate changelogs and determine semantic version bumps.
+
+Examples:
+
+- feat: add new cursor animation option
+- fix: resolve smoothing calculation issue
+- docs: update installation instructions
+- test: add tests for container bounds
+
+## Issue Templates
+
+Please use our issue templates when creating new issues:
+
+- Bug Report
+- Feature Request
+- Documentation Update
