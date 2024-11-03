@@ -12,17 +12,12 @@ export interface CustomCursorProps {
   onMove?: (x: number, y: number) => void;
 }
 
-export const CustomCursor: React.FC<CustomCursorProps> = ({
-  children,
-  className = '',
-  style = {},
-  offsetX = 0,
-  offsetY = 0,
-  zIndex = 9999,
-  smoothFactor = 1,
-  containerRef,
-  onMove,
-}) => {
+// New custom hook
+function useMousePosition(
+  containerRef: React.RefObject<HTMLElement> | undefined,
+  offsetX: number,
+  offsetY: number
+) {
   const [position, setPosition] = useState<{
     x: number | null;
     y: number | null;
@@ -95,6 +90,26 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
     };
   }, [containerRef, offsetX, offsetY, position.x, position.y]);
 
+  return { position, setPosition, targetPosition, isVisible };
+}
+
+export const CustomCursor: React.FC<CustomCursorProps> = ({
+  children,
+  className = '',
+  style = {},
+  offsetX = 0,
+  offsetY = 0,
+  zIndex = 9999,
+  smoothFactor = 1,
+  containerRef,
+  onMove,
+}) => {
+  const { position, setPosition, targetPosition, isVisible } = useMousePosition(
+    containerRef,
+    offsetX,
+    offsetY
+  );
+
   useEffect(() => {
     if (position.x === null || position.y === null) return;
 
@@ -107,7 +122,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
 
     const smoothing = () => {
       setPosition((prev) => {
-        if (prev.x === null || prev.y === null) return prev;
+        if (prev.x === null || prev.y === null) return prev; // TODO: Check if this is the best way to handle this. It could be that we are losing the initial call here, it could return the "next" position instead.
 
         const dx = targetPosition.x - prev.x;
         const dy = targetPosition.y - prev.y;
