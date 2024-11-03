@@ -93,23 +93,14 @@ function useMousePosition(
   return { position, setPosition, targetPosition, isVisible };
 }
 
-export const CustomCursor: React.FC<CustomCursorProps> = ({
-  children,
-  className = '',
-  style = {},
-  offsetX = 0,
-  offsetY = 0,
-  zIndex = 9999,
-  smoothFactor = 1,
-  containerRef,
-  onMove,
-}) => {
-  const { position, setPosition, targetPosition, isVisible } = useMousePosition(
-    containerRef,
-    offsetX,
-    offsetY
-  );
-
+function useSmoothAnimation(
+  position: { x: number | null; y: number | null },
+  targetPosition: { x: number; y: number },
+  smoothFactor: number,
+  setPosition: React.Dispatch<
+    React.SetStateAction<{ x: number | null; y: number | null }>
+  >
+) {
   useEffect(() => {
     if (position.x === null || position.y === null) return;
 
@@ -147,7 +138,29 @@ export const CustomCursor: React.FC<CustomCursorProps> = ({
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [targetPosition, smoothFactor]);
+  }, [position.x, position.y, targetPosition, smoothFactor, setPosition]);
+
+  return null;
+}
+
+export const CustomCursor: React.FC<CustomCursorProps> = ({
+  children,
+  className = '',
+  style = {},
+  offsetX = 0,
+  offsetY = 0,
+  zIndex = 9999,
+  smoothFactor = 1,
+  containerRef,
+  onMove,
+}) => {
+  const { position, setPosition, targetPosition, isVisible } = useMousePosition(
+    containerRef,
+    offsetX,
+    offsetY
+  );
+
+  useSmoothAnimation(position, targetPosition, smoothFactor, setPosition);
 
   useEffect(() => {
     const styleSheet = document.createElement('style');
