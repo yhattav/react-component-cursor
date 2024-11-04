@@ -12,7 +12,6 @@ import {
 const { Title, Paragraph } = Typography;
 
 export const DemoSection: React.FC = () => {
-  console.log('DEMO');
   // State management
   const [useContainer, setUseContainer] = useState(false);
   const [isMouseInContainer1, setIsMouseInContainer1] = useState(false);
