@@ -17,6 +17,7 @@ export const DebugInfo: React.FC<DebugInfoProps> = ({ data }) => (
       position: 'fixed',
       top: 10,
       right: 10,
+      width: '300px',
       background: 'rgba(0,0,0,0.8)',
       color: 'white',
       padding: '1rem',
