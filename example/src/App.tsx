@@ -1,5 +1,5 @@
-import React from 'react';
-import { Layout } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Layout, Tabs } from 'antd';
 import {
   DemoSection,
   MagneticFieldsSection,
@@ -8,58 +8,93 @@ import {
 } from './sections';
 import { Section } from './types/Section';
 
-const { Content } = Layout;
+const { Content, Header } = Layout;
+const { TabPane } = Tabs;
 
 // Define all sections
 const sections: Section[] = [
   {
     id: 'demo',
+    title: 'Basic Demo',
     component: DemoSection,
     height: '100vh',
   },
   {
     id: 'magnetic-fields',
+    title: 'Magnetic Fields',
     component: MagneticFieldsSection,
     height: '100vh',
   },
   {
     id: 'paint',
+    title: 'Paint',
     component: PaintSection,
     height: '100vh',
   },
   {
     id: 'content-reveal',
+    title: 'Content Reveal',
     component: ContentRevealSection,
     height: '100vh',
   },
-  // Add more sections here as needed
 ];
 
 function App() {
+  const [activeSection, setActiveSection] = useState(() => {
+    const saved = localStorage.getItem('activeSection');
+    return saved || 'magnetic-fields';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('activeSection', activeSection);
+  }, [activeSection]);
+
+  const CurrentSection = sections.find(
+    (section) => section.id === activeSection
+  )?.component;
+
   return (
-    <Layout
-      style={{
-        minHeight: '100vh',
-        height: '100vh',
-        background: 'linear-gradient(45deg, #f0f2f5, #e6f7ff)',
-      }}
-    >
-      <Content style={{ position: 'relative' }}>
-        {sections.map(({ id, component: Component, height = '200vh' }) => (
-          <div
-            key={id}
-            style={{
-              height,
-              width: '100%',
-              position: 'relative',
-              overflow: 'hidden',
-              border: '1px solid',
-            }}
-          >
-            <Component />
-          </div>
-        ))}
-      </Content>
+    <Layout style={{ height: '100vh' }}>
+      <Header
+        style={{
+          background: '#fff',
+          padding: '0 16px',
+          height: 'auto',
+          lineHeight: 'normal',
+        }}
+      >
+        <Tabs
+          activeKey={activeSection}
+          onChange={setActiveSection}
+          style={{ marginBottom: 0 }}
+        >
+          {sections.map(({ id, title }) => (
+            <TabPane tab={title} key={id} />
+          ))}
+        </Tabs>
+      </Header>
+      <Layout>
+        <Content
+          style={{
+            position: 'relative',
+            height: 'calc(100vh - 64px)',
+            overflow: 'hidden',
+          }}
+        >
+          {CurrentSection && <CurrentSection />}
+        </Content>
+        <Layout.Sider
+          width="20%"
+          style={{
+            background: '#fff',
+            minWidth: '300px',
+            height: 'calc(100vh - 64px)',
+            overflow: 'auto',
+          }}
+        >
+          Debug Info Panel
+        </Layout.Sider>
+      </Layout>
     </Layout>
   );
 }
