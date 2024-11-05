@@ -126,7 +126,6 @@ export const MagneticFieldsSection: React.FC = () => {
     (cursorX: number, cursorY: number, pointerX: number, pointerY: number) => {
       let totalFx = 0;
       let totalFy = 0;
-      console.log(cursorX, cursorY, pointerX, pointerY);
       // Add pointer gravitational pull (constant mass of 0.5)
       const pointerForce = calculateGravitationalForce(
         cursorX,
@@ -324,7 +323,7 @@ export const MagneticFieldsSection: React.FC = () => {
               velocity.x,
               velocity.y,
               '#4CAF50', // Green
-              20 // Scale factor to make the arrow visible
+              200 // Scale factor to make the arrow visible
             )}
 
             {/* Force/Acceleration vector */}
@@ -344,7 +343,7 @@ export const MagneticFieldsSection: React.FC = () => {
                 pointerPos.y
               ).fy,
               '#FF4081', // Pink
-              100 // Different scale for force
+              1000 // Different scale for force
             )}
           </svg>
         </div>
