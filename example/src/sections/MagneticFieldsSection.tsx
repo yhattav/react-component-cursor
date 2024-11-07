@@ -2,7 +2,6 @@ import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { CustomCursor } from '@yhattav/react-component-cursor';
 import { Card, Typography } from 'antd';
 import { motion } from 'framer-motion';
-import { DebugInfo } from '../components/DebugInfo';
 
 const { Title, Paragraph } = Typography;
 
@@ -63,7 +62,13 @@ const drawArrow = (
   );
 };
 
-export const MagneticFieldsSection: React.FC = () => {
+interface MagneticFieldsSectionProps {
+  onDebugData?: (data: any) => void;
+}
+
+export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
+  onDebugData,
+}) => {
   const magneticRef = useRef<HTMLDivElement>(null);
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number }>({
     x: 0,
@@ -205,6 +210,40 @@ export const MagneticFieldsSection: React.FC = () => {
       setPointerPos({ x, y });
     }
   }, []);
+
+  // Use effect to send debug data
+  useEffect(() => {
+    onDebugData?.({
+      cursor: {
+        position: cursorPos,
+        velocity: velocity,
+      },
+      pointer: {
+        position: pointerPos,
+        force: calculateGravitationalForce(
+          cursorPos.x,
+          cursorPos.y,
+          pointerPos.x,
+          pointerPos.y,
+          500
+        ),
+      },
+      velocity: velocity,
+      totalForce: calculateTotalForce(
+        cursorPos.x,
+        cursorPos.y,
+        pointerPos.x,
+        pointerPos.y
+      ),
+    });
+  }, [
+    cursorPos,
+    pointerPos,
+    velocity,
+    calculateGravitationalForce,
+    calculateTotalForce,
+    onDebugData,
+  ]);
 
   return (
     <Card
@@ -348,32 +387,6 @@ export const MagneticFieldsSection: React.FC = () => {
           </svg>
         </div>
       </CustomCursor>
-
-      <DebugInfo
-        data={{
-          cursor: {
-            position: cursorPos,
-            velocity: velocity,
-          },
-          pointer: {
-            position: pointerPos,
-            force: calculateGravitationalForce(
-              cursorPos.x,
-              cursorPos.y,
-              pointerPos.x,
-              pointerPos.y,
-              500
-            ),
-          },
-          velocity: velocity,
-          totalForce: calculateTotalForce(
-            cursorPos.x,
-            cursorPos.y,
-            pointerPos.x,
-            pointerPos.y
-          ),
-        }}
-      />
     </Card>
   );
 };
