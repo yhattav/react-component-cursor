@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Layout, Tabs } from 'antd';
 import {
   DemoSection,
@@ -7,6 +7,7 @@ import {
   ContentRevealSection,
 } from './sections';
 import { Section } from './types/Section';
+import { DebugInfo } from './components/DebugInfo';
 
 const { Content, Header } = Layout;
 const { TabPane } = Tabs;
@@ -39,11 +40,18 @@ const sections: Section[] = [
   },
 ];
 
+// Add type for debug data
+interface DebugData {
+  [key: string]: any;
+}
+
 function App() {
   const [activeSection, setActiveSection] = useState(() => {
     const saved = localStorage.getItem('activeSection');
     return saved || 'magnetic-fields';
   });
+
+  const [debugData, setDebugData] = useState<DebugData | null>(null);
 
   useEffect(() => {
     localStorage.setItem('activeSection', activeSection);
@@ -52,6 +60,10 @@ function App() {
   const CurrentSection = sections.find(
     (section) => section.id === activeSection
   )?.component;
+
+  const handleDebugData = useCallback((data: DebugData) => {
+    setDebugData(data);
+  }, []);
 
   return (
     <Layout style={{ height: '100vh' }}>
@@ -81,7 +93,7 @@ function App() {
             overflow: 'hidden',
           }}
         >
-          {CurrentSection && <CurrentSection />}
+          {CurrentSection && <CurrentSection onDebugData={handleDebugData} />}
         </Content>
         <Layout.Sider
           width="20%"
@@ -92,7 +104,7 @@ function App() {
             overflow: 'auto',
           }}
         >
-          Debug Info Panel
+          {debugData && <DebugInfo data={debugData} />}
         </Layout.Sider>
       </Layout>
     </Layout>

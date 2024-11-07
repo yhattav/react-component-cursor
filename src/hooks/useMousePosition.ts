@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Position, TargetPosition } from '../types';
 
 export function useMousePosition(
@@ -13,8 +13,11 @@ export function useMousePosition(
   });
   const [isVisible, setIsVisible] = useState(false);
 
-  useEffect(() => {
-    const updateTargetPosition = (e: MouseEvent) => {
+  const positionRef = useRef(position);
+  positionRef.current = position;
+
+  const updateTargetPosition = useCallback(
+    (e: MouseEvent) => {
       if (containerRef?.current) {
         const rect = containerRef.current.getBoundingClientRect();
         const isInside =
@@ -31,7 +34,10 @@ export function useMousePosition(
             y: e.clientY - rect.top + offsetY,
           };
           setTargetPosition(newPosition);
-          if (position.x === null || position.y === null) {
+          if (
+            positionRef.current.x === null ||
+            positionRef.current.y === null
+          ) {
             setPosition(newPosition);
           }
         }
@@ -42,12 +48,15 @@ export function useMousePosition(
           y: e.clientY + offsetY,
         };
         setTargetPosition(newPosition);
-        if (position.x === null || position.y === null) {
+        if (positionRef.current.x === null || positionRef.current.y === null) {
           setPosition(newPosition);
         }
       }
-    };
+    },
+    [containerRef, offsetX, offsetY]
+  );
 
+  useEffect(() => {
     const handleMouseLeave = () => {
       if (containerRef?.current) {
         setIsVisible(false);
@@ -76,7 +85,7 @@ export function useMousePosition(
         );
       }
     };
-  }, [containerRef, offsetX, offsetY, position.x, position.y]);
+  }, [containerRef, updateTargetPosition]);
 
   return { position, setPosition, targetPosition, isVisible };
 }
