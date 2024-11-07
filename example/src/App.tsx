@@ -5,6 +5,7 @@ import {
   MagneticFieldsSection,
   PaintSection,
   ContentRevealSection,
+  EntryAnimationSection,
 } from './sections';
 import { Section } from './types/Section';
 import { DebugInfo } from './components/DebugInfo';
@@ -18,6 +19,12 @@ const sections: Section[] = [
     id: 'demo',
     title: 'Basic Demo',
     component: DemoSection,
+    height: '100vh',
+  },
+  {
+    id: 'entry-animation',
+    title: 'Entry Animation',
+    component: EntryAnimationSection,
     height: '100vh',
   },
   {

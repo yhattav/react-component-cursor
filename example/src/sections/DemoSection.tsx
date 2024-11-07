@@ -181,7 +181,7 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
               cursor: useContainer || !isMouseInContainer1 ? 'none' : 'default',
             }}
           >
-            {isMouseInContainer1 && (
+            {
               <CustomCursor
                 containerRef={mainContainerRef}
                 smoothFactor={2}
@@ -189,7 +189,7 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
               >
                 {renderCursor(containerCursorMode)}
               </CustomCursor>
-            )}
+            }
 
             <Title level={2}>First Container</Title>
             <Paragraph>
