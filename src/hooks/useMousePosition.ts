@@ -26,8 +26,6 @@ export function useMousePosition(
           e.clientY >= rect.top &&
           e.clientY <= rect.bottom;
 
-        setIsVisible(isInside);
-
         if (isInside) {
           const newPosition = {
             x: e.clientX - rect.left + offsetX,
@@ -42,7 +40,6 @@ export function useMousePosition(
           }
         }
       } else {
-        setIsVisible(true);
         const newPosition = {
           x: e.clientX + offsetX,
           y: e.clientY + offsetY,
@@ -63,6 +60,12 @@ export function useMousePosition(
       }
     };
 
+    const handleMouseEnter = () => {
+      if (containerRef?.current) {
+        setIsVisible(true);
+      }
+    };
+
     const element = containerRef?.current || document;
     element.addEventListener(
       'mousemove',
@@ -71,6 +74,7 @@ export function useMousePosition(
 
     if (containerRef?.current) {
       containerRef.current.addEventListener('mouseleave', handleMouseLeave);
+      containerRef.current.addEventListener('mouseenter', handleMouseEnter);
     }
 
     return () => {
@@ -82,6 +86,10 @@ export function useMousePosition(
         containerRef.current.removeEventListener(
           'mouseleave',
           handleMouseLeave
+        );
+        containerRef.current.removeEventListener(
+          'mouseenter',
+          handleMouseEnter
         );
       }
     };
