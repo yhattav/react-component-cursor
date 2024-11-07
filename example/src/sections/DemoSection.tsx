@@ -182,6 +182,7 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
             }}
           >
             {
+
               <CustomCursor
                 containerRef={mainContainerRef}
                 smoothFactor={2}
