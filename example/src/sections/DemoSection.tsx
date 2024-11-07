@@ -11,7 +11,20 @@ import {
 
 const { Title, Paragraph } = Typography;
 
-export const DemoSection: React.FC = () => {
+// Move static styles outside component
+const containerStyle = {
+  height: '100%',
+  padding: '2rem',
+  position: 'relative',
+  boxSizing: 'border-box',
+} as const;
+
+const buttonSpaceStyle = {
+  marginBottom: '2rem',
+} as const;
+
+export const DemoSection: React.FC = React.memo(() => {
+  console.count('Called DemoSection');
   // State management
   const [useContainer, setUseContainer] = useState(false);
   const [isMouseInContainer1, setIsMouseInContainer1] = useState(false);
@@ -51,8 +64,8 @@ export const DemoSection: React.FC = () => {
     setContainerCursorMode(isHovered ? 'hover' : 'simple');
   }, []);
 
-  // Cursor rendering helper
-  const renderCursor = (mode: string) => {
+  // Memoize cursor rendering
+  const renderCursor = useCallback((mode: string) => {
     switch (mode) {
       case 'button':
         return <CustomCursorButton text="Click me!" />;
@@ -83,17 +96,10 @@ export const DemoSection: React.FC = () => {
           />
         );
     }
-  };
+  }, []);
 
   return (
-    <div
-      style={{
-        height: '100%',
-        padding: '2rem',
-        position: 'relative',
-        boxSizing: 'border-box',
-      }}
-    >
+    <div style={containerStyle}>
       <Typography>
         <Title>Custom Cursor Component Demo</Title>
         <Paragraph>
@@ -104,7 +110,7 @@ export const DemoSection: React.FC = () => {
       </Typography>
 
       {/* Control Buttons */}
-      <Space size="middle" style={{ marginBottom: '2rem' }}>
+      <Space size="middle" style={buttonSpaceStyle}>
         <Button
           type={globalCursorMode === 'simple' ? 'primary' : 'default'}
           icon={<AimOutlined />}
@@ -217,4 +223,4 @@ export const DemoSection: React.FC = () => {
       />
     </div>
   );
-};
+});
