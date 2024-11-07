@@ -6,7 +6,6 @@ export function useMousePosition(
   offsetX: number,
   offsetY: number
 ) {
-  console.count('Called useMousePosition');
   const [position, setPosition] = useState<Position>({ x: null, y: null });
   const [targetPosition, setTargetPosition] = useState<TargetPosition>({
     x: 0,

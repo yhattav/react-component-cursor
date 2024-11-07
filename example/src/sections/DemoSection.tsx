@@ -29,7 +29,6 @@ interface DemoSectionProps {
 
 export const DemoSection: React.FC<DemoSectionProps> = React.memo(
   ({ onDebugData }) => {
-    console.count('Called DemoSection');
     // State management
     const [useContainer, setUseContainer] = useState(false);
     const [isMouseInContainer1, setIsMouseInContainer1] = useState(false);

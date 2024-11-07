@@ -28,7 +28,6 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     containerRef,
     onMove,
   }) => {
-    console.count('Called CustomCursor');
     const { position, setPosition, targetPosition, isVisible } =
       useMousePosition(containerRef, offsetX, offsetY);
 
