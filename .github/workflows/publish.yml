@@ -62,6 +62,11 @@ jobs:
       - name: Publish to npm
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_AUTOMATION_TOKEN }}" > .npmrc
+          # Publish the package with beta tag
           npm publish --access public --tag beta
+          # Update the beta tag to point to this version
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          npm dist-tag add ${PACKAGE_NAME}@${PACKAGE_VERSION} beta
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTOMATION_TOKEN }}
