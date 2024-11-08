@@ -270,17 +270,7 @@ export const GallerySection: React.FC<GallerySectionProps> = React.memo(
                 fontSize: '32px',
                 color: 'white',
               }}
-              onClick={(e) => e.stopPropagation()}
             >
-              <Button
-                icon={<CloseOutlined />}
-                style={{
-                  position: 'absolute',
-                  top: '1rem',
-                  right: '1rem',
-                }}
-                onClick={handleClose}
-              />
               Gallery Item {expandedItem + 1}
             </div>
           </div>

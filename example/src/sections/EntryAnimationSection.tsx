@@ -45,7 +45,11 @@ export const EntryAnimationSection: React.FC<EntryAnimationSectionProps> =
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
-          <CustomCursor containerRef={containerRef} smoothFactor={2}>
+          <CustomCursor
+            containerRef={containerRef}
+            smoothFactor={2}
+            hideNativeCursor={false}
+          >
             <div
               style={{
                 width: '20px',
@@ -55,6 +59,10 @@ export const EntryAnimationSection: React.FC<EntryAnimationSectionProps> =
                 transform: 'translate(-50%, -50%)',
                 opacity: isVisible ? 1 : 0,
                 transition: 'opacity 0.3s ease',
+                boxShadow:
+                  process.env.NODE_ENV === 'development'
+                    ? '0 0 0 1px red, inset 0 0 0 1px red'
+                    : 'none',
               }}
             />
           </CustomCursor>

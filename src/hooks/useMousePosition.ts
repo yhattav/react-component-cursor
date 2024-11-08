@@ -11,7 +11,7 @@ export function useMousePosition(
     x: 0,
     y: 0,
   });
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(containerRef?.current !== null);
 
   const positionRef = useRef(position);
   positionRef.current = position;
@@ -28,8 +28,8 @@ export function useMousePosition(
 
         if (isInside) {
           const newPosition = {
-            x: e.clientX - rect.left + offsetX,
-            y: e.clientY - rect.top + offsetY,
+            x: e.clientX + offsetX,
+            y: e.clientY + offsetY,
           };
           setTargetPosition(newPosition);
           if (

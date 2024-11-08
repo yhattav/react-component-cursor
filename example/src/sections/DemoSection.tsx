@@ -32,8 +32,9 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
     // State management
     const [useContainer, setUseContainer] = useState(false);
     const [isMouseInContainer1, setIsMouseInContainer1] = useState(false);
+    const [isMouseInContainer2, setIsMouseInContainer2] = useState(false);
     const [globalCursorMode, setGlobalCursorMode] = useState('simple');
-    const [containerCursorMode, setContainerCursorMode] = useState('simple');
+    const [container1CursorMode, setContainer1CursorMode] = useState('simple');
     const [cursor1Position, setCursor1Position] = useState({ x: 0, y: 0 });
     const [lastGlobalPosition, setLastGlobalPosition] = useState({
       x: 0,
@@ -56,19 +57,33 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
 
     const handleContainer1Enter = useCallback(() => {
       setIsMouseInContainer1(true);
-    }, []);
+      requestAnimationFrame(() => {
+        setContainer1CursorMode(globalCursorMode);
+      });
+    }, [globalCursorMode]);
 
     const handleContainer1Leave = useCallback(() => {
-      setIsMouseInContainer1(false);
+      setContainer1CursorMode('simple');
+      requestAnimationFrame(() => {
+        setIsMouseInContainer1(false);
+      });
+    }, []);
+
+    const handleContainer2Enter = useCallback(() => {
+      setIsMouseInContainer2(true);
+    }, []);
+
+    const handleContainer2Leave = useCallback(() => {
+      setIsMouseInContainer2(false);
     }, []);
 
     const handleCursorModeChange = useCallback((mode: string) => {
       setGlobalCursorMode(mode);
-      setContainerCursorMode(mode);
+      setContainer1CursorMode(mode);
     }, []);
 
     const handleContainerHover = useCallback((isHovered: boolean) => {
-      setContainerCursorMode(isHovered ? 'hover' : 'simple');
+      setContainer1CursorMode(isHovered ? 'hover' : 'simple');
     }, []);
 
     // Memoize cursor rendering
@@ -107,21 +122,33 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
 
     // Use effect to send debug data
     useEffect(() => {
+      console.log('Container 1 state:', {
+        isMouseInContainer1,
+        container1CursorMode,
+        useContainer,
+      });
+    }, [isMouseInContainer1, container1CursorMode, useContainer]);
+
+    // Update debug data
+    useEffect(() => {
       onDebugData?.({
         mode: useContainer ? 'container' : 'global',
         isMouseInContainer1,
+        isMouseInContainer2,
         cursor1Position,
         lastGlobalPosition,
         globalCursorMode,
-        containerCursorMode,
+        container1CursorMode,
+        isVisible: isMouseInContainer1 || isMouseInContainer2 || !useContainer,
       });
     }, [
       useContainer,
       isMouseInContainer1,
+      isMouseInContainer2,
       cursor1Position,
       lastGlobalPosition,
       globalCursorMode,
-      containerCursorMode,
+      container1CursorMode,
       onDebugData,
     ]);
 
@@ -164,12 +191,16 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
         </Space>
 
         {/* Global Cursor */}
-        {!useContainer && !isMouseInContainer1 && (
-          <CustomCursor smoothFactor={2} onMove={handleGlobalCursorMove}>
+        {!useContainer && (
+          <CustomCursor
+            id="global-cursor"
+            smoothFactor={2}
+            onMove={handleGlobalCursorMove}
+            hideNativeCursor={true}
+          >
             {renderCursor(globalCursorMode)}
           </CustomCursor>
         )}
-
         {/* Container Demo Section */}
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
           {/* First Container */}
@@ -177,20 +208,18 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
             ref={mainContainerRef}
             onMouseEnter={handleContainer1Enter}
             onMouseLeave={handleContainer1Leave}
-            style={{
-              cursor: useContainer || !isMouseInContainer1 ? 'none' : 'default',
-            }}
           >
-            {
-
+            {useContainer && isMouseInContainer1 && (
               <CustomCursor
+                id="container-1-cursor"
                 containerRef={mainContainerRef}
                 smoothFactor={2}
                 onMove={handleContainer1CursorMove}
+                hideNativeCursor={true}
               >
-                {renderCursor(containerCursorMode)}
+                {renderCursor(container1CursorMode)}
               </CustomCursor>
-            }
+            )}
 
             <Title level={2}>First Container</Title>
             <Paragraph>
@@ -199,7 +228,7 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
 
             <Card
               type="inner"
-              style={{ cursor: 'none' }}
+              style={{ cursor: 'default' }}
               onMouseEnter={() => handleContainerHover(true)}
               onMouseLeave={() => handleContainerHover(false)}
             >
@@ -211,21 +240,29 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
           {/* Second Container */}
           <Card
             ref={secondContainerRef}
-            style={{ cursor: useContainer ? 'none' : 'default' }}
+            onMouseEnter={handleContainer2Enter}
+            onMouseLeave={handleContainer2Leave}
           >
-            <CustomCursor containerRef={secondContainerRef} smoothFactor={2}>
-              <div
-                style={{
-                  width: hoveredSecond ? '60px' : '20px',
-                  height: hoveredSecond ? '60px' : '20px',
-                  backgroundColor: hoveredSecond ? 'transparent' : '#ff4d4f',
-                  border: hoveredSecond ? '2px solid #ff4d4f' : 'none',
-                  borderRadius: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  transition: 'all 0.2s ease',
-                }}
-              />
-            </CustomCursor>
+            {useContainer && isMouseInContainer2 && (
+              <CustomCursor
+                id="container-2-cursor"
+                containerRef={secondContainerRef}
+                smoothFactor={2}
+                hideNativeCursor={true}
+              >
+                <div
+                  style={{
+                    width: hoveredSecond ? '60px' : '20px',
+                    height: hoveredSecond ? '60px' : '20px',
+                    backgroundColor: hoveredSecond ? 'transparent' : '#ff4d4f',
+                    border: hoveredSecond ? '2px solid #ff4d4f' : 'none',
+                    borderRadius: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    transition: 'all 0.2s ease',
+                  }}
+                />
+              </CustomCursor>
+            )}
 
             <Title level={2}>Second Container</Title>
             <Paragraph>
@@ -234,7 +271,7 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
 
             <Card
               type="inner"
-              style={{ cursor: 'none' }}
+              style={{ cursor: 'default' }}
               onMouseEnter={() => setHoveredSecond(true)}
               onMouseLeave={() => setHoveredSecond(false)}
             >
