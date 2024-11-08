@@ -6,6 +6,7 @@ import {
   PaintSection,
   ContentRevealSection,
   EntryAnimationSection,
+  GallerySection,
 } from './sections';
 import { Section } from './types/Section';
 import { DebugInfo } from './components/DebugInfo';
@@ -43,6 +44,12 @@ const sections: Section[] = [
     id: 'content-reveal',
     title: 'Content Reveal',
     component: ContentRevealSection,
+    height: '100vh',
+  },
+  {
+    id: 'gallery',
+    title: 'Gallery',
+    component: GallerySection,
     height: '100vh',
   },
 ];
