@@ -36,15 +36,18 @@ export const GallerySection: React.FC<GallerySectionProps> = React.memo(
     const [scrollPosition, setScrollPosition] = useState(0);
     const [expandedItem, setExpandedItem] = useState<number | null>(null);
     const expandedContainerRef = useRef<HTMLDivElement>(null);
+    const [activeContainer, setActiveContainer] = useState<
+      'gallery' | 'expanded'
+    >('gallery');
 
     const handleMouseMove = useCallback(
       (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!containerRef.current) return;
+        if (!containerRef.current || activeContainer !== 'gallery') return;
         const { width, left } = containerRef.current.getBoundingClientRect();
         const isLeft = e.clientX - left < width / 2;
         setIsLeftSide(isLeft);
       },
-      []
+      [activeContainer]
     );
 
     const handleClick = useCallback(() => {
@@ -70,6 +73,58 @@ export const GallerySection: React.FC<GallerySectionProps> = React.memo(
     const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
       setScrollPosition(e.currentTarget.scrollLeft);
     }, []);
+
+    const handleExpand = useCallback((itemId: number) => {
+      setExpandedItem(itemId);
+      setActiveContainer('expanded');
+    }, []);
+
+    const handleClose = useCallback(() => {
+      setExpandedItem(null);
+      setActiveContainer('gallery');
+    }, []);
+
+    const renderCursorContent = useCallback(() => {
+      if (activeContainer === 'expanded') {
+        return (
+          <div
+            style={{
+              width: '40px',
+              height: '40px',
+              backgroundColor: 'rgba(255, 255, 255, 0.3)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transform: 'translate(-50%, -50%)',
+              color: 'white',
+              fontSize: '16px',
+            }}
+          >
+            <CloseOutlined />
+          </div>
+        );
+      }
+
+      return (
+        <div
+          style={{
+            width: '50px',
+            height: '50px',
+            backgroundColor: 'rgba(0,0,0,0.3)',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transform: 'translate(-50%, -50%)',
+            color: 'white',
+            fontSize: '20px',
+          }}
+        >
+          {isLeftSide ? <LeftOutlined /> : <RightOutlined />}
+        </div>
+      );
+    }, [activeContainer, isLeftSide]);
 
     const GalleryItem = ({ item }: { item: GalleryItem }) => {
       const [isHovered, setIsHovered] = useState(false);
@@ -115,7 +170,7 @@ export const GallerySection: React.FC<GallerySectionProps> = React.memo(
                 icon={<ExpandAltOutlined />}
                 onClick={(e) => {
                   e.stopPropagation();
-                  setExpandedItem(item.id);
+                  handleExpand(item.id);
                 }}
               />
             </div>
@@ -134,6 +189,15 @@ export const GallerySection: React.FC<GallerySectionProps> = React.memo(
           </Paragraph>
         </Typography>
 
+        <CustomCursor
+          containerRef={
+            activeContainer === 'expanded' ? expandedContainerRef : containerRef
+          }
+          smoothFactor={2}
+        >
+          {renderCursorContent()}
+        </CustomCursor>
+
         <div
           ref={containerRef}
           onMouseMove={handleMouseMove}
@@ -145,30 +209,9 @@ export const GallerySection: React.FC<GallerySectionProps> = React.memo(
             background: '#f0f0f0',
             borderRadius: '8px',
             width: '100%',
+            visibility: activeContainer === 'expanded' ? 'hidden' : 'visible',
           }}
         >
-          {/* Only show gallery cursor when not in expanded mode */}
-          {expandedItem === null && (
-            <CustomCursor containerRef={containerRef} smoothFactor={2}>
-              <div
-                style={{
-                  width: '50px',
-                  height: '50px',
-                  backgroundColor: 'rgba(0,0,0,0.3)',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transform: 'translate(-50%, -50%)',
-                  color: 'white',
-                  fontSize: '20px',
-                }}
-              >
-                {isLeftSide ? <LeftOutlined /> : <RightOutlined />}
-              </div>
-            </CustomCursor>
-          )}
-
           <div
             ref={galleryRef}
             onScroll={handleScroll}
@@ -196,7 +239,6 @@ export const GallerySection: React.FC<GallerySectionProps> = React.memo(
           </div>
         </div>
 
-        {/* Expanded Item Modal */}
         {expandedItem !== null && (
           <div
             ref={expandedContainerRef}
@@ -211,29 +253,10 @@ export const GallerySection: React.FC<GallerySectionProps> = React.memo(
               alignItems: 'center',
               justifyContent: 'center',
               zIndex: 1000,
-              cursor: 'none', // Hide default cursor
+              cursor: 'none',
             }}
-            onClick={() => setExpandedItem(null)}
+            onClick={handleClose}
           >
-            <CustomCursor containerRef={expandedContainerRef} smoothFactor={2}>
-              <div
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transform: 'translate(-50%, -50%)',
-                  color: 'white',
-                  fontSize: '16px',
-                }}
-              >
-                <CloseOutlined />
-              </div>
-            </CustomCursor>
-
             <div
               style={{
                 position: 'relative',
@@ -256,7 +279,7 @@ export const GallerySection: React.FC<GallerySectionProps> = React.memo(
                   top: '1rem',
                   right: '1rem',
                 }}
-                onClick={() => setExpandedItem(null)}
+                onClick={handleClose}
               />
               Gallery Item {expandedItem + 1}
             </div>
