@@ -9,7 +9,14 @@ export const ContentRevealSection: React.FC = () => {
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
 
   const updateCursorPos = useCallback((x: number, y: number) => {
-    setCursorPos({ x, y });
+    const containerRect = revealRef.current?.getBoundingClientRect();
+    const offsetX = containerRect?.left || 0;
+    const offsetY = containerRect?.top || 0;
+
+    const relativeX = x - offsetX;
+    const relativeY = y - offsetY;
+
+    setCursorPos({ x: relativeX, y: relativeY });
   }, []);
 
   return (

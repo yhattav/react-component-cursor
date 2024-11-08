@@ -131,6 +131,12 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
     (cursorX: number, cursorY: number, pointerX: number, pointerY: number) => {
       let totalFx = 0;
       let totalFy = 0;
+
+      // Get container's position
+      const containerRect = magneticRef.current?.getBoundingClientRect();
+      const offsetX = containerRect?.left || 0;
+      const offsetY = containerRect?.top || 0;
+
       // Add pointer gravitational pull (constant mass of 0.5)
       const pointerForce = calculateGravitationalForce(
         cursorX,
@@ -142,13 +148,13 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
       totalFx += pointerForce.fx;
       totalFy += pointerForce.fy;
 
-      // Add magnetic points gravitational pull
+      // Add magnetic points gravitational pull with offset correction
       magneticElements.forEach((magnet) => {
         const force = calculateGravitationalForce(
           cursorX,
           cursorY,
-          magnet.x,
-          magnet.y,
+          magnet.x + offsetX, // Add container offset
+          magnet.y + offsetY, // Add container offset
           magnet.mass
         );
         totalFx += force.fx;
@@ -325,6 +331,7 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
         containerRef={magneticRef}
         smoothFactor={1}
         onMove={handleCursorMove}
+        hideNativeCursor={false}
       >
         <div style={{ position: 'relative' }}>
           {/* Cursor */}

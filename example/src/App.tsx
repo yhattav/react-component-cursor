@@ -6,6 +6,7 @@ import {
   PaintSection,
   ContentRevealSection,
   EntryAnimationSection,
+  GallerySection,
 } from './sections';
 import { Section } from './types/Section';
 import { DebugInfo } from './components/DebugInfo';
@@ -45,6 +46,12 @@ const sections: Section[] = [
     component: ContentRevealSection,
     height: '100vh',
   },
+  {
+    id: 'gallery',
+    title: 'Gallery',
+    component: GallerySection,
+    height: '100vh',
+  },
 ];
 
 // Add type for debug data
@@ -70,6 +77,27 @@ function App() {
 
   const handleDebugData = useCallback((data: DebugData) => {
     setDebugData(data);
+  }, []);
+
+  useEffect(() => {
+    // Create a container for cursors if it doesn't exist
+    if (!document.getElementById('cursor-container')) {
+      const cursorContainer = document.createElement('div');
+      cursorContainer.id = 'cursor-container';
+      cursorContainer.style.position = 'fixed';
+      cursorContainer.style.top = '0';
+      cursorContainer.style.left = '0';
+      cursorContainer.style.pointerEvents = 'none';
+      cursorContainer.style.zIndex = '9999';
+      document.body.appendChild(cursorContainer);
+    }
+
+    return () => {
+      const container = document.getElementById('cursor-container');
+      if (container) {
+        document.body.removeChild(container);
+      }
+    };
   }, []);
 
   return (
