@@ -428,73 +428,67 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
         </motion.div>
       ))}
 
-      {/* Only render cursor and vectors when simulation has started */}
+      {/* Simplified CustomCursor only for tracking pointer position */}
       <CustomCursor
         containerRef={gravityRef}
         smoothFactor={1}
         onMove={handleCursorMove}
         hideNativeCursor={false}
       >
-        <div
-          style={{
-            position: 'relative',
-            width: '100vw',
-            height: '100vh',
-          }}
-        >
-          {/* Only show vectors and cursor when simulation has started */}
-          {isSimulationStarted && (
-            <>
-              <svg
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  pointerEvents: 'none',
-                  overflow: 'visible',
-                }}
-              >
-                {/* Velocity vector */}
-                {drawArrow(
-                  cursorPos.x - pointerPos.x,
-                  cursorPos.y - pointerPos.y,
-                  velocity.x,
-                  velocity.y,
-                  '#4CAF50', // Green
-                  40 // Scale factor to make the arrow visible
-                )}
-
-                {/* Force/Acceleration vector */}
-                {drawArrow(
-                  cursorPos.x - pointerPos.x,
-                  cursorPos.y - pointerPos.y,
-                  force.fx,
-                  force.fy,
-                  '#FF4081', // Pink
-                  200 // Different scale for force
-                )}
-              </svg>
-              <motion.div
-                style={{
-                  width: '20px',
-                  height: '20px',
-                  backgroundColor: 'transparent',
-                  border: '2px solid #666',
-                  borderRadius: '50%',
-                  position: 'absolute',
-                  left: cursorPos.x - pointerPos.x,
-                  top: cursorPos.y - pointerPos.y,
-                  transform: 'translate(-50%, -50%)',
-                  transition: 'border-color 0.2s ease',
-                  boxShadow: '0 0 20px rgba(255,255,255,0.2)',
-                }}
-              />
-            </>
-          )}
-        </div>
+        <div style={{ width: '100vw', height: '100vh' }} />
       </CustomCursor>
+
+      {/* Moved gravity-affected elements outside CustomCursor */}
+      {isSimulationStarted && (
+        <>
+          <svg
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+              overflow: 'visible',
+            }}
+          >
+            {/* Velocity vector */}
+            {drawArrow(
+              cursorPos.x,
+              cursorPos.y,
+              velocity.x,
+              velocity.y,
+              '#4CAF50',
+              40
+            )}
+
+            {/* Force/Acceleration vector */}
+            {drawArrow(
+              cursorPos.x,
+              cursorPos.y,
+              force.fx,
+              force.fy,
+              '#FF4081',
+              200
+            )}
+          </svg>
+          <motion.div
+            style={{
+              width: '20px',
+              height: '20px',
+              backgroundColor: 'transparent',
+              border: '2px solid #666',
+              borderRadius: '50%',
+              position: 'fixed',
+              left: cursorPos.x,
+              top: cursorPos.y,
+              transform: 'translate(-50%, -50%)',
+              transition: 'border-color 0.2s ease',
+              boxShadow: '0 0 20px rgba(255,255,255,0.2)',
+            }}
+          />
+        </>
+      )}
     </Card>
   );
 };
