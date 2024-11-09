@@ -1,7 +1,7 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { CustomCursor } from '@yhattav/react-component-cursor';
 import { Card, Typography } from 'antd';
-import { motion } from 'framer-motion';
+import { motion, PanInfo } from 'framer-motion';
 
 const { Title, Paragraph } = Typography;
 
@@ -83,11 +83,11 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
     y: 0,
   });
 
-  const gravityPoints: GravityPoint[] = [
+  const [gravityPoints, setGravityPoints] = useState<GravityPoint[]>([
     { x: 700, y: 700, label: 'Heavy', mass: 50000, color: '#FF6B6B' },
     { x: 500, y: 150, label: 'Medium', mass: 30000, color: '#4ECDC4' },
     { x: 350, y: 250, label: 'Light', mass: 10000, color: '#45B7D1' },
-  ];
+  ]);
 
   const calculateGravitationalForce = useCallback(
     (x1: number, y1: number, x2: number, y2: number, mass: number) => {
@@ -127,17 +127,43 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
     []
   );
 
+  const handleDrag = (_: any, info: PanInfo, index: number) => {
+    const containerRect = gravityRef.current?.getBoundingClientRect();
+    if (!containerRect) return;
+
+    setGravityPoints((points) =>
+      points.map((point, i) => {
+        if (i === index) {
+          // Use the absolute position from the drag event
+          return {
+            ...point,
+            x: info.point.x - containerRect.left,
+            y: info.point.y - containerRect.top,
+          };
+        }
+        return point;
+      })
+    );
+  };
+
+  // Add function to convert between coordinate systems
+  const getContainerOffset = useCallback(() => {
+    const containerRect = gravityRef.current?.getBoundingClientRect();
+    return {
+      x: containerRect?.left || 0,
+      y: containerRect?.top || 0,
+    };
+  }, []);
+
+  // Update force calculation to use screen coordinates
   const calculateTotalForce = useCallback(
     (cursorX: number, cursorY: number, pointerX: number, pointerY: number) => {
       let totalFx = 0;
       let totalFy = 0;
 
-      // Get container's position
-      const containerRect = gravityRef.current?.getBoundingClientRect();
-      const offsetX = containerRect?.left || 0;
-      const offsetY = containerRect?.top || 0;
+      const offset = getContainerOffset();
 
-      // Add pointer gravitational pull (constant mass of 0.5)
+      // Add pointer gravitational pull
       const pointerForce = calculateGravitationalForce(
         cursorX,
         cursorY,
@@ -148,13 +174,13 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
       totalFx += pointerForce.fx;
       totalFy += pointerForce.fy;
 
-      // Add gravity points gravitational pull with offset correction
+      // Add gravity points force with proper coordinate conversion
       gravityPoints.forEach((point) => {
         const force = calculateGravitationalForce(
           cursorX,
           cursorY,
-          point.x + offsetX, // Add container offset
-          point.y + offsetY, // Add container offset
+          point.x + offset.x, // Convert to screen coordinates
+          point.y + offset.y, // Convert to screen coordinates
           point.mass
         );
         totalFx += force.fx;
@@ -163,7 +189,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
 
       return { fx: totalFx, fy: totalFy };
     },
-    [calculateGravitationalForce]
+    [calculateGravitationalForce, gravityPoints]
   );
 
   // Add cursor mass constant
@@ -281,56 +307,56 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
       {gravityPoints.map((point, index) => (
         <motion.div
           key={index}
-          animate={{ scale: 1 }}
-          transition={{
-            repeat: Infinity,
-            duration: 2,
-            ease: 'easeInOut',
+          drag
+          dragMomentum={false}
+          dragElastic={0}
+          onDrag={(e, info) => handleDrag(e, info, index)}
+          initial={{ x: point.x, y: point.y }}
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            transform: 'translate(-50%, -50%)',
+            cursor: 'grab',
           }}
+          dragConstraints={gravityRef}
+          whileDrag={{ cursor: 'grabbing' }}
         >
           <div
             style={{
+              width: '16px',
+              height: '16px',
+              backgroundColor: point.color,
+              borderRadius: '50%',
+              transition: 'all 0.3s ease',
+              boxShadow: `0 0 10px ${point.color}`,
+            }}
+          />
+          <div
+            style={{
               position: 'absolute',
-              left: point.x,
-              top: point.y,
-              transform: 'translate(-50%, -50%)',
+              top: '20px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              color: point.color,
+              fontSize: '12px',
+              fontWeight: 'bold',
+              textShadow: '0 0 10px rgba(0,0,0,0.5)',
+              pointerEvents: 'none', // Prevent text from interfering with drag
             }}
           >
+            {point.label}
             <div
               style={{
-                width: '16px',
-                height: '16px',
-                backgroundColor: point.color,
-                borderRadius: '50%',
-                transition: 'all 0.3s ease',
-                boxShadow: `0 0 10px ${point.color}`,
+                width: '50px',
+                height: '4px',
+                background: `linear-gradient(90deg, ${point.color} ${
+                  point.mass / 1000
+                }%, transparent ${point.mass / 1000}%)`,
+                borderRadius: '2px',
+                marginTop: '4px',
               }}
             />
-            <div
-              style={{
-                position: 'absolute',
-                top: '20px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                color: point.color,
-                fontSize: '12px',
-                fontWeight: 'bold',
-                textShadow: '0 0 10px rgba(0,0,0,0.5)',
-              }}
-            >
-              {point.label}
-              <div
-                style={{
-                  width: '50px',
-                  height: '4px',
-                  background: `linear-gradient(90deg, ${point.color} ${
-                    point.mass / 1000
-                  }%, transparent ${point.mass / 1000}%)`,
-                  borderRadius: '2px',
-                  marginTop: '4px',
-                }}
-              />
-            </div>
           </div>
         </motion.div>
       ))}
