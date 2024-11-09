@@ -193,12 +193,12 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
   );
 
   // Add cursor mass constant
-  const CURSOR_MASS = 0.01; // Adjust this value to change cursor's "weight"
+  const CURSOR_MASS = 0.1; // Adjust this value to change cursor's "weight"
 
   // Use requestAnimationFrame for smooth cursor movement
   useEffect(() => {
     let animationFrameId: number;
-    const friction = 1;
+    const friction = 0.999;
     const deltaTime = 1 / 60;
 
     const updateCursorPosition = () => {
@@ -373,6 +373,29 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
       <Paragraph style={{ color: '#aaa' }}>
         Move your cursor near the gravity points to feel the pull!
       </Paragraph>
+
+      {/* Add click to start message */}
+      {!isSimulationStarted && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            textAlign: 'center',
+            color: '#fff',
+            background: 'rgba(0, 0, 0, 0.7)',
+            padding: '20px 40px',
+            borderRadius: '8px',
+            backdropFilter: 'blur(4px)',
+            zIndex: 10,
+          }}
+        >
+          <Title level={3} style={{ color: '#fff', margin: 0 }}>
+            Click Anywhere to Start
+          </Title>
+        </div>
+      )}
 
       {/* Gravity Points */}
       {gravityPoints.map((point, index) => (
