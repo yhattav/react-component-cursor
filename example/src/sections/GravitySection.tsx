@@ -27,11 +27,84 @@ interface GravitySectionProps {
   onDebugData?: (data: any) => void;
 }
 
+// Add new interface for particle parameters
+interface ParticleRenderParams {
+  position: Point2D;
+  velocity: Point2D;
+  force: Force;
+  color?: string;
+  size?: number;
+  showVectors?: boolean;
+}
+
+// Separate particle rendering function that's more flexible
+const renderParticle = ({
+  position,
+  velocity,
+  force,
+  color = '#BADA55',
+  size = 20,
+  showVectors = true,
+}: ParticleRenderParams) => {
+  return (
+    <>
+      {showVectors && (
+        <svg
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            pointerEvents: 'none',
+            overflow: 'visible',
+          }}
+        >
+          {/* Velocity vector */}
+          {drawArrow(
+            position.x,
+            position.y,
+            velocity.x,
+            velocity.y,
+            '#4CAF50',
+            40
+          )}
+
+          {/* Force/Acceleration vector */}
+          {drawArrow(
+            position.x,
+            position.y,
+            force.fx,
+            force.fy,
+            '#FF4081',
+            200
+          )}
+        </svg>
+      )}
+      <motion.div
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          backgroundColor: 'transparent',
+          border: `2px solid ${color}`,
+          borderRadius: '50%',
+          position: 'fixed',
+          left: position.x,
+          top: position.y,
+          transform: 'translate(-50%, -50%)',
+          transition: 'border-color 0.2s ease',
+          boxShadow: `0 0 20px rgba(255,255,255,0.2)`,
+        }}
+      />
+    </>
+  );
+};
+
 export const GravitySection: React.FC<GravitySectionProps> = ({
   onDebugData,
 }) => {
   const gravityRef = useRef<HTMLDivElement>(null);
-  const [cursorPos, setCursorPos] = useState<Point2D>({ x: 0, y: 0 });
+  const [particlePos, setParticlePos] = useState<Point2D>({ x: 0, y: 0 });
   const [pointerPos, setPointerPos] = useState<Point2D>({ x: 0, y: 0 });
   const [velocity, setVelocity] = useState<Point2D>({ x: 0, y: 0 });
 
@@ -68,7 +141,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
 
   // Update force calculation to use screen coordinates
   const force = calculateTotalForce(
-    cursorPos,
+    particlePos,
     pointerPos,
     gravityPoints,
     offset
@@ -82,7 +155,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
 
     const updateCursorPosition = () => {
       const force = calculateTotalForce(
-        cursorPos,
+        particlePos,
         pointerPos,
         gravityPoints,
         offset
@@ -109,7 +182,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
       });
 
       // Update position using the current velocity state
-      setCursorPos((prev) => ({
+      setParticlePos((prev) => ({
         x: Number.isFinite(prev.x + velocity.x * deltaTime)
           ? prev.x + velocity.x * deltaTime
           : prev.x,
@@ -126,7 +199,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [cursorPos, pointerPos, gravityPoints, offset, velocity]);
+  }, [particlePos, pointerPos, gravityPoints, offset, velocity]);
 
   const handleCursorMove = useCallback((x: number, y: number) => {
     if (isFinite(x) && isFinite(y)) {
@@ -137,29 +210,24 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
   // Use effect to send debug data
   useEffect(() => {
     onDebugData?.({
-      cursor: {
-        position: cursorPos,
+      particle: {
+        position: particlePos,
         velocity: velocity,
       },
       pointer: {
         position: pointerPos,
         force: calculateGravitationalForce(
-          cursorPos.x,
-          cursorPos.y,
+          particlePos.x,
+          particlePos.y,
           pointerPos.x,
           pointerPos.y,
           500
         ),
       },
       velocity: velocity,
-      totalForce: calculateTotalForce(
-        cursorPos,
-        pointerPos,
-        gravityPoints,
-        offset
-      ),
+      totalForce: force,
     });
-  }, [cursorPos, pointerPos, velocity, gravityPoints, offset, onDebugData]);
+  }, [particlePos, pointerPos, velocity, gravityPoints, offset, onDebugData]);
 
   // Add click handler
   const [isSimulationStarted, setIsSimulationStarted] = useState(false);
@@ -168,7 +236,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
   const handleContainerClick = useCallback(() => {
     if (isDragging) return; // Ignore clicks during drag
 
-    setCursorPos(pointerPos);
+    setParticlePos(pointerPos);
     setVelocity({ x: 0, y: 0 });
     if (!isSimulationStarted) {
       setIsSimulationStarted(true);
@@ -185,7 +253,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
 
     const updateCursorPosition = () => {
       const force = calculateTotalForce(
-        cursorPos,
+        particlePos,
         pointerPos,
         gravityPoints,
         offset
@@ -212,7 +280,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
       });
 
       // Update position using the current velocity state
-      setCursorPos((prev) => ({
+      setParticlePos((prev) => ({
         x: Number.isFinite(prev.x + velocity.x * deltaTime)
           ? prev.x + velocity.x * deltaTime
           : prev.x,
@@ -230,7 +298,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
       cancelAnimationFrame(animationFrameId);
     };
   }, [
-    cursorPos,
+    particlePos,
     pointerPos,
     gravityPoints,
     offset,
@@ -276,7 +344,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
     const updateCursorPosition = () => {
       const offset = getContainerOffset(gravityRef);
       const force = calculateTotalForce(
-        cursorPos,
+        particlePos,
         pointerPos,
         gravityPoints,
         offset,
@@ -284,26 +352,26 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
       );
 
       const { newPosition, newVelocity } = updatePhysicsState(
-        cursorPos,
+        particlePos,
         velocity,
         force
       );
 
       setVelocity(newVelocity);
-      setCursorPos(newPosition);
+      setParticlePos(newPosition);
 
       // Debug data
       if (onDebugData) {
         const pointerForce = calculateGravitationalForce(
-          cursorPos.x,
-          cursorPos.y,
+          particlePos.x,
+          particlePos.y,
           pointerPos.x,
           pointerPos.y,
           PHYSICS_CONFIG.POINTER_MASS
         );
 
         onDebugData({
-          cursor: { position: newPosition, velocity: newVelocity },
+          particle: { position: newPosition, velocity: newVelocity },
           pointer: { position: pointerPos, force: pointerForce },
           totalForce: force,
         });
@@ -316,7 +384,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
     return () => cancelAnimationFrame(animationFrameId);
   }, [
     isSimulationStarted,
-    cursorPos,
+    particlePos,
     pointerPos,
     gravityPoints,
     velocity,
@@ -438,55 +506,29 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
         <div style={{ width: '100vw', height: '100vh' }} />
       </CustomCursor>
 
-      {/* Moved gravity-affected elements outside CustomCursor */}
+      {/* Example of rendering multiple particles */}
       {isSimulationStarted && (
         <>
-          <svg
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              pointerEvents: 'none',
-              overflow: 'visible',
-            }}
-          >
-            {/* Velocity vector */}
-            {drawArrow(
-              cursorPos.x,
-              cursorPos.y,
-              velocity.x,
-              velocity.y,
-              '#4CAF50',
-              40
-            )}
+          {/* Main particle */}
+          {renderParticle({
+            position: particlePos,
+            velocity,
+            force,
+            color: '#666',
+            showVectors: true,
+          })}
 
-            {/* Force/Acceleration vector */}
-            {drawArrow(
-              cursorPos.x,
-              cursorPos.y,
-              force.fx,
-              force.fy,
-              '#FF4081',
-              200
-            )}
-          </svg>
-          <motion.div
-            style={{
-              width: '20px',
-              height: '20px',
-              backgroundColor: 'transparent',
-              border: '2px solid #666',
-              borderRadius: '50%',
-              position: 'fixed',
-              left: cursorPos.x,
-              top: cursorPos.y,
-              transform: 'translate(-50%, -50%)',
-              transition: 'border-color 0.2s ease',
-              boxShadow: '0 0 20px rgba(255,255,255,0.2)',
-            }}
-          />
+          {/* Example of additional particles */}
+          {/* 
+          {renderParticle({
+            position: { x: particlePos.x + 50, y: particlePos.y + 50 },
+            velocity: { x: velocity.x * 0.5, y: velocity.y * 0.5 },
+            force: { fx: force.fx * 0.5, fy: force.fy * 0.5 },
+            color: '#ff0000',
+            size: 15,
+            showVectors: false,
+          })}
+          */}
         </>
       )}
     </Card>
