@@ -340,23 +340,6 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
             height: '100vh',
           }}
         >
-          {/* Cursor */}
-          <motion.div
-            style={{
-              //   width: '20px',
-              //   height: '20px',
-              backgroundColor: 'transparent',
-              border: '2px solid #666',
-              borderRadius: '50%',
-              position: 'absolute',
-              left: cursorPos.x - pointerPos.x,
-              top: cursorPos.y - pointerPos.y,
-              transform: 'translate(-50%, -50%)',
-              transition: 'border-color 0.2s ease',
-              boxShadow: '0 0 20px rgba(255,255,255,0.2)',
-            }}
-          />
-
           {/* Vector visualization */}
           <svg
             style={{
@@ -399,6 +382,22 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
               1000 // Different scale for force
             )}
           </svg>
+          {/* Cursor */}
+          <motion.div
+            style={{
+              width: '20px',
+              height: '20px',
+              backgroundColor: 'transparent',
+              border: '2px solid #666',
+              borderRadius: '50%',
+              position: 'absolute',
+              left: cursorPos.x - pointerPos.x,
+              top: cursorPos.y - pointerPos.y,
+              transform: 'translate(-50%, -50%)',
+              transition: 'border-color 0.2s ease',
+              boxShadow: '0 0 20px rgba(255,255,255,0.2)',
+            }}
+          />
         </div>
       </CustomCursor>
     </Card>
