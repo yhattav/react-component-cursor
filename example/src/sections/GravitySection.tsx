@@ -12,6 +12,14 @@ import { Point2D, GravityPoint, Force } from '../utils/types/physics';
 
 const { Title, Paragraph } = Typography;
 
+// Move physics constants to a config
+const PHYSICS_CONFIG = {
+  CURSOR_MASS: 0.1,
+  FRICTION: 0.999,
+  DELTA_TIME: 1 / 60,
+  POINTER_MASS: 50000,
+} as const;
+
 interface GravitySectionProps {
   onDebugData?: (data: any) => void;
 }
@@ -32,24 +40,19 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
 
   const [isDragging, setIsDragging] = useState(false);
 
-  const handleDrag = (_: any, info: PanInfo, index: number) => {
+  const handleDrag = useCallback((e: any, info: PanInfo, index: number) => {
     setIsDragging(true);
-    const containerRect = gravityRef.current?.getBoundingClientRect();
-    if (!containerRect) return;
+    const offset = getContainerOffset(gravityRef);
+    if (!offset) return;
 
     setGravityPoints((points) =>
-      points.map((point, i) => {
-        if (i === index) {
-          return {
-            ...point,
-            x: info.point.x - containerRect.left,
-            y: info.point.y - containerRect.top,
-          };
-        }
-        return point;
-      })
+      points.map((point, i) =>
+        i === index
+          ? { ...point, x: info.point.x - offset.x, y: info.point.y - offset.y }
+          : point
+      )
     );
-  };
+  }, []);
 
   const handleDragEnd = () => {
     setTimeout(() => {
@@ -68,9 +71,6 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
     offset
   );
 
-  // Add cursor mass constant
-  const CURSOR_MASS = 0.1; // Adjust this value to change cursor's "weight"
-
   // Use requestAnimationFrame for smooth cursor movement
   useEffect(() => {
     let animationFrameId: number;
@@ -86,8 +86,12 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
       );
 
       // Calculate acceleration using F = ma
-      const ax = Number.isFinite(force.fx) ? force.fx / CURSOR_MASS : 0;
-      const ay = Number.isFinite(force.fy) ? force.fy / CURSOR_MASS : 0;
+      const ax = Number.isFinite(force.fx)
+        ? force.fx / PHYSICS_CONFIG.CURSOR_MASS
+        : 0;
+      const ay = Number.isFinite(force.fy)
+        ? force.fy / PHYSICS_CONFIG.CURSOR_MASS
+        : 0;
 
       // Update velocity using the existing velocity state
       setVelocity((currentVelocity) => {
@@ -185,8 +189,12 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
       );
 
       // Calculate acceleration using F = ma
-      const ax = Number.isFinite(force.fx) ? force.fx / CURSOR_MASS : 0;
-      const ay = Number.isFinite(force.fy) ? force.fy / CURSOR_MASS : 0;
+      const ax = Number.isFinite(force.fx)
+        ? force.fx / PHYSICS_CONFIG.CURSOR_MASS
+        : 0;
+      const ay = Number.isFinite(force.fy)
+        ? force.fy / PHYSICS_CONFIG.CURSOR_MASS
+        : 0;
 
       // Update velocity using the existing velocity state
       setVelocity((currentVelocity) => {
@@ -225,6 +233,114 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
     offset,
     velocity,
     isSimulationStarted,
+  ]);
+
+  const updatePhysicsState = useCallback(
+    (
+      currentPos: Point2D,
+      currentVelocity: Point2D,
+      force: Force
+    ): { newPosition: Point2D; newVelocity: Point2D } => {
+      // Calculate acceleration using F = ma
+      const acceleration = {
+        x: Number.isFinite(force.fx)
+          ? force.fx / PHYSICS_CONFIG.CURSOR_MASS
+          : 0,
+        y: Number.isFinite(force.fy)
+          ? force.fy / PHYSICS_CONFIG.CURSOR_MASS
+          : 0,
+      };
+
+      // Update velocity using current acceleration
+      const newVelocity = {
+        x: Number.isFinite(
+          currentVelocity.x + acceleration.x * PHYSICS_CONFIG.DELTA_TIME
+        )
+          ? (currentVelocity.x + acceleration.x * PHYSICS_CONFIG.DELTA_TIME) *
+            PHYSICS_CONFIG.FRICTION
+          : 0,
+        y: Number.isFinite(
+          currentVelocity.y + acceleration.y * PHYSICS_CONFIG.DELTA_TIME
+        )
+          ? (currentVelocity.y + acceleration.y * PHYSICS_CONFIG.DELTA_TIME) *
+            PHYSICS_CONFIG.FRICTION
+          : 0,
+      };
+
+      // Update position using new velocity
+      const newPosition = {
+        x: Number.isFinite(
+          currentPos.x + newVelocity.x * PHYSICS_CONFIG.DELTA_TIME
+        )
+          ? currentPos.x + newVelocity.x * PHYSICS_CONFIG.DELTA_TIME
+          : currentPos.x,
+        y: Number.isFinite(
+          currentPos.y + newVelocity.y * PHYSICS_CONFIG.DELTA_TIME
+        )
+          ? currentPos.y + newVelocity.y * PHYSICS_CONFIG.DELTA_TIME
+          : currentPos.y,
+      };
+
+      return { newPosition, newVelocity };
+    },
+    []
+  );
+
+  // Animation frame effect
+  useEffect(() => {
+    if (!isSimulationStarted) return;
+
+    let animationFrameId: number;
+
+    const updateCursorPosition = () => {
+      const offset = getContainerOffset(gravityRef);
+      const force = calculateTotalForce(
+        cursorPos,
+        pointerPos,
+        gravityPoints,
+        offset,
+        PHYSICS_CONFIG.POINTER_MASS
+      );
+
+      const { newPosition, newVelocity } = updatePhysicsState(
+        cursorPos,
+        velocity,
+        force
+      );
+
+      setVelocity(newVelocity);
+      setCursorPos(newPosition);
+
+      // Debug data
+      if (onDebugData) {
+        const pointerForce = calculateGravitationalForce(
+          cursorPos.x,
+          cursorPos.y,
+          pointerPos.x,
+          pointerPos.y,
+          PHYSICS_CONFIG.POINTER_MASS
+        );
+
+        onDebugData({
+          cursor: { position: newPosition, velocity: newVelocity },
+          pointer: { position: pointerPos, force: pointerForce },
+          totalForce: force,
+        });
+      }
+
+      animationFrameId = requestAnimationFrame(updateCursorPosition);
+    };
+
+    animationFrameId = requestAnimationFrame(updateCursorPosition);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [
+    isSimulationStarted,
+    cursorPos,
+    pointerPos,
+    gravityPoints,
+    velocity,
+    updatePhysicsState,
+    onDebugData,
   ]);
 
   return (
