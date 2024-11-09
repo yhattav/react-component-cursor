@@ -127,14 +127,16 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
     []
   );
 
+  const [isDragging, setIsDragging] = useState(false);
+
   const handleDrag = (_: any, info: PanInfo, index: number) => {
+    setIsDragging(true);
     const containerRect = gravityRef.current?.getBoundingClientRect();
     if (!containerRect) return;
 
     setGravityPoints((points) =>
       points.map((point, i) => {
         if (i === index) {
-          // Use the absolute position from the drag event
           return {
             ...point,
             x: info.point.x - containerRect.left,
@@ -144,6 +146,12 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
         return point;
       })
     );
+  };
+
+  const handleDragEnd = () => {
+    setTimeout(() => {
+      setIsDragging(false);
+    }, 0);
   };
 
   // Add function to convert between coordinate systems
@@ -288,14 +296,16 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
   // Add click handler
   const [isSimulationStarted, setIsSimulationStarted] = useState(false);
 
-  // Clean version of the click handler
+  // Modify click handler to check for drag state
   const handleContainerClick = useCallback(() => {
+    if (isDragging) return; // Ignore clicks during drag
+
     setCursorPos(pointerPos);
-    setVelocity({ x: 0, y: 0 }); // Reset velocity
+    setVelocity({ x: 0, y: 0 });
     if (!isSimulationStarted) {
       setIsSimulationStarted(true);
     }
-  }, [pointerPos, isSimulationStarted]);
+  }, [pointerPos, isSimulationStarted, isDragging]);
 
   // Modify animation effect to only run when simulation is started
   useEffect(() => {
@@ -405,6 +415,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
           dragMomentum={false}
           dragElastic={0}
           onDrag={(e, info) => handleDrag(e, info, index)}
+          onDragEnd={handleDragEnd}
           initial={{ x: point.x, y: point.y }}
           style={{
             position: 'absolute',
