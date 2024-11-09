@@ -172,9 +172,8 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
   // Use requestAnimationFrame for smooth cursor movement
   useEffect(() => {
     let animationFrameId: number;
-    const currentVelocity = { x: 0, y: 0 };
-    const friction = 1; // Added more dampening
-    const deltaTime = 1 / 60; // Time step for physics calculation (assuming 60fps)
+    const friction = 1;
+    const deltaTime = 1 / 60;
 
     const updateCursorPosition = () => {
       const force = calculateTotalForce(
@@ -188,23 +187,25 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
       const ax = Number.isFinite(force.fx) ? force.fx / CURSOR_MASS : 0;
       const ay = Number.isFinite(force.fy) ? force.fy / CURSOR_MASS : 0;
 
-      // Update velocity using acceleration (v = v0 + at)
-      currentVelocity.x = Number.isFinite(currentVelocity.x + ax * deltaTime)
-        ? (currentVelocity.x + ax * deltaTime) * friction
-        : 0;
-      currentVelocity.y = Number.isFinite(currentVelocity.y + ay * deltaTime)
-        ? (currentVelocity.y + ay * deltaTime) * friction
-        : 0;
+      // Update velocity using the existing velocity state
+      setVelocity((currentVelocity) => {
+        const newVx = Number.isFinite(currentVelocity.x + ax * deltaTime)
+          ? (currentVelocity.x + ax * deltaTime) * friction
+          : 0;
+        const newVy = Number.isFinite(currentVelocity.y + ay * deltaTime)
+          ? (currentVelocity.y + ay * deltaTime) * friction
+          : 0;
 
-      setVelocity(currentVelocity);
+        return { x: newVx, y: newVy };
+      });
 
-      // Update position using velocity (x = x0 + vt)
+      // Update position using the current velocity state
       setCursorPos((prev) => ({
-        x: Number.isFinite(prev.x + currentVelocity.x * deltaTime)
-          ? prev.x + currentVelocity.x * deltaTime
+        x: Number.isFinite(prev.x + velocity.x * deltaTime)
+          ? prev.x + velocity.x * deltaTime
           : prev.x,
-        y: Number.isFinite(prev.y + currentVelocity.y * deltaTime)
-          ? prev.y + currentVelocity.y * deltaTime
+        y: Number.isFinite(prev.y + velocity.y * deltaTime)
+          ? prev.y + velocity.y * deltaTime
           : prev.y,
       }));
 
@@ -216,7 +217,7 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [cursorPos, pointerPos, calculateTotalForce]);
+  }, [cursorPos, pointerPos, calculateTotalForce, velocity]);
 
   const handleCursorMove = useCallback((x: number, y: number) => {
     if (isFinite(x) && isFinite(y)) {
@@ -366,7 +367,7 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
               velocity.x,
               velocity.y,
               '#4CAF50', // Green
-              200 // Scale factor to make the arrow visible
+              40 // Scale factor to make the arrow visible
             )}
 
             {/* Force/Acceleration vector */}
