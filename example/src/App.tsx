@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Layout, Tabs } from 'antd';
 import {
   DemoSection,
-  MagneticFieldsSection,
+  GravitySection,
   PaintSection,
   ContentRevealSection,
   EntryAnimationSection,
@@ -29,9 +29,9 @@ const sections: Section[] = [
     height: '100vh',
   },
   {
-    id: 'magnetic-fields',
-    title: 'Magnetic Fields',
-    component: MagneticFieldsSection,
+    id: 'gravity',
+    title: 'Gravity',
+    component: GravitySection,
     height: '100vh',
   },
   {
@@ -62,7 +62,7 @@ interface DebugData {
 function App() {
   const [activeSection, setActiveSection] = useState(() => {
     const saved = localStorage.getItem('activeSection');
-    return saved || 'magnetic-fields';
+    return saved || 'gravity';
   });
 
   const [debugData, setDebugData] = useState<DebugData | null>(null);
