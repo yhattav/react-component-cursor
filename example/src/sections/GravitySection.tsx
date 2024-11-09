@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 
 const { Title, Paragraph } = Typography;
 
-interface MagneticPoint {
+interface GravityPoint {
   x: number;
   y: number;
   label: string;
@@ -62,14 +62,14 @@ const drawArrow = (
   );
 };
 
-interface MagneticFieldsSectionProps {
+interface GravitySectionProps {
   onDebugData?: (data: any) => void;
 }
 
-export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
+export const GravitySection: React.FC<GravitySectionProps> = ({
   onDebugData,
 }) => {
-  const magneticRef = useRef<HTMLDivElement>(null);
+  const gravityRef = useRef<HTMLDivElement>(null);
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number }>({
     x: 0,
     y: 0,
@@ -83,7 +83,7 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
     y: 0,
   });
 
-  const magneticElements: MagneticPoint[] = [
+  const gravityPoints: GravityPoint[] = [
     { x: 700, y: 700, label: 'Heavy', mass: 50000, color: '#FF6B6B' },
     { x: 500, y: 150, label: 'Medium', mass: 30000, color: '#4ECDC4' },
     { x: 350, y: 250, label: 'Light', mass: 10000, color: '#45B7D1' },
@@ -133,7 +133,7 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
       let totalFy = 0;
 
       // Get container's position
-      const containerRect = magneticRef.current?.getBoundingClientRect();
+      const containerRect = gravityRef.current?.getBoundingClientRect();
       const offsetX = containerRect?.left || 0;
       const offsetY = containerRect?.top || 0;
 
@@ -148,14 +148,14 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
       totalFx += pointerForce.fx;
       totalFy += pointerForce.fy;
 
-      // Add magnetic points gravitational pull with offset correction
-      magneticElements.forEach((magnet) => {
+      // Add gravity points gravitational pull with offset correction
+      gravityPoints.forEach((point) => {
         const force = calculateGravitationalForce(
           cursorX,
           cursorY,
-          magnet.x + offsetX, // Add container offset
-          magnet.y + offsetY, // Add container offset
-          magnet.mass
+          point.x + offsetX, // Add container offset
+          point.y + offsetY, // Add container offset
+          point.mass
         );
         totalFx += force.fx;
         totalFy += force.fy;
@@ -261,7 +261,7 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
 
   return (
     <Card
-      ref={magneticRef}
+      ref={gravityRef}
       style={{
         height: '100%',
         position: 'relative',
@@ -271,14 +271,14 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
       }}
     >
       <Title level={2} style={{ color: '#fff' }}>
-        Magnetic Fields
+        Gravity
       </Title>
       <Paragraph style={{ color: '#aaa' }}>
-        Move your cursor near the magnetic points to feel the pull!
+        Move your cursor near the gravity points to feel the pull!
       </Paragraph>
 
-      {/* Magnetic Points */}
-      {magneticElements.map((point, index) => (
+      {/* Gravity Points */}
+      {gravityPoints.map((point, index) => (
         <motion.div
           key={index}
           animate={{ scale: 1 }}
@@ -336,7 +336,7 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
       ))}
 
       <CustomCursor
-        containerRef={magneticRef}
+        containerRef={gravityRef}
         smoothFactor={1}
         onMove={handleCursorMove}
         hideNativeCursor={false}

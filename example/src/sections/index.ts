@@ -1,5 +1,5 @@
 export * from './DemoSection';
-export * from './MagneticFieldsSection';
+export * from './GravitySection';
 export * from './PaintSection';
 export * from './ContentRevealSection';
 export * from './EntryAnimationSection';
