@@ -166,11 +166,15 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
     [calculateGravitationalForce]
   );
 
+  // Add cursor mass constant
+  const CURSOR_MASS = 0.01; // Adjust this value to change cursor's "weight"
+
   // Use requestAnimationFrame for smooth cursor movement
   useEffect(() => {
     let animationFrameId: number;
     const currentVelocity = { x: 0, y: 0 };
-    const friction = 1; // Changed from 1 to add some dampening
+    const friction = 1; // Added more dampening
+    const deltaTime = 1 / 60; // Time step for physics calculation (assuming 60fps)
 
     const updateCursorPosition = () => {
       const force = calculateTotalForce(
@@ -180,24 +184,27 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
         pointerPos.y
       );
 
-      const fx = Number.isFinite(force.fx) ? force.fx : 0;
-      const fy = Number.isFinite(force.fy) ? force.fy : 0;
+      // Calculate acceleration using F = ma
+      const ax = Number.isFinite(force.fx) ? force.fx / CURSOR_MASS : 0;
+      const ay = Number.isFinite(force.fy) ? force.fy / CURSOR_MASS : 0;
 
-      currentVelocity.x = Number.isFinite(currentVelocity.x + fx)
-        ? (currentVelocity.x + fx) * friction
+      // Update velocity using acceleration (v = v0 + at)
+      currentVelocity.x = Number.isFinite(currentVelocity.x + ax * deltaTime)
+        ? (currentVelocity.x + ax * deltaTime) * friction
         : 0;
-      currentVelocity.y = Number.isFinite(currentVelocity.y + fy)
-        ? (currentVelocity.y + fy) * friction
+      currentVelocity.y = Number.isFinite(currentVelocity.y + ay * deltaTime)
+        ? (currentVelocity.y + ay * deltaTime) * friction
         : 0;
 
       setVelocity(currentVelocity);
 
+      // Update position using velocity (x = x0 + vt)
       setCursorPos((prev) => ({
-        x: Number.isFinite(prev.x + currentVelocity.x)
-          ? prev.x + currentVelocity.x
+        x: Number.isFinite(prev.x + currentVelocity.x * deltaTime)
+          ? prev.x + currentVelocity.x * deltaTime
           : prev.x,
-        y: Number.isFinite(prev.y + currentVelocity.y)
-          ? prev.y + currentVelocity.y
+        y: Number.isFinite(prev.y + currentVelocity.y * deltaTime)
+          ? prev.y + currentVelocity.y * deltaTime
           : prev.y,
       }));
 
