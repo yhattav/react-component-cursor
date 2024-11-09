@@ -170,7 +170,7 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
   useEffect(() => {
     let animationFrameId: number;
     const currentVelocity = { x: 0, y: 0 };
-    const friction = 0.95; // Changed from 1 to add some dampening
+    const friction = 1; // Changed from 1 to add some dampening
 
     const updateCursorPosition = () => {
       const force = calculateTotalForce(
@@ -379,7 +379,7 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
                 pointerPos.y
               ).fy,
               '#FF4081', // Pink
-              1000 // Different scale for force
+              200 // Different scale for force
             )}
           </svg>
           {/* Cursor */}
