@@ -285,9 +285,80 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
     onDebugData,
   ]);
 
+  // Add click handler
+  const [isSimulationStarted, setIsSimulationStarted] = useState(false);
+
+  // Clean version of the click handler
+  const handleContainerClick = useCallback(() => {
+    setCursorPos(pointerPos);
+    setVelocity({ x: 0, y: 0 }); // Reset velocity
+    if (!isSimulationStarted) {
+      setIsSimulationStarted(true);
+    }
+  }, [pointerPos, isSimulationStarted]);
+
+  // Modify animation effect to only run when simulation is started
+  useEffect(() => {
+    if (!isSimulationStarted) return;
+
+    let animationFrameId: number;
+    const friction = 1;
+    const deltaTime = 1 / 60;
+
+    const updateCursorPosition = () => {
+      const force = calculateTotalForce(
+        cursorPos.x,
+        cursorPos.y,
+        pointerPos.x,
+        pointerPos.y
+      );
+
+      // Calculate acceleration using F = ma
+      const ax = Number.isFinite(force.fx) ? force.fx / CURSOR_MASS : 0;
+      const ay = Number.isFinite(force.fy) ? force.fy / CURSOR_MASS : 0;
+
+      // Update velocity using the existing velocity state
+      setVelocity((currentVelocity) => {
+        const newVx = Number.isFinite(currentVelocity.x + ax * deltaTime)
+          ? (currentVelocity.x + ax * deltaTime) * friction
+          : 0;
+        const newVy = Number.isFinite(currentVelocity.y + ay * deltaTime)
+          ? (currentVelocity.y + ay * deltaTime) * friction
+          : 0;
+
+        return { x: newVx, y: newVy };
+      });
+
+      // Update position using the current velocity state
+      setCursorPos((prev) => ({
+        x: Number.isFinite(prev.x + velocity.x * deltaTime)
+          ? prev.x + velocity.x * deltaTime
+          : prev.x,
+        y: Number.isFinite(prev.y + velocity.y * deltaTime)
+          ? prev.y + velocity.y * deltaTime
+          : prev.y,
+      }));
+
+      animationFrameId = requestAnimationFrame(updateCursorPosition);
+    };
+
+    animationFrameId = requestAnimationFrame(updateCursorPosition);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [
+    cursorPos,
+    pointerPos,
+    calculateTotalForce,
+    velocity,
+    isSimulationStarted,
+  ]);
+
   return (
     <Card
       ref={gravityRef}
+      onClick={handleContainerClick}
       style={{
         height: '100%',
         position: 'relative',
@@ -361,6 +432,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
         </motion.div>
       ))}
 
+      {/* Only render cursor and vectors when simulation has started */}
       <CustomCursor
         containerRef={gravityRef}
         smoothFactor={1}
@@ -374,64 +446,67 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
             height: '100vh',
           }}
         >
-          {/* Vector visualization */}
-          <svg
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              pointerEvents: 'none',
-              overflow: 'visible',
-            }}
-          >
-            {/* Velocity vector */}
-            {drawArrow(
-              cursorPos.x - pointerPos.x,
-              cursorPos.y - pointerPos.y,
-              velocity.x,
-              velocity.y,
-              '#4CAF50', // Green
-              40 // Scale factor to make the arrow visible
-            )}
+          {/* Only show vectors and cursor when simulation has started */}
+          {isSimulationStarted && (
+            <>
+              <svg
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  pointerEvents: 'none',
+                  overflow: 'visible',
+                }}
+              >
+                {/* Velocity vector */}
+                {drawArrow(
+                  cursorPos.x - pointerPos.x,
+                  cursorPos.y - pointerPos.y,
+                  velocity.x,
+                  velocity.y,
+                  '#4CAF50', // Green
+                  40 // Scale factor to make the arrow visible
+                )}
 
-            {/* Force/Acceleration vector */}
-            {drawArrow(
-              cursorPos.x - pointerPos.x,
-              cursorPos.y - pointerPos.y,
-              calculateTotalForce(
-                cursorPos.x,
-                cursorPos.y,
-                pointerPos.x,
-                pointerPos.y
-              ).fx,
-              calculateTotalForce(
-                cursorPos.x,
-                cursorPos.y,
-                pointerPos.x,
-                pointerPos.y
-              ).fy,
-              '#FF4081', // Pink
-              200 // Different scale for force
-            )}
-          </svg>
-          {/* Cursor */}
-          <motion.div
-            style={{
-              width: '20px',
-              height: '20px',
-              backgroundColor: 'transparent',
-              border: '2px solid #666',
-              borderRadius: '50%',
-              position: 'absolute',
-              left: cursorPos.x - pointerPos.x,
-              top: cursorPos.y - pointerPos.y,
-              transform: 'translate(-50%, -50%)',
-              transition: 'border-color 0.2s ease',
-              boxShadow: '0 0 20px rgba(255,255,255,0.2)',
-            }}
-          />
+                {/* Force/Acceleration vector */}
+                {drawArrow(
+                  cursorPos.x - pointerPos.x,
+                  cursorPos.y - pointerPos.y,
+                  calculateTotalForce(
+                    cursorPos.x,
+                    cursorPos.y,
+                    pointerPos.x,
+                    pointerPos.y
+                  ).fx,
+                  calculateTotalForce(
+                    cursorPos.x,
+                    cursorPos.y,
+                    pointerPos.x,
+                    pointerPos.y
+                  ).fy,
+                  '#FF4081', // Pink
+                  200 // Different scale for force
+                )}
+              </svg>
+              <motion.div
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  backgroundColor: 'transparent',
+                  border: '2px solid #666',
+                  borderRadius: '50%',
+                  position: 'absolute',
+                  left: cursorPos.x - pointerPos.x,
+                  top: cursorPos.y - pointerPos.y,
+                  transform: 'translate(-50%, -50%)',
+                  transition: 'border-color 0.2s ease',
+                  boxShadow: '0 0 20px rgba(255,255,255,0.2)',
+                }}
+              />
+            </>
+          )}
         </div>
       </CustomCursor>
     </Card>
