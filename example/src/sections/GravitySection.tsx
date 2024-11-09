@@ -410,7 +410,6 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
             position: 'absolute',
             left: 0,
             top: 0,
-            transform: 'translate(-50%, -50%)',
             cursor: 'grab',
           }}
           dragConstraints={gravityRef}
@@ -424,6 +423,10 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
               borderRadius: '50%',
               transition: 'all 0.3s ease',
               boxShadow: `0 0 10px ${point.color}`,
+              position: 'absolute',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
             }}
           />
           <div
