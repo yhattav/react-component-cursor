@@ -2,65 +2,15 @@ import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { CustomCursor } from '@yhattav/react-component-cursor';
 import { Card, Typography } from 'antd';
 import { motion, PanInfo } from 'framer-motion';
+import { drawArrow } from '../utils/physics/vectorUtils';
+import {
+  calculateGravitationalForce,
+  calculateTotalForce,
+} from '../utils/physics/physicsUtils';
+import { getContainerOffset } from '../utils/dom/domUtils';
+import { Point2D, GravityPoint, Force } from '../utils/types/physics';
 
 const { Title, Paragraph } = Typography;
-
-interface GravityPoint {
-  x: number;
-  y: number;
-  label: string;
-  mass: number;
-  color: string;
-}
-
-const drawArrow = (
-  x: number,
-  y: number,
-  vectorX: number,
-  vectorY: number,
-  color: string,
-  scale: number = 1
-) => {
-  const length = Math.sqrt(vectorX * vectorX + vectorY * vectorY) * scale;
-  const angle = Math.atan2(vectorY, vectorX);
-
-  // Calculate end point using length
-  const endX =
-    x + (vectorX / Math.sqrt(vectorX * vectorX + vectorY * vectorY)) * length;
-  const endY =
-    y + (vectorY / Math.sqrt(vectorX * vectorX + vectorY * vectorY)) * length;
-
-  // Arrow head size proportional to length
-  const arrowSize = Math.min(length * 0.2, 10); // 20% of length, max 10px
-  const arrowAngle = Math.PI / 6; // 30 degrees
-
-  const arrowPoint1X = endX - arrowSize * Math.cos(angle - arrowAngle);
-  const arrowPoint1Y = endY - arrowSize * Math.sin(angle - arrowAngle);
-  const arrowPoint2X = endX - arrowSize * Math.cos(angle + arrowAngle);
-  const arrowPoint2Y = endY - arrowSize * Math.sin(angle + arrowAngle);
-
-  return (
-    <>
-      <line x1={x} y1={y} x2={endX} y2={endY} stroke={color} strokeWidth="2" />
-      <line
-        x1={endX}
-        y1={endY}
-        x2={arrowPoint1X}
-        y2={arrowPoint1Y}
-        stroke={color}
-        strokeWidth="2"
-      />
-      <line
-        x1={endX}
-        y1={endY}
-        x2={arrowPoint2X}
-        y2={arrowPoint2Y}
-        stroke={color}
-        strokeWidth="2"
-      />
-    </>
-  );
-};
 
 interface GravitySectionProps {
   onDebugData?: (data: any) => void;
@@ -70,62 +20,15 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
   onDebugData,
 }) => {
   const gravityRef = useRef<HTMLDivElement>(null);
-  const [cursorPos, setCursorPos] = useState<{ x: number; y: number }>({
-    x: 0,
-    y: 0,
-  });
-  const [pointerPos, setPointerPos] = useState<{ x: number; y: number }>({
-    x: 0,
-    y: 0,
-  });
-  const [velocity, setVelocity] = useState<{ x: number; y: number }>({
-    x: 0,
-    y: 0,
-  });
+  const [cursorPos, setCursorPos] = useState<Point2D>({ x: 0, y: 0 });
+  const [pointerPos, setPointerPos] = useState<Point2D>({ x: 0, y: 0 });
+  const [velocity, setVelocity] = useState<Point2D>({ x: 0, y: 0 });
 
   const [gravityPoints, setGravityPoints] = useState<GravityPoint[]>([
     { x: 700, y: 700, label: 'Heavy', mass: 50000, color: '#FF6B6B' },
     { x: 500, y: 150, label: 'Medium', mass: 30000, color: '#4ECDC4' },
     { x: 350, y: 250, label: 'Light', mass: 10000, color: '#45B7D1' },
   ]);
-
-  const calculateGravitationalForce = useCallback(
-    (x1: number, y1: number, x2: number, y2: number, mass: number) => {
-      if (!isFinite(x1) || !isFinite(y1) || !isFinite(x2) || !isFinite(y2)) {
-        return { fx: 0, fy: 0 };
-      }
-
-      const G = 0.1;
-      const dx = x2 - x1;
-      const dy = y2 - y1;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      const minDistance = 30;
-      const maxForce = 2;
-
-      if (distance === 0) {
-        return { fx: 0, fy: 0 };
-      }
-
-      const force = Math.min(
-        (G * (mass * 1)) /
-          Math.max(distance * distance, minDistance * minDistance),
-        maxForce
-      );
-
-      const falloffStart = minDistance * 2;
-      const smoothingFactor =
-        distance < falloffStart ? Math.pow(distance / falloffStart, 0.5) : 1;
-
-      const dirX = dx / distance;
-      const dirY = dy / distance;
-
-      return {
-        fx: Number.isFinite(dirX * force) ? dirX * force * smoothingFactor : 0,
-        fy: Number.isFinite(dirY * force) ? dirY * force * smoothingFactor : 0,
-      };
-    },
-    []
-  );
 
   const [isDragging, setIsDragging] = useState(false);
 
@@ -155,49 +58,14 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
   };
 
   // Add function to convert between coordinate systems
-  const getContainerOffset = useCallback(() => {
-    const containerRect = gravityRef.current?.getBoundingClientRect();
-    return {
-      x: containerRect?.left || 0,
-      y: containerRect?.top || 0,
-    };
-  }, []);
+  const offset = getContainerOffset(gravityRef);
 
   // Update force calculation to use screen coordinates
-  const calculateTotalForce = useCallback(
-    (cursorX: number, cursorY: number, pointerX: number, pointerY: number) => {
-      let totalFx = 0;
-      let totalFy = 0;
-
-      const offset = getContainerOffset();
-
-      // Add pointer gravitational pull
-      const pointerForce = calculateGravitationalForce(
-        cursorX,
-        cursorY,
-        pointerX,
-        pointerY,
-        50000
-      );
-      totalFx += pointerForce.fx;
-      totalFy += pointerForce.fy;
-
-      // Add gravity points force with proper coordinate conversion
-      gravityPoints.forEach((point) => {
-        const force = calculateGravitationalForce(
-          cursorX,
-          cursorY,
-          point.x + offset.x, // Convert to screen coordinates
-          point.y + offset.y, // Convert to screen coordinates
-          point.mass
-        );
-        totalFx += force.fx;
-        totalFy += force.fy;
-      });
-
-      return { fx: totalFx, fy: totalFy };
-    },
-    [calculateGravitationalForce, gravityPoints]
+  const force = calculateTotalForce(
+    cursorPos,
+    pointerPos,
+    gravityPoints,
+    offset
   );
 
   // Add cursor mass constant
@@ -211,10 +79,10 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
 
     const updateCursorPosition = () => {
       const force = calculateTotalForce(
-        cursorPos.x,
-        cursorPos.y,
-        pointerPos.x,
-        pointerPos.y
+        cursorPos,
+        pointerPos,
+        gravityPoints,
+        offset
       );
 
       // Calculate acceleration using F = ma
@@ -251,7 +119,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [cursorPos, pointerPos, calculateTotalForce, velocity]);
+  }, [cursorPos, pointerPos, gravityPoints, offset, velocity]);
 
   const handleCursorMove = useCallback((x: number, y: number) => {
     if (isFinite(x) && isFinite(y)) {
@@ -278,20 +146,13 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
       },
       velocity: velocity,
       totalForce: calculateTotalForce(
-        cursorPos.x,
-        cursorPos.y,
-        pointerPos.x,
-        pointerPos.y
+        cursorPos,
+        pointerPos,
+        gravityPoints,
+        offset
       ),
     });
-  }, [
-    cursorPos,
-    pointerPos,
-    velocity,
-    calculateGravitationalForce,
-    calculateTotalForce,
-    onDebugData,
-  ]);
+  }, [cursorPos, pointerPos, velocity, gravityPoints, offset, onDebugData]);
 
   // Add click handler
   const [isSimulationStarted, setIsSimulationStarted] = useState(false);
@@ -317,10 +178,10 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
 
     const updateCursorPosition = () => {
       const force = calculateTotalForce(
-        cursorPos.x,
-        cursorPos.y,
-        pointerPos.x,
-        pointerPos.y
+        cursorPos,
+        pointerPos,
+        gravityPoints,
+        offset
       );
 
       // Calculate acceleration using F = ma
@@ -360,7 +221,8 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
   }, [
     cursorPos,
     pointerPos,
-    calculateTotalForce,
+    gravityPoints,
+    offset,
     velocity,
     isSimulationStarted,
   ]);
@@ -511,18 +373,8 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
                 {drawArrow(
                   cursorPos.x - pointerPos.x,
                   cursorPos.y - pointerPos.y,
-                  calculateTotalForce(
-                    cursorPos.x,
-                    cursorPos.y,
-                    pointerPos.x,
-                    pointerPos.y
-                  ).fx,
-                  calculateTotalForce(
-                    cursorPos.x,
-                    cursorPos.y,
-                    pointerPos.x,
-                    pointerPos.y
-                  ).fy,
+                  force.fx,
+                  force.fy,
                   '#FF4081', // Pink
                   200 // Different scale for force
                 )}
