@@ -6,6 +6,9 @@ import { drawArrow } from '../utils/physics/vectorUtils';
 import {
   calculateGravitationalForce,
   calculateTotalForce,
+  calculateAcceleration,
+  calculateNewVelocity,
+  calculateNewPosition,
 } from '../utils/physics/physicsUtils';
 import { getContainerOffset } from '../utils/dom/domUtils';
 import { Point2D, GravityPoint, Force } from '../utils/types/physics';
@@ -241,45 +244,23 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
       currentVelocity: Point2D,
       force: Force
     ): { newPosition: Point2D; newVelocity: Point2D } => {
-      // Calculate acceleration using F = ma
-      const acceleration = {
-        x: Number.isFinite(force.fx)
-          ? force.fx / PHYSICS_CONFIG.CURSOR_MASS
-          : 0,
-        y: Number.isFinite(force.fy)
-          ? force.fy / PHYSICS_CONFIG.CURSOR_MASS
-          : 0,
-      };
+      const acceleration = calculateAcceleration(
+        force,
+        PHYSICS_CONFIG.CURSOR_MASS
+      );
 
-      // Update velocity using current acceleration
-      const newVelocity = {
-        x: Number.isFinite(
-          currentVelocity.x + acceleration.x * PHYSICS_CONFIG.DELTA_TIME
-        )
-          ? (currentVelocity.x + acceleration.x * PHYSICS_CONFIG.DELTA_TIME) *
-            PHYSICS_CONFIG.FRICTION
-          : 0,
-        y: Number.isFinite(
-          currentVelocity.y + acceleration.y * PHYSICS_CONFIG.DELTA_TIME
-        )
-          ? (currentVelocity.y + acceleration.y * PHYSICS_CONFIG.DELTA_TIME) *
-            PHYSICS_CONFIG.FRICTION
-          : 0,
-      };
+      const newVelocity = calculateNewVelocity(
+        currentVelocity,
+        acceleration,
+        PHYSICS_CONFIG.DELTA_TIME,
+        PHYSICS_CONFIG.FRICTION
+      );
 
-      // Update position using new velocity
-      const newPosition = {
-        x: Number.isFinite(
-          currentPos.x + newVelocity.x * PHYSICS_CONFIG.DELTA_TIME
-        )
-          ? currentPos.x + newVelocity.x * PHYSICS_CONFIG.DELTA_TIME
-          : currentPos.x,
-        y: Number.isFinite(
-          currentPos.y + newVelocity.y * PHYSICS_CONFIG.DELTA_TIME
-        )
-          ? currentPos.y + newVelocity.y * PHYSICS_CONFIG.DELTA_TIME
-          : currentPos.y,
-      };
+      const newPosition = calculateNewPosition(
+        currentPos,
+        newVelocity,
+        PHYSICS_CONFIG.DELTA_TIME
+      );
 
       return { newPosition, newVelocity };
     },

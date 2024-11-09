@@ -120,3 +120,38 @@ export const calculateTotalForce = (
 
   return { fx: totalFx, fy: totalFy };
 };
+
+// F = ma -> Calculate acceleration from force and mass
+export const calculateAcceleration = (force: Force, mass: number): Point2D => ({
+  x: Number.isFinite(force.fx) ? force.fx / mass : 0,
+  y: Number.isFinite(force.fy) ? force.fy / mass : 0,
+});
+
+// v = v0 + at with friction
+export const calculateNewVelocity = (
+  currentVelocity: Point2D,
+  acceleration: Point2D,
+  deltaTime: number,
+  friction: number
+): Point2D => ({
+  x: Number.isFinite(currentVelocity.x + acceleration.x * deltaTime)
+    ? (currentVelocity.x + acceleration.x * deltaTime) * friction
+    : 0,
+  y: Number.isFinite(currentVelocity.y + acceleration.y * deltaTime)
+    ? (currentVelocity.y + acceleration.y * deltaTime) * friction
+    : 0,
+});
+
+// p = p0 + vt
+export const calculateNewPosition = (
+  currentPosition: Point2D,
+  velocity: Point2D,
+  deltaTime: number
+): Point2D => ({
+  x: Number.isFinite(currentPosition.x + velocity.x * deltaTime)
+    ? currentPosition.x + velocity.x * deltaTime
+    : currentPosition.x,
+  y: Number.isFinite(currentPosition.y + velocity.y * deltaTime)
+    ? currentPosition.y + velocity.y * deltaTime
+    : currentPosition.y,
+});
