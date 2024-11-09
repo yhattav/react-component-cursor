@@ -333,12 +333,18 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
         onMove={handleCursorMove}
         hideNativeCursor={false}
       >
-        <div style={{ position: 'relative' }}>
+        <div
+          style={{
+            position: 'relative',
+            width: '100vw',
+            height: '100vh',
+          }}
+        >
           {/* Cursor */}
           <motion.div
             style={{
-              width: '20px',
-              height: '20px',
+              //   width: '20px',
+              //   height: '20px',
               backgroundColor: 'transparent',
               border: '2px solid #666',
               borderRadius: '50%',
@@ -354,12 +360,13 @@ export const MagneticFieldsSection: React.FC<MagneticFieldsSectionProps> = ({
           {/* Vector visualization */}
           <svg
             style={{
-              //position: 'absolute',
+              position: 'absolute',
               top: 0,
               left: 0,
               width: '100%',
               height: '100%',
               pointerEvents: 'none',
+              overflow: 'visible',
             }}
           >
             {/* Velocity vector */}
