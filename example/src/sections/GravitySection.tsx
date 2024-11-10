@@ -16,6 +16,7 @@ import { GravityPointComponent } from '../components/GravityPoint/GravityPoint';
 import { ParticleRenderer } from '../components/ParticleRenderer/ParticleRenderer';
 import { StarPalette } from '../components/StarPalette/StarPalette';
 import { StarTemplate } from '../types/star';
+import { ModeSelector } from '../components/ModeSelector/ModeSelector';
 
 const { Title, Paragraph } = Typography;
 
@@ -311,36 +312,6 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
     }
   }, []);
 
-  // Add mode selector UI
-  const renderModeSelector = () => (
-    <div
-      style={{
-        position: 'absolute',
-        top: 20,
-        right: 20,
-        display: 'flex',
-        gap: '10px',
-        zIndex: 100,
-      }}
-    >
-      {Object.entries(PARTICLE_MODES).map(([mode, props]) => (
-        <button
-          key={mode}
-          onClick={() => setCurrentMode(mode as keyof typeof PARTICLE_MODES)}
-          style={{
-            background: currentMode === mode ? props.color : 'transparent',
-            border: `2px solid ${props.color}`,
-            borderRadius: '50%',
-            width: props.size,
-            height: props.size,
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-          }}
-        />
-      ))}
-    </div>
-  );
-
   // Update StarPalette component to use proper drag handling
   const handleStarDragStart = useCallback((template: StarTemplate) => {
     setIsDraggingNewStar(true);
@@ -460,8 +431,11 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
             />
           ))}
 
-        {/* Render mode selector */}
-        {renderModeSelector()}
+        {/* Replace renderModeSelector() with ModeSelector component */}
+        <ModeSelector
+          currentMode={currentMode}
+          setCurrentMode={setCurrentMode}
+        />
       </Card>
     </>
   );
