@@ -76,16 +76,16 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
     null
   );
 
-  const handleDrag = useCallback((e: any, info: PanInfo, index: number) => {
+  const handleDrag = useCallback((point: Point2D, index: number) => {
     setIsDragging(true);
     const offset = getContainerOffset(gravityRef);
     if (!offset) return;
 
     setGravityPoints((points) =>
-      points.map((point, i) =>
+      points.map((point2, i) =>
         i === index
-          ? { ...point, x: info.point.x - offset.x, y: info.point.y - offset.y }
-          : point
+          ? { ...point2, x: point.x - offset.x, y: point.y - offset.y }
+          : point2
       )
     );
   }, []);

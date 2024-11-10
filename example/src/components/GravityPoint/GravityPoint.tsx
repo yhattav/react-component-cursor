@@ -1,30 +1,83 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion, PanInfo } from 'framer-motion';
-import { GravityPoint } from '../../types/star';
+import { GravityPoint, Point2D } from '../../types/star';
+import debounce from 'lodash/debounce';
 
-interface GravityPointProps {
+interface GravityPointComponentProps {
   point: GravityPoint;
   index: number;
-  onDrag: (e: any, info: PanInfo, index: number) => void;
+  onDrag: (point: Point2D, index: number) => void;
   onDragEnd: () => void;
   containerRef: React.RefObject<HTMLElement>;
 }
 
-export const GravityPointComponent: React.FC<GravityPointProps> = ({
+export const GravityPointComponent: React.FC<GravityPointComponentProps> = ({
   point,
   index,
   onDrag,
   onDragEnd,
   containerRef,
 }) => {
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!elementRef.current) return;
+
+    const updateFinalPosition = debounce(() => {
+      console.count('CALLED');
+      const element = elementRef.current;
+      if (element) {
+        const rect = element.getBoundingClientRect();
+        const finalX = rect.left + rect.width / 2;
+        const finalY = rect.top + rect.height / 2;
+        onDrag({ x: finalX, y: finalY }, index);
+      }
+    }, 50);
+
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (
+          mutation.type === 'attributes' &&
+          mutation.attributeName === 'style' &&
+          mutation.target instanceof HTMLElement
+        ) {
+          const oldTransform = (mutation.oldValue || '').match(
+            /transform: ([^;]+)/
+          )?.[1];
+          const newTransform = mutation.target.style.transform;
+          if (
+            oldTransform !== newTransform &&
+            newTransform !== 'none' &&
+            oldTransform !== 'none'
+          ) {
+            updateFinalPosition();
+          }
+        }
+      }
+    });
+
+    observer.observe(elementRef.current, {
+      attributes: true,
+      attributeFilter: ['style'],
+      attributeOldValue: true,
+    });
+
+    return () => {
+      observer.disconnect();
+      updateFinalPosition.cancel();
+    };
+  }, [index, onDrag, containerRef]);
+
   return (
     <motion.div
+      ref={elementRef}
       key={`point-${index}`}
       drag
-      dragMomentum={false}
+      dragMomentum={true}
       dragElastic={0}
-      onDrag={(e, info) => onDrag(e, info, index)}
+      onDrag={(e, info) => onDrag({ x: info.point.x, y: info.point.y }, index)}
       onDragEnd={onDragEnd}
+      data-point={index}
       initial={{ x: point.x, y: point.y }}
       style={{
         position: 'absolute',
