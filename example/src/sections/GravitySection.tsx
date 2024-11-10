@@ -40,7 +40,20 @@ interface Particle extends ParticleMechanics {
   color: string;
   size: number;
   showVectors: boolean;
+  trails: TrailPoint[];
 }
+
+// Add new interface for trail points
+interface TrailPoint extends Point2D {
+  timestamp: number;
+}
+
+// Add particle creation modes
+const PARTICLE_MODES = {
+  NORMAL: { mass: 0.1, size: 20, color: '#666' },
+  HEAVY: { mass: 1.0, size: 30, color: '#FF5252' },
+  LIGHT: { mass: 0.05, size: 15, color: '#4CAF50' },
+} as const;
 
 // Separate particle rendering function that's more flexible
 const renderParticle = ({
@@ -50,6 +63,7 @@ const renderParticle = ({
   color = '#BADA55',
   size = 20,
   showVectors = true,
+  trails = [],
 }: ParticleRenderParams) => {
   return (
     <>
@@ -101,6 +115,37 @@ const renderParticle = ({
           boxShadow: `0 0 20px rgba(255,255,255,0.2)`,
         }}
       />
+
+      <svg
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          overflow: 'visible',
+        }}
+      >
+        {trails.length > 1 &&
+          trails.slice(0, -1).map((point, i) => {
+            const nextPoint = trails[i + 1];
+            const progress = 1 - i / (trails.length - 1);
+            return (
+              <line
+                key={i}
+                x1={point.x}
+                y1={point.y}
+                x2={nextPoint.x}
+                y2={nextPoint.y}
+                stroke={color}
+                strokeWidth={size * progress}
+                strokeOpacity={progress * 0.8}
+                strokeLinecap="round"
+              />
+            );
+          })}
+      </svg>
     </>
   );
 };
@@ -118,6 +163,8 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
     { x: 350, y: 250, label: 'Light', mass: 10000, color: '#45B7D1' },
   ]);
   const [isDragging, setIsDragging] = useState(false);
+  const [currentMode, setCurrentMode] =
+    useState<keyof typeof PARTICLE_MODES>('NORMAL');
 
   const handleDrag = useCallback((e: any, info: PanInfo, index: number) => {
     setIsDragging(true);
@@ -145,9 +192,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
   // Extract physics update logic
   const updateParticleMechanics = useCallback(
     (
-      particle: ParticleMechanics,
-      gravityPoints: GravityPoint[],
-      offset: { x: number; y: number } | null
+      particle: ParticleMechanics & { trails: TrailPoint[] }
     ): ParticleMechanics => {
       const force = calculateTotalForce(
         particle.position,
@@ -170,11 +215,19 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
         PHYSICS_CONFIG.DELTA_TIME
       );
 
+      // Update trails - keep 3 seconds of trails
+      const now = Date.now();
+      const newTrails = [
+        { x: particle.position.x, y: particle.position.y, timestamp: now },
+        ...particle.trails.filter((t) => now - t.timestamp < 3000), // Keep 3 seconds of trails
+      ].slice(0, 75); // Increase to 75 points for smoother trail
+
       return {
         position: newPosition,
         velocity: newVelocity,
         force,
         mass: particle.mass,
+        trails: newTrails,
       };
     },
     [pointerPos]
@@ -191,11 +244,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
 
       setParticles((currentParticles) =>
         currentParticles.map((particle) => {
-          const mechanics = updateParticleMechanics(
-            particle,
-            gravityPoints,
-            offset
-          );
+          const mechanics = updateParticleMechanics(particle);
           return { ...particle, ...mechanics };
         })
       );
@@ -221,6 +270,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
       color: '#666',
       size: 20,
       showVectors: true,
+      trails: [],
       ...options,
     }),
     []
@@ -332,134 +382,180 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
     }
   }, []);
 
-  return (
-    <Card
-      ref={gravityRef}
-      onClick={handleContainerClick}
+  // Keep the styles as a constant
+  const GRAVITY_STYLES = {
+    field: (point: GravityPoint) => ({
+      position: 'absolute' as const,
+      left: point.x,
+      top: point.y,
+      width: `${point.mass / 100}px`,
+      height: `${point.mass / 100}px`,
+      background: `radial-gradient(circle at center, 
+        ${point.color}20 0%, 
+        ${point.color}10 30%, 
+        ${point.color}05 60%, 
+        transparent 70%
+      )`,
+      transform: 'translate(-50%, -50%)',
+      pointerEvents: 'none' as const,
+      transition: 'all 0.3s ease',
+      animation: 'pulse 2s infinite ease-in-out',
+      zIndex: 1,
+    }),
+  };
+
+  // Keep the render function
+  const renderGravityField = (point: GravityPoint, index: number) => (
+    <div key={`field-${index}`} style={GRAVITY_STYLES.field(point)} />
+  );
+
+  // Add mode selector UI
+  const renderModeSelector = () => (
+    <div
       style={{
-        height: '100%',
-        position: 'relative',
-        background: 'linear-gradient(45deg, #1a1a1a, #2a2a2a)',
-        border: 'none',
-        overflow: 'hidden',
+        position: 'absolute',
+        top: 20,
+        right: 20,
+        display: 'flex',
+        gap: '10px',
+        zIndex: 100,
       }}
     >
-      <Title level={2} style={{ color: '#fff' }}>
-        Gravity
-      </Title>
-      <Paragraph style={{ color: '#aaa' }}>
-        Move your cursor near the gravity points to feel the pull!
-      </Paragraph>
-
-      {/* Add click to start message */}
-      {!isSimulationStarted && (
-        <div
+      {Object.entries(PARTICLE_MODES).map(([mode, props]) => (
+        <button
+          key={mode}
+          onClick={() => setCurrentMode(mode as keyof typeof PARTICLE_MODES)}
           style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            textAlign: 'center',
-            color: '#fff',
-            background: 'rgba(0, 0, 0, 0.7)',
-            padding: '20px 40px',
-            borderRadius: '8px',
-            backdropFilter: 'blur(4px)',
-            zIndex: 10,
+            background: currentMode === mode ? props.color : 'transparent',
+            border: `2px solid ${props.color}`,
+            borderRadius: '50%',
+            width: props.size,
+            height: props.size,
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
           }}
-        >
-          <Title level={3} style={{ color: '#fff', margin: 0 }}>
-            Click Anywhere to Start
-          </Title>
-        </div>
-      )}
+        />
+      ))}
+    </div>
+  );
 
-      {/* Gravity Points */}
-      {gravityPoints.map((point, index) => (
-        <motion.div
-          key={index}
-          drag
-          dragMomentum={false}
-          dragElastic={0}
-          onDrag={(e, info) => handleDrag(e, info, index)}
-          onDragEnd={handleDragEnd}
-          initial={{ x: point.x, y: point.y }}
-          style={{
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            cursor: 'grab',
-          }}
-          dragConstraints={gravityRef}
-          whileDrag={{ cursor: 'grabbing' }}
-        >
-          <div
-            style={{
-              width: '16px',
-              height: '16px',
-              backgroundColor: point.color,
-              borderRadius: '50%',
-              transition: 'all 0.3s ease',
-              boxShadow: `0 0 10px ${point.color}`,
-              position: 'absolute',
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-            }}
-          />
-          <div
+  return (
+    <>
+      <style>
+        {`
+          @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+          }
+        `}
+      </style>
+      <Card
+        ref={gravityRef}
+        onClick={handleContainerClick}
+        style={{
+          height: '100%',
+          position: 'relative',
+          background: 'linear-gradient(45deg, #1a1a1a, #2a2a2a)',
+          border: 'none',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Add gravity field visualization before the gravity points */}
+        {gravityPoints.map((point, index) => renderGravityField(point, index))}
+
+        {/* Existing gravity points rendering */}
+        {gravityPoints.map((point, index) => (
+          <motion.div
+            key={`point-${index}`}
+            drag
+            dragMomentum={false}
+            dragElastic={0}
+            onDrag={(e, info) => handleDrag(e, info, index)}
+            onDragEnd={handleDragEnd}
+            initial={{ x: point.x, y: point.y }}
             style={{
               position: 'absolute',
-              top: '20px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              color: point.color,
-              fontSize: '12px',
-              fontWeight: 'bold',
-              textShadow: '0 0 10px rgba(0,0,0,0.5)',
-              pointerEvents: 'none', // Prevent text from interfering with drag
+              left: 0,
+              top: 0,
+              cursor: 'grab',
+              zIndex: 2, // Ensure points are above the fields
             }}
+            dragConstraints={gravityRef}
+            whileDrag={{ cursor: 'grabbing' }}
           >
-            {point.label}
             <div
               style={{
-                width: '50px',
-                height: '4px',
-                background: `linear-gradient(90deg, ${point.color} ${
-                  point.mass / 1000
-                }%, transparent ${point.mass / 1000}%)`,
-                borderRadius: '2px',
-                marginTop: '4px',
+                width: '16px',
+                height: '16px',
+                backgroundColor: point.color,
+                borderRadius: '50%',
+                transition: 'all 0.3s ease',
+                boxShadow: `0 0 10px ${point.color}`,
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
               }}
             />
-          </div>
-        </motion.div>
-      ))}
-
-      {/* Simplified CustomCursor only for tracking pointer position */}
-      <CustomCursor
-        containerRef={gravityRef}
-        smoothFactor={1}
-        onMove={handleCursorMove}
-        hideNativeCursor={false}
-      >
-        <div style={{ width: '100vw', height: '100vh' }} />
-      </CustomCursor>
-
-      {/* Render all particles */}
-      {isSimulationStarted &&
-        particles.map((particle) => (
-          <React.Fragment key={particle.id}>
-            {renderParticle({
-              position: particle.position,
-              velocity: particle.velocity,
-              force: particle.force,
-              color: particle.color,
-              size: particle.size,
-              showVectors: particle.showVectors,
-            })}
-          </React.Fragment>
+            <div
+              style={{
+                position: 'absolute',
+                top: '20px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                color: point.color,
+                fontSize: '12px',
+                fontWeight: 'bold',
+                textShadow: '0 0 10px rgba(0,0,0,0.5)',
+                pointerEvents: 'none', // Prevent text from interfering with drag
+              }}
+            >
+              {point.label}
+              <div
+                style={{
+                  width: '50px',
+                  height: '4px',
+                  background: `linear-gradient(90deg, ${point.color} ${
+                    point.mass / 1000
+                  }%, transparent ${point.mass / 1000}%)`,
+                  borderRadius: '2px',
+                  marginTop: '4px',
+                }}
+              />
+            </div>
+          </motion.div>
         ))}
-    </Card>
+
+        {/* Simplified CustomCursor only for tracking pointer position */}
+        <CustomCursor
+          containerRef={gravityRef}
+          smoothFactor={1}
+          onMove={handleCursorMove}
+          hideNativeCursor={false}
+        >
+          <div style={{ width: '100vw', height: '100vh' }} />
+        </CustomCursor>
+
+        {/* Render all particles */}
+        {isSimulationStarted &&
+          particles.map((particle) => (
+            <React.Fragment key={particle.id}>
+              {renderParticle({
+                position: particle.position,
+                velocity: particle.velocity,
+                force: particle.force,
+                color: particle.color,
+                size: particle.size,
+                showVectors: particle.showVectors,
+                trails: particle.trails,
+              })}
+            </React.Fragment>
+          ))}
+
+        {/* Render mode selector */}
+        {renderModeSelector()}
+      </Card>
+    </>
   );
 };
