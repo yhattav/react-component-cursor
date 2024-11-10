@@ -174,6 +174,13 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [currentMode, setCurrentMode] =
     useState<keyof typeof PARTICLE_MODES>('NORMAL');
+  const [isDraggingNewStar, setIsDraggingNewStar] = useState(false);
+  const [dragPosition, setDragPosition] = useState<Point2D | null>(null);
+
+  // Keep the newStarTemplate state for preview
+  const [newStarTemplate, setNewStarTemplate] = useState<StarTemplate | null>(
+    null
+  );
 
   const handleDrag = useCallback((e: any, info: PanInfo, index: number) => {
     setIsDragging(true);
@@ -448,6 +455,200 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
     </div>
   );
 
+  // Add new interface and constants for star templates
+  interface StarTemplate {
+    label: string;
+    mass: number;
+    color: string;
+    size: number;
+    icon: string; // You could use an emoji or custom icon
+  }
+
+  const STAR_TEMPLATES: StarTemplate[] = [
+    {
+      label: 'Supergiant',
+      mass: 50000,
+      color: '#FF6B6B',
+      size: 24,
+      icon: '★',
+    },
+    {
+      label: 'Giant',
+      mass: 30000,
+      color: '#4ECDC4',
+      size: 20,
+      icon: '⭐',
+    },
+    {
+      label: 'Dwarf',
+      mass: 10000,
+      color: '#45B7D1',
+      size: 16,
+      icon: '✦',
+    },
+  ];
+
+  // Update StarPalette component to use proper drag handling
+  const StarPalette: React.FC<{
+    onStarDragStart: (template: StarTemplate) => void;
+    onStarDragEnd: (
+      template: StarTemplate,
+      e: MouseEvent | TouchEvent | PointerEvent
+    ) => void;
+    containerRef: React.RefObject<HTMLElement>;
+  }> = ({ onStarDragStart, onStarDragEnd, containerRef }) => {
+    return (
+      <>
+        <div
+          style={{
+            position: 'absolute',
+            left: 20,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px',
+            background: 'rgba(0, 0, 0, 0.3)',
+            padding: '15px',
+            borderRadius: '12px',
+            backdropFilter: 'blur(8px)',
+            zIndex: 100,
+          }}
+        >
+          {STAR_TEMPLATES.map((template, index) => (
+            <motion.div
+              key={index}
+              drag
+              dragSnapToOrigin
+              dragConstraints={containerRef}
+              whileDrag={{ scale: 1.1, zIndex: 1000 }}
+              onDragStart={() => onStarDragStart(template)}
+              onDragEnd={(e) => onStarDragEnd(template, e)}
+              onDrag={(event, info) => {
+                setDragPosition({ x: info.point.x, y: info.point.y });
+              }}
+              style={{
+                width: '40px',
+                height: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'grab',
+                position: 'relative',
+                touchAction: 'none',
+              }}
+            >
+              <div
+                style={{
+                  width: template.size,
+                  height: template.size,
+                  backgroundColor: template.color,
+                  borderRadius: '50%',
+                  boxShadow: `0 0 15px ${template.color}`,
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  left: '100%',
+                  marginLeft: '10px',
+                  color: template.color,
+                  fontSize: '12px',
+                  whiteSpace: 'nowrap',
+                  opacity: 0,
+                  transition: 'opacity 0.2s',
+                  pointerEvents: 'none',
+                }}
+                className="star-label"
+              >
+                {template.label}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Update preview to use the currently dragged template */}
+        {isDraggingNewStar && dragPosition && newStarTemplate && (
+          <motion.div
+            style={{
+              position: 'fixed',
+              left: dragPosition.x,
+              top: dragPosition.y,
+              transform: 'translate(-50%, -50%)',
+              pointerEvents: 'none',
+              zIndex: 1001,
+            }}
+          >
+            <div
+              style={{
+                width: newStarTemplate.size,
+                height: newStarTemplate.size,
+                backgroundColor: newStarTemplate.color,
+                borderRadius: '50%',
+                boxShadow: `0 0 15px ${newStarTemplate.color}`,
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                width: `${newStarTemplate.mass / 100}px`,
+                height: `${newStarTemplate.mass / 100}px`,
+                background: `radial-gradient(circle at center, 
+                  ${newStarTemplate.color}20 0%, 
+                  ${newStarTemplate.color}10 30%, 
+                  ${newStarTemplate.color}05 60%, 
+                  transparent 70%
+                )`,
+                transform: 'translate(-50%, -50%)',
+                animation: 'pulse 2s infinite ease-in-out',
+              }}
+            />
+          </motion.div>
+        )}
+      </>
+    );
+  };
+
+  // Update handlers to manage template state for preview
+  const handleStarDragStart = useCallback((template: StarTemplate) => {
+    setIsDraggingNewStar(true);
+    setNewStarTemplate(template); // Set template for preview
+  }, []);
+
+  const handleStarDragEnd = useCallback(
+    (template: StarTemplate, e: MouseEvent | TouchEvent | PointerEvent) => {
+      if (gravityRef.current) {
+        const rect = gravityRef.current.getBoundingClientRect();
+        const clientX =
+          'clientX' in e ? e.clientX : (e as TouchEvent).touches[0].clientX;
+        const clientY =
+          'clientY' in e ? e.clientY : (e as TouchEvent).touches[0].clientY;
+
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+
+        // Only add if dropped within the container bounds
+        if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+          setGravityPoints((points) => [
+            ...points,
+            {
+              x,
+              y,
+              label: template.label,
+              mass: template.mass,
+              color: template.color,
+            },
+          ]);
+        }
+      }
+
+      setIsDraggingNewStar(false);
+      setNewStarTemplate(null);
+      setDragPosition(null);
+    },
+    [] // No dependencies needed since we're not using isDraggingNewStar anymore
+  );
+
   return (
     <>
       <style>
@@ -457,11 +658,20 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
             50% { transform: translate(-50%, -50%) scale(1.1); }
             100% { transform: translate(-50%, -50%) scale(1); }
           }
+          
+          .star-label {
+            opacity: 0;
+          }
+          
+          div:hover .star-label {
+            opacity: 1;
+          }
         `}
       </style>
       <Card
         ref={gravityRef}
         onClick={handleContainerClick}
+        onDragOver={(e) => e.preventDefault()}
         style={{
           height: '100%',
           position: 'relative',
@@ -470,6 +680,12 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
           overflow: 'hidden',
         }}
       >
+        <StarPalette
+          onStarDragStart={handleStarDragStart}
+          onStarDragEnd={handleStarDragEnd}
+          containerRef={gravityRef}
+        />
+
         {/* Existing gravity points rendering */}
         {gravityPoints.map((point, index) => (
           <motion.div
