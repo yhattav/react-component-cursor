@@ -4,7 +4,6 @@ import { GravityPointComponent } from '../GravityPoint/GravityPoint';
 import { ParticleRenderer } from '../ParticleRenderer/ParticleRenderer';
 import { StarPalette } from '../StarPalette/StarPalette';
 import { StarTemplate } from '../../types/star';
-import { ModeSelector } from '../ModeSelector/ModeSelector';
 import {
   calculateTotalForce,
   calculateAcceleration,
@@ -12,14 +11,9 @@ import {
   calculateNewPosition,
 } from '../../utils/physics/physicsUtils';
 import { getContainerOffset } from '../../utils/dom/domUtils';
-import {
-  PHYSICS_CONFIG,
-  PARTICLE_MODES,
-  INITIAL_GRAVITY_POINTS,
-} from '../../constants/physics';
+import { INITIAL_GRAVITY_POINTS } from '../../constants/physics';
 import { SimulatorSettings } from '../SimulatorSettings/SimulatorSettings';
 import { useSettings } from '../../hooks/useSettings';
-
 interface ParticleMechanics {
   position: Point2D;
   velocity: Point2D;
@@ -63,8 +57,6 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
     INITIAL_GRAVITY_POINTS
   );
   const [isDragging, setIsDragging] = useState(false);
-  const [currentMode, setCurrentMode] =
-    useState<keyof typeof PARTICLE_MODES>('NORMAL');
   const [isDraggingNewStar, setIsDraggingNewStar] = useState(false);
   const [dragPosition, setDragPosition] = useState<Point2D | null>(null);
   const [newStarTemplate, setNewStarTemplate] = useState<StarTemplate | null>(
@@ -305,7 +297,6 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
           />
         ))}
 
-      <ModeSelector currentMode={currentMode} setCurrentMode={setCurrentMode} />
       <SimulatorSettings onSettingsChange={updateSettings} />
     </div>
   );
