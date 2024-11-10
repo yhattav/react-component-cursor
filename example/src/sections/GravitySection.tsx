@@ -180,7 +180,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
       color: generatePastelColor(),
       size: 10,
       showVectors: true,
-      trails: [],
+      trails: [{ ...position, timestamp: Date.now() }],
       ...options,
     }),
     []
@@ -218,74 +218,6 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
       totalForce: particles.map((particle) => particle.force),
     });
   }, [particles, pointerPos, onDebugData]);
-
-  // Modify animation effect to only run when simulation is started
-  useEffect(() => {
-    if (!isSimulationStarted) return;
-
-    let animationFrameId: number;
-    const friction = 1;
-    const deltaTime = 1 / 60;
-
-    const updateCursorPosition = () => {
-      const force = calculateTotalForce(
-        particles.map((particle) => particle.position),
-        pointerPos,
-        gravityPoints,
-        offset
-      );
-
-      // Calculate acceleration using F = ma
-      const ax = Number.isFinite(force.fx)
-        ? force.fx / PHYSICS_CONFIG.CURSOR_MASS
-        : 0;
-      const ay = Number.isFinite(force.fy)
-        ? force.fy / PHYSICS_CONFIG.CURSOR_MASS
-        : 0;
-
-      // Update velocity using the existing velocity state
-      setParticles((currentParticles) =>
-        currentParticles.map((particle) => ({
-          ...particle,
-          velocity: {
-            x: Number.isFinite(particle.velocity.x + ax * deltaTime)
-              ? (particle.velocity.x + ax * deltaTime) * friction
-              : 0,
-            y: Number.isFinite(particle.velocity.y + ay * deltaTime)
-              ? (particle.velocity.y + ay * deltaTime) * friction
-              : 0,
-          },
-        }))
-      );
-
-      // Update position using the current velocity state
-      setParticles((currentParticles) =>
-        currentParticles.map((particle) => ({
-          ...particle,
-          position: {
-            x: Number.isFinite(
-              particle.position.x + particle.velocity.x * deltaTime
-            )
-              ? particle.position.x + particle.velocity.x * deltaTime
-              : particle.position.x,
-            y: Number.isFinite(
-              particle.position.y + particle.velocity.y * deltaTime
-            )
-              ? particle.position.y + particle.velocity.y * deltaTime
-              : particle.position.y,
-          },
-        }))
-      );
-
-      animationFrameId = requestAnimationFrame(updateCursorPosition);
-    };
-
-    animationFrameId = requestAnimationFrame(updateCursorPosition);
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, [particles, pointerPos, gravityPoints, offset, isSimulationStarted]);
 
   const handleCursorMove = useCallback((x: number, y: number) => {
     if (isFinite(x) && isFinite(y)) {
