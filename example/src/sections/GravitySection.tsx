@@ -12,6 +12,7 @@ import {
 } from '../utils/physics/physicsUtils';
 import { getContainerOffset } from '../utils/dom/domUtils';
 import { Point2D, GravityPoint, Force } from '../utils/types/physics';
+import { GravityPointComponent } from '../components/GravityPoint/GravityPoint';
 
 const { Title, Paragraph } = Typography;
 
@@ -398,33 +399,6 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
     }
   }, []);
 
-  // Keep the styles as a constant
-  const GRAVITY_STYLES = {
-    field: (point: GravityPoint) => ({
-      position: 'absolute' as const,
-      left: point.x,
-      top: point.y,
-      width: `${point.mass / 100}px`,
-      height: `${point.mass / 100}px`,
-      background: `radial-gradient(circle at center, 
-        ${point.color}20 0%, 
-        ${point.color}10 30%, 
-        ${point.color}05 60%, 
-        transparent 70%
-      )`,
-      transform: 'translate(-50%, -50%)',
-      pointerEvents: 'none' as const,
-      transition: 'all 0.3s ease',
-      animation: 'pulse 2s infinite ease-in-out',
-      zIndex: 1,
-    }),
-  };
-
-  // Keep the render function
-  const renderGravityField = (point: GravityPoint, index: number) => (
-    <div key={`field-${index}`} style={GRAVITY_STYLES.field(point)} />
-  );
-
   // Add mode selector UI
   const renderModeSelector = () => (
     <div
@@ -496,7 +470,19 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
       e: MouseEvent | TouchEvent | PointerEvent
     ) => void;
     containerRef: React.RefObject<HTMLElement>;
-  }> = ({ onStarDragStart, onStarDragEnd, containerRef }) => {
+    isDraggingNewStar: boolean;
+    dragPosition: Point2D | null;
+    newStarTemplate: StarTemplate | null;
+    setDragPosition: React.Dispatch<React.SetStateAction<Point2D | null>>;
+  }> = ({
+    onStarDragStart,
+    onStarDragEnd,
+    containerRef,
+    isDraggingNewStar,
+    dragPosition,
+    newStarTemplate,
+    setDragPosition,
+  }) => {
     return (
       <>
         <div
@@ -684,93 +670,22 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
           onStarDragStart={handleStarDragStart}
           onStarDragEnd={handleStarDragEnd}
           containerRef={gravityRef}
+          isDraggingNewStar={isDraggingNewStar}
+          dragPosition={dragPosition}
+          newStarTemplate={newStarTemplate}
+          setDragPosition={setDragPosition}
         />
 
-        {/* Existing gravity points rendering */}
+        {/* Replace the old gravity points rendering with GravityPointComponent */}
         {gravityPoints.map((point, index) => (
-          <motion.div
-            key={`point-${index}`}
-            drag
-            dragMomentum={false}
-            dragElastic={0}
-            onDrag={(e, info) => handleDrag(e, info, index)}
+          <GravityPointComponent
+            key={index}
+            point={point}
+            index={index}
+            onDrag={handleDrag}
             onDragEnd={handleDragEnd}
-            initial={{ x: point.x, y: point.y }}
-            style={{
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              cursor: 'grab',
-              zIndex: 2,
-            }}
-            dragConstraints={gravityRef}
-            whileDrag={{ cursor: 'grabbing' }}
-          >
-            {/* Add the gravity field inside the motion.div */}
-            <div
-              style={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                width: `${point.mass / 100}px`,
-                height: `${point.mass / 100}px`,
-                background: `radial-gradient(circle at center, 
-                  ${point.color}20 0%, 
-                  ${point.color}10 30%, 
-                  ${point.color}05 60%, 
-                  transparent 70%
-                )`,
-                transform: 'translate(-50%, -50%)',
-                pointerEvents: 'none',
-                transition: 'all 0.3s ease',
-                animation: 'pulse 2s infinite ease-in-out',
-              }}
-            />
-
-            {/* Existing point visualization */}
-            <div
-              style={{
-                width: '16px',
-                height: '16px',
-                backgroundColor: point.color,
-                borderRadius: '50%',
-                transition: 'all 0.3s ease',
-                boxShadow: `0 0 10px ${point.color}`,
-                position: 'absolute',
-                left: '50%',
-                top: '50%',
-                transform: 'translate(-50%, -50%)',
-              }}
-            />
-
-            {/* Existing label */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '20px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                color: point.color,
-                fontSize: '12px',
-                fontWeight: 'bold',
-                textShadow: '0 0 10px rgba(0,0,0,0.5)',
-                pointerEvents: 'none',
-              }}
-            >
-              {point.label}
-              <div
-                style={{
-                  width: '50px',
-                  height: '4px',
-                  background: `linear-gradient(90deg, ${point.color} ${
-                    point.mass / 1000
-                  }%, transparent ${point.mass / 1000}%)`,
-                  borderRadius: '2px',
-                  marginTop: '4px',
-                }}
-              />
-            </div>
-          </motion.div>
+            containerRef={gravityRef}
+          />
         ))}
 
         {/* Simplified CustomCursor only for tracking pointer position */}
