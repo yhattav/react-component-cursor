@@ -17,6 +17,8 @@ import {
   PARTICLE_MODES,
   INITIAL_GRAVITY_POINTS,
 } from '../../constants/physics';
+import { SimulatorSettings } from '../SimulatorSettings/SimulatorSettings';
+import { useSettings } from '../../hooks/useSettings';
 
 interface ParticleMechanics {
   position: Point2D;
@@ -68,6 +70,7 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
   const [newStarTemplate, setNewStarTemplate] = useState<StarTemplate | null>(
     null
   );
+  const { settings: physicsConfig, updateSettings } = useSettings();
 
   const handleDrag = useCallback((point: Point2D, index: number) => {
     setIsDragging(true);
@@ -100,20 +103,20 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
         pointerPos,
         gravityPoints,
         offset,
-        PHYSICS_CONFIG.POINTER_MASS
+        physicsConfig.POINTER_MASS
       );
 
       const acceleration = calculateAcceleration(force, particle.mass);
       const newVelocity = calculateNewVelocity(
         particle.velocity,
         acceleration,
-        PHYSICS_CONFIG.DELTA_TIME,
-        PHYSICS_CONFIG.FRICTION
+        physicsConfig.DELTA_TIME,
+        physicsConfig.FRICTION
       );
       const newPosition = calculateNewPosition(
         particle.position,
         newVelocity,
-        PHYSICS_CONFIG.DELTA_TIME
+        physicsConfig.DELTA_TIME
       );
 
       const now = Date.now();
@@ -130,7 +133,7 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
         trails: newTrails,
       };
     },
-    [pointerPos, gravityPoints, offset]
+    [pointerPos, gravityPoints, offset, physicsConfig]
   );
 
   useEffect(() => {
@@ -166,14 +169,14 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
       position,
       velocity: { x: 0, y: 0 },
       force: { fx: 0, fy: 0 },
-      mass: PHYSICS_CONFIG.CURSOR_MASS,
+      mass: physicsConfig.NEW_PARTICLE_MASS,
       color: generatePastelColor(),
       size: 10,
       showVectors: true,
       trails: [{ ...position, timestamp: Date.now() }],
       ...options,
     }),
-    []
+    [physicsConfig]
   );
 
   const handleContainerClick = useCallback(() => {
@@ -293,6 +296,7 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
         ))}
 
       <ModeSelector currentMode={currentMode} setCurrentMode={setCurrentMode} />
+      <SimulatorSettings onSettingsChange={updateSettings} />
     </div>
   );
 };

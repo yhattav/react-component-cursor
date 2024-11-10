@@ -1,10 +1,21 @@
 import { StarTemplate, GravityPoint } from '../types/star';
 
+// Split settings into production and dev
 export const PHYSICS_CONFIG = {
-  CURSOR_MASS: 0.1,
+  // Production settings
+  NEW_PARTICLE_MASS: 0.1,
   FRICTION: 0.999,
-  DELTA_TIME: 1 / 60,
   POINTER_MASS: 50000,
+  // Dev settings
+  DELTA_TIME: 1 / 60,
+} as const;
+
+// Metadata about which settings are dev-only
+export const SETTINGS_METADATA = {
+  NEW_PARTICLE_MASS: { isDev: false },
+  FRICTION: { isDev: false },
+  POINTER_MASS: { isDev: false },
+  DELTA_TIME: { isDev: true },
 } as const;
 
 export const PARTICLE_MODES = {
