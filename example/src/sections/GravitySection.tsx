@@ -55,6 +55,15 @@ const PARTICLE_MODES = {
   LIGHT: { mass: 0.05, size: 15, color: '#4CAF50' },
 } as const;
 
+// Add a utility function to generate random pastel colors
+const generatePastelColor = () => {
+  // Use higher base values for pastel effect (between 180-255)
+  const r = Math.floor(Math.random() * 75 + 180);
+  const g = Math.floor(Math.random() * 75 + 180);
+  const b = Math.floor(Math.random() * 75 + 180);
+  return `rgb(${r}, ${g}, ${b})`;
+};
+
 // Separate particle rendering function that's more flexible
 const renderParticle = ({
   position,
@@ -139,8 +148,8 @@ const renderParticle = ({
                 x2={nextPoint.x}
                 y2={nextPoint.y}
                 stroke={color}
-                strokeWidth={size * progress}
-                strokeOpacity={progress * 0.8}
+                strokeWidth={size * progress * 0.8}
+                strokeOpacity={progress * 0.4}
                 strokeLinecap="round"
               />
             );
@@ -215,12 +224,12 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
         PHYSICS_CONFIG.DELTA_TIME
       );
 
-      // Update trails - keep 3 seconds of trails
+      // Update trails - keep 5 seconds of trails
       const now = Date.now();
       const newTrails = [
         { x: particle.position.x, y: particle.position.y, timestamp: now },
-        ...particle.trails.filter((t) => now - t.timestamp < 3000), // Keep 3 seconds of trails
-      ].slice(0, 75); // Increase to 75 points for smoother trail
+        ...particle.trails.filter((t) => now - t.timestamp < 5000), // Increased to 5 seconds
+      ].slice(0, 100); // Increased to 100 points for smoother, longer trail
 
       return {
         position: newPosition,
@@ -267,8 +276,8 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
       velocity: { x: 0, y: 0 },
       force: { fx: 0, fy: 0 },
       mass: PHYSICS_CONFIG.CURSOR_MASS,
-      color: '#666',
-      size: 20,
+      color: generatePastelColor(),
+      size: 10,
       showVectors: true,
       trails: [],
       ...options,
