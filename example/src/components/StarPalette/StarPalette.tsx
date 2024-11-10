@@ -11,9 +11,6 @@ interface StarPaletteProps {
     e: MouseEvent | TouchEvent | PointerEvent
   ) => void;
   containerRef: React.RefObject<HTMLElement>;
-  isDraggingNewStar: boolean;
-  dragPosition: Point2D | null;
-  newStarTemplate: StarTemplate | null;
   setDragPosition: (position: Point2D) => void;
 }
 
@@ -21,9 +18,6 @@ export const StarPalette: React.FC<StarPaletteProps> = ({
   onStarDragStart,
   onStarDragEnd,
   containerRef,
-  isDraggingNewStar,
-  dragPosition,
-  newStarTemplate,
   setDragPosition,
 }) => {
   return (
@@ -95,44 +89,6 @@ export const StarPalette: React.FC<StarPaletteProps> = ({
           </motion.div>
         ))}
       </div>
-
-      {isDraggingNewStar && dragPosition && newStarTemplate && (
-        <motion.div
-          style={{
-            position: 'fixed',
-            left: dragPosition.x,
-            top: dragPosition.y,
-            transform: 'translate(-50%, -50%)',
-            pointerEvents: 'none',
-            zIndex: 1001,
-          }}
-        >
-          <div
-            style={{
-              width: newStarTemplate.size,
-              height: newStarTemplate.size,
-              backgroundColor: newStarTemplate.color,
-              borderRadius: '50%',
-              boxShadow: `0 0 15px ${newStarTemplate.color}`,
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              width: `${newStarTemplate.mass / 100}px`,
-              height: `${newStarTemplate.mass / 100}px`,
-              background: `radial-gradient(circle at center, 
-                ${newStarTemplate.color}20 0%, 
-                ${newStarTemplate.color}10 30%, 
-                ${newStarTemplate.color}05 60%, 
-                transparent 70%
-              )`,
-              transform: 'translate(-50%, -50%)',
-              animation: 'pulse 2s infinite ease-in-out',
-            }}
-          />
-        </motion.div>
-      )}
     </>
   );
 };

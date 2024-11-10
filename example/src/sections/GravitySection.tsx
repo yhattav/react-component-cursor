@@ -369,9 +369,6 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
           onStarDragStart={handleStarDragStart}
           onStarDragEnd={handleStarDragEnd}
           containerRef={gravityRef}
-          isDraggingNewStar={isDraggingNewStar}
-          dragPosition={dragPosition}
-          newStarTemplate={newStarTemplate}
           setDragPosition={setDragPosition}
         />
 
