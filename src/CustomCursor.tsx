@@ -164,18 +164,18 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       [position.x, position.y, zIndex, style]
     );
 
-    console.log(`${id} state:`, {
-      isVisible,
-      position,
-      targetPosition,
-      portalContainer: !!portalContainer,
-      shouldRender: !(
-        !isVisible ||
-        position.x === null ||
-        position.y === null ||
-        !portalContainer
-      ),
-    });
+    // console.log(`${id} state:`, {
+    //   isVisible,
+    //   position,
+    //   targetPosition,
+    //   portalContainer: !!portalContainer,
+    //   shouldRender: !(
+    //     !isVisible ||
+    //     position.x === null ||
+    //     position.y === null ||
+    //     !portalContainer
+    //   ),
+    // });
 
     if (
       !isVisible ||
@@ -184,7 +184,6 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       !portalContainer
     )
       return null;
-    console.log(`rendering custom cursor: ${id}`);
     return (
       <>
         {hideNativeCursor && (
