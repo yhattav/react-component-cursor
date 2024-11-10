@@ -470,9 +470,6 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
           overflow: 'hidden',
         }}
       >
-        {/* Add gravity field visualization before the gravity points */}
-        {gravityPoints.map((point, index) => renderGravityField(point, index))}
-
         {/* Existing gravity points rendering */}
         {gravityPoints.map((point, index) => (
           <motion.div
@@ -488,11 +485,33 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
               left: 0,
               top: 0,
               cursor: 'grab',
-              zIndex: 2, // Ensure points are above the fields
+              zIndex: 2,
             }}
             dragConstraints={gravityRef}
             whileDrag={{ cursor: 'grabbing' }}
           >
+            {/* Add the gravity field inside the motion.div */}
+            <div
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                width: `${point.mass / 100}px`,
+                height: `${point.mass / 100}px`,
+                background: `radial-gradient(circle at center, 
+                  ${point.color}20 0%, 
+                  ${point.color}10 30%, 
+                  ${point.color}05 60%, 
+                  transparent 70%
+                )`,
+                transform: 'translate(-50%, -50%)',
+                pointerEvents: 'none',
+                transition: 'all 0.3s ease',
+                animation: 'pulse 2s infinite ease-in-out',
+              }}
+            />
+
+            {/* Existing point visualization */}
             <div
               style={{
                 width: '16px',
@@ -507,6 +526,8 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
                 transform: 'translate(-50%, -50%)',
               }}
             />
+
+            {/* Existing label */}
             <div
               style={{
                 position: 'absolute',
@@ -517,7 +538,7 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
                 fontSize: '12px',
                 fontWeight: 'bold',
                 textShadow: '0 0 10px rgba(0,0,0,0.5)',
-                pointerEvents: 'none', // Prevent text from interfering with drag
+                pointerEvents: 'none',
               }}
             >
               {point.label}
