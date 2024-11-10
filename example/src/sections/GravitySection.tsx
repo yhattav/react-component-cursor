@@ -13,6 +13,7 @@ import {
 import { getContainerOffset } from '../utils/dom/domUtils';
 import { Point2D, GravityPoint, Force } from '../utils/types/physics';
 import { GravityPointComponent } from '../components/GravityPoint/GravityPoint';
+import { ParticleRenderer } from '../components/ParticleRenderer/ParticleRenderer';
 
 const { Title, Paragraph } = Typography;
 
@@ -63,101 +64,6 @@ const generatePastelColor = () => {
   const g = Math.floor(Math.random() * 75 + 180);
   const b = Math.floor(Math.random() * 75 + 180);
   return `rgb(${r}, ${g}, ${b})`;
-};
-
-// Separate particle rendering function that's more flexible
-const renderParticle = ({
-  position,
-  velocity,
-  force,
-  color = '#BADA55',
-  size = 20,
-  showVectors = true,
-  trails = [],
-}: ParticleRenderParams) => {
-  return (
-    <>
-      {showVectors && (
-        <svg
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            pointerEvents: 'none',
-            overflow: 'visible',
-          }}
-        >
-          {/* Velocity vector */}
-          {drawArrow(
-            position.x,
-            position.y,
-            velocity.x,
-            velocity.y,
-            '#4CAF50',
-            40
-          )}
-
-          {/* Force/Acceleration vector */}
-          {drawArrow(
-            position.x,
-            position.y,
-            force.fx,
-            force.fy,
-            '#FF4081',
-            200
-          )}
-        </svg>
-      )}
-      <motion.div
-        style={{
-          width: `${size}px`,
-          height: `${size}px`,
-          backgroundColor: 'transparent',
-          border: `2px solid ${color}`,
-          borderRadius: '50%',
-          position: 'fixed',
-          left: position.x,
-          top: position.y,
-          transform: 'translate(-50%, -50%)',
-          transition: 'border-color 0.2s ease',
-          boxShadow: `0 0 20px rgba(255,255,255,0.2)`,
-        }}
-      />
-
-      <svg
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'none',
-          overflow: 'visible',
-        }}
-      >
-        {trails.length > 1 &&
-          trails.slice(0, -1).map((point, i) => {
-            const nextPoint = trails[i + 1];
-            const progress = 1 - i / (trails.length - 1);
-            return (
-              <line
-                key={i}
-                x1={point.x}
-                y1={point.y}
-                x2={nextPoint.x}
-                y2={nextPoint.y}
-                stroke={color}
-                strokeWidth={size * progress * 0.8}
-                strokeOpacity={progress * 0.4}
-                strokeLinecap="round"
-              />
-            );
-          })}
-      </svg>
-    </>
-  );
 };
 
 export const GravitySection: React.FC<GravitySectionProps> = ({
@@ -698,20 +604,19 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
           <div style={{ width: '100vw', height: '100vh' }} />
         </CustomCursor>
 
-        {/* Render all particles */}
+        {/* Update particle rendering to use ParticleRenderer component */}
         {isSimulationStarted &&
           particles.map((particle) => (
-            <React.Fragment key={particle.id}>
-              {renderParticle({
-                position: particle.position,
-                velocity: particle.velocity,
-                force: particle.force,
-                color: particle.color,
-                size: particle.size,
-                showVectors: particle.showVectors,
-                trails: particle.trails,
-              })}
-            </React.Fragment>
+            <ParticleRenderer
+              key={particle.id}
+              position={particle.position}
+              velocity={particle.velocity}
+              force={particle.force}
+              color={particle.color}
+              size={particle.size}
+              showVectors={particle.showVectors}
+              trails={particle.trails}
+            />
           ))}
 
         {/* Render mode selector */}
