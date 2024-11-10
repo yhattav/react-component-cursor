@@ -1,10 +1,8 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { CustomCursor } from '@yhattav/react-component-cursor';
 import { Card, Typography } from 'antd';
-import { motion, PanInfo } from 'framer-motion';
-import { drawArrow } from '../utils/physics/vectorUtils';
+import { PanInfo } from 'framer-motion';
 import {
-  calculateGravitationalForce,
   calculateTotalForce,
   calculateAcceleration,
   calculateNewVelocity,
@@ -17,16 +15,13 @@ import { ParticleRenderer } from '../components/ParticleRenderer/ParticleRendere
 import { StarPalette } from '../components/StarPalette/StarPalette';
 import { StarTemplate } from '../types/star';
 import { ModeSelector } from '../components/ModeSelector/ModeSelector';
+import {
+  PHYSICS_CONFIG,
+  PARTICLE_MODES,
+  INITIAL_GRAVITY_POINTS,
+} from '../constants/physics';
 
 const { Title, Paragraph } = Typography;
-
-// Move physics constants to a config
-const PHYSICS_CONFIG = {
-  CURSOR_MASS: 0.1,
-  FRICTION: 0.999,
-  DELTA_TIME: 1 / 60,
-  POINTER_MASS: 50000,
-} as const;
 
 interface GravitySectionProps {
   onDebugData?: (data: any) => void;
@@ -53,13 +48,6 @@ interface TrailPoint extends Point2D {
   timestamp: number;
 }
 
-// Add particle creation modes
-const PARTICLE_MODES = {
-  NORMAL: { mass: 0.1, size: 20, color: '#666' },
-  HEAVY: { mass: 1.0, size: 30, color: '#FF5252' },
-  LIGHT: { mass: 0.05, size: 15, color: '#4CAF50' },
-} as const;
-
 // Add a utility function to generate random pastel colors
 const generatePastelColor = () => {
   // Use higher base values for pastel effect (between 180-255)
@@ -76,11 +64,9 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
   const [isSimulationStarted, setIsSimulationStarted] = useState(false);
   const [particles, setParticles] = useState<Particle[]>([]);
   const [pointerPos, setPointerPos] = useState<Point2D>({ x: 0, y: 0 });
-  const [gravityPoints, setGravityPoints] = useState<GravityPoint[]>([
-    { x: 700, y: 700, label: 'Heavy', mass: 50000, color: '#FF6B6B' },
-    { x: 500, y: 150, label: 'Medium', mass: 30000, color: '#4ECDC4' },
-    { x: 350, y: 250, label: 'Light', mass: 10000, color: '#45B7D1' },
-  ]);
+  const [gravityPoints, setGravityPoints] = useState<GravityPoint[]>(
+    INITIAL_GRAVITY_POINTS
+  );
   const [isDragging, setIsDragging] = useState(false);
   const [currentMode, setCurrentMode] =
     useState<keyof typeof PARTICLE_MODES>('NORMAL');
@@ -227,11 +213,6 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
       },
       pointer: {
         position: pointerPos,
-        force: calculateGravitationalForce(
-          pointerPos.x,
-          pointerPos.y,
-          PHYSICS_CONFIG.POINTER_MASS
-        ),
       },
       velocity: particles.map((particle) => particle.velocity),
       totalForce: particles.map((particle) => particle.force),

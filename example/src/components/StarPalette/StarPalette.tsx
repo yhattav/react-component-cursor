@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { StarTemplate } from '../../types/star';
-import { Point2D } from '../../types/physics';
+import { Point2D } from '../../utils/types/physics';
 import { STAR_TEMPLATES } from '../../constants/physics';
 
 interface StarPaletteProps {

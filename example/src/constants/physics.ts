@@ -1,4 +1,4 @@
-import { StarTemplate } from '../types/star';
+import { StarTemplate, GravityPoint } from '../types/star';
 
 export const PHYSICS_CONFIG = {
   CURSOR_MASS: 0.1,
@@ -35,4 +35,10 @@ export const STAR_TEMPLATES: StarTemplate[] = [
     size: 16,
     icon: '✦',
   },
+];
+
+export const INITIAL_GRAVITY_POINTS: GravityPoint[] = [
+  { x: 700, y: 700, label: 'Heavy', mass: 50000, color: '#FF6B6B' },
+  { x: 500, y: 150, label: 'Medium', mass: 30000, color: '#4ECDC4' },
+  { x: 350, y: 250, label: 'Light', mass: 10000, color: '#45B7D1' },
 ];
