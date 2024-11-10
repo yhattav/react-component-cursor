@@ -177,7 +177,6 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
   );
 
   const handleContainerClick = useCallback(() => {
-    console.log('handleContainerClick');
     if (isDragging || isDraggingNewStar) return;
 
     if (!isSimulationStarted) {
@@ -287,6 +286,9 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
             size={particle.size}
             showVectors={particle.showVectors}
             trails={particle.trails}
+            onDelete={() => {
+              setParticles(particles.filter((p) => p.id !== particle.id));
+            }}
           />
         ))}
 
