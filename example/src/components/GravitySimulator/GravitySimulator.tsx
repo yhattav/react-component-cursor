@@ -73,6 +73,7 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
   const { settings: physicsConfig, updateSettings } = useSettings();
 
   const handleDrag = useCallback((point: Point2D, index: number) => {
+    console.log('handleDrag');
     setIsDragging(true);
     const offset = getContainerOffset(gravityRef);
     if (!offset) return;
@@ -87,6 +88,7 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
   }, []);
 
   const handleDragEnd = () => {
+    console.log('handleDragEnd');
     setTimeout(() => {
       setIsDragging(false);
     }, 0);
@@ -180,6 +182,8 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
   );
 
   const handleContainerClick = useCallback(() => {
+    console.log('handleContainerClick');
+    console.log(isDragging, isDraggingNewStar);
     if (isDragging || isDraggingNewStar) return;
 
     if (!isSimulationStarted) {

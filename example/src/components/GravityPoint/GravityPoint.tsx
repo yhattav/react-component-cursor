@@ -43,13 +43,13 @@ export const GravityPointComponent: React.FC<GravityPointComponentProps> = ({
     if (!elementRef.current) return;
 
     const updateFinalPosition = debounce(() => {
-      console.count('CALLED');
       const element = elementRef.current;
       if (element) {
         const rect = element.getBoundingClientRect();
         const finalX = rect.left + rect.width / 2;
         const finalY = rect.top + rect.height / 2;
         onDrag({ x: finalX, y: finalY }, index);
+        onDragEnd();
       }
     }, 50);
 
@@ -85,7 +85,7 @@ export const GravityPointComponent: React.FC<GravityPointComponentProps> = ({
       observer.disconnect();
       updateFinalPosition.cancel();
     };
-  }, [index, onDrag, containerRef]);
+  }, [index, onDrag, onDragEnd, containerRef]);
 
   return (
     <motion.div
