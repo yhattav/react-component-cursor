@@ -1,4 +1,4 @@
-name: Deploy Examples to GitHub Pages
+name: Deploy Example to GitHub Pages
 
 on:
   push:
@@ -25,17 +25,17 @@ jobs:
         # Install dependencies in both root and examples directory
         run: |
           npm ci
-          cd examples
+          cd example
           npm ci
 
       - name: Build
-        # Build the examples app
+        # Build the example app
         run: |
-          cd examples
+          cd example
           npm run build
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: examples/public # Changed to examples/build
+          folder: example/dist # Changed to example/build
           branch: gh-pages
