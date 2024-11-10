@@ -231,6 +231,7 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
           setGravityPoints((points) => [
             ...points,
             {
+              id: Math.random().toString(36).substr(2, 9),
               x,
               y,
               label: template.label,
@@ -247,6 +248,10 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
     },
     []
   );
+
+  const handlePointDelete = useCallback((index: number) => {
+    setGravityPoints((points) => points.filter((_, i) => i !== index));
+  }, []);
 
   return (
     <div
@@ -269,11 +274,12 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
 
       {gravityPoints.map((point, index) => (
         <GravityPointComponent
-          key={index}
+          key={point.id}
           point={point}
           index={index}
           onDrag={handleDrag}
           onDragEnd={handleDragEnd}
+          onDelete={handlePointDelete}
           containerRef={gravityRef}
         />
       ))}

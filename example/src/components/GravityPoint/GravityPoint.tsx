@@ -8,6 +8,7 @@ interface GravityPointComponentProps {
   index: number;
   onDrag: (point: Point2D, index: number) => void;
   onDragEnd: () => void;
+  onDelete: (index: number) => void;
   containerRef: React.RefObject<HTMLElement>;
 }
 
@@ -16,9 +17,27 @@ export const GravityPointComponent: React.FC<GravityPointComponentProps> = ({
   index,
   onDrag,
   onDragEnd,
+  onDelete,
   containerRef,
 }) => {
   const elementRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  const isDraggingRef = useRef(false);
+
+  const handlePointerDown = () => {
+    isDraggingRef.current = false;
+    timeoutRef.current = setTimeout(() => {
+      isDraggingRef.current = true;
+    }, 200); // Wait 200ms before considering it a drag
+  };
+
+  const handlePointerUp = () => {
+    clearTimeout(timeoutRef.current);
+    if (!isDraggingRef.current) {
+      onDelete(index);
+    }
+    isDraggingRef.current = false;
+  };
 
   useEffect(() => {
     if (!elementRef.current) return;
@@ -71,23 +90,29 @@ export const GravityPointComponent: React.FC<GravityPointComponentProps> = ({
   return (
     <motion.div
       ref={elementRef}
-      key={`point-${index}`}
       drag
       dragMomentum={true}
       dragElastic={0}
-      onDrag={(e, info) => onDrag({ x: info.point.x, y: info.point.y }, index)}
+      onDrag={(e, info) => {
+        isDraggingRef.current = true;
+        onDrag({ x: info.point.x, y: info.point.y }, index);
+      }}
       onDragEnd={onDragEnd}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
       data-point={index}
-      initial={{ x: point.x, y: point.y }}
       style={{
         position: 'absolute',
-        left: 0,
-        top: 0,
+        left: point.x,
+        top: point.y,
         cursor: 'grab',
         zIndex: 2,
       }}
       dragConstraints={containerRef}
       whileDrag={{ cursor: 'grabbing' }}
+      whileHover={{
+        scale: 1.1,
+      }}
     >
       <div
         style={{
