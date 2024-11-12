@@ -40,7 +40,6 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
         `}
       </style>
       <Card
-        ref={gravityRef}
         onDragOver={(e) => e.preventDefault()}
         style={{
           height: '100%',

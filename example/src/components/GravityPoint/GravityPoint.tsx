@@ -97,14 +97,13 @@ export const GravityPointComponent: React.FC<GravityPointComponentProps> = ({
         isDraggingRef.current = true;
         onDrag({ x: info.point.x, y: info.point.y }, index);
       }}
+      initial={{ x: point.x, y: point.y }}
       onDragEnd={onDragEnd}
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
       data-point={index}
       style={{
         position: 'absolute',
-        left: point.x,
-        top: point.y,
         cursor: 'grab',
         zIndex: 2,
       }}

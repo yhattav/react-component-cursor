@@ -251,6 +251,7 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
 
   return (
     <div
+      ref={gravityRef}
       onClick={handleContainerClick}
       style={{
         position: 'absolute',
