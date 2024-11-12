@@ -37,6 +37,7 @@ interface GravitySimulatorProps {
   gravityRef: React.RefObject<HTMLDivElement>;
   pointerPos: Point2D;
   onDebugData?: (data: any) => void;
+  className?: string;
 }
 
 const generatePastelColor = () => {
@@ -50,6 +51,7 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
   gravityRef,
   pointerPos,
   onDebugData,
+  className,
 }) => {
   const [isSimulationStarted, setIsSimulationStarted] = useState(false);
   const [particles, setParticles] = useState<Particle[]>([]);
@@ -63,6 +65,27 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
     null
   );
   const { settings: physicsConfig, updateSettings } = useSettings();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      gravityRef.current?.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  }, [gravityRef]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () =>
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   const handleDrag = useCallback((point: Point2D, index: number) => {
     console.log('handleDrag');
@@ -250,55 +273,99 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
   }, []);
 
   return (
-    <div
-      ref={gravityRef}
-      onClick={handleContainerClick}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        zIndex: 1,
-      }}
-    >
-      <StarPalette
-        onStarDragStart={handleStarDragStart}
-        onStarDragEnd={handleStarDragEnd}
-        containerRef={gravityRef}
-        setDragPosition={setDragPosition}
-      />
+    <>
+      <style>
+        {`
+          @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+          }
+          
+          .star-label {
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+          }
+          
+          div:hover .star-label {
+            opacity: 1;
+          }
+        `}
+      </style>
+      <div
+        ref={gravityRef}
+        onClick={handleContainerClick}
+        className={className}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'linear-gradient(45deg, #1a1a1a, #2a2a2a)',
 
-      {gravityPoints.map((point, index) => (
-        <GravityPointComponent
-          key={point.id}
-          point={point}
-          index={index}
-          onDrag={handleDrag}
-          onDragEnd={handleDragEnd}
-          onDelete={handlePointDelete}
+          zIndex: 1,
+        }}
+      >
+        <button
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent particle creation
+            toggleFullscreen();
+          }}
+          style={{
+            position: 'absolute',
+            top: '1rem',
+            right: '1rem',
+            zIndex: 2,
+            padding: '0.5rem',
+            cursor: 'pointer',
+            background: 'rgba(255, 255, 255, 0.2)',
+            border: 'none',
+            borderRadius: '4px',
+            color: 'white',
+          }}
+        >
+          {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+        </button>
+
+        <StarPalette
+          onStarDragStart={handleStarDragStart}
+          onStarDragEnd={handleStarDragEnd}
           containerRef={gravityRef}
+          setDragPosition={setDragPosition}
         />
-      ))}
 
-      {isSimulationStarted &&
-        particles.map((particle) => (
-          <ParticleRenderer
-            key={particle.id}
-            position={particle.position}
-            velocity={particle.velocity}
-            force={particle.force}
-            color={particle.color}
-            size={particle.size}
-            showVectors={particle.showVectors}
-            trails={particle.trails}
-            onDelete={() => {
-              setParticles(particles.filter((p) => p.id !== particle.id));
-            }}
+        {gravityPoints.map((point, index) => (
+          <GravityPointComponent
+            key={point.id}
+            point={point}
+            index={index}
+            onDrag={handleDrag}
+            onDragEnd={handleDragEnd}
+            onDelete={handlePointDelete}
+            containerRef={gravityRef}
           />
         ))}
 
-      <SimulatorSettings onSettingsChange={updateSettings} />
-    </div>
+        {isSimulationStarted &&
+          particles.map((particle) => (
+            <ParticleRenderer
+              key={particle.id}
+              position={particle.position}
+              velocity={particle.velocity}
+              force={particle.force}
+              color={particle.color}
+              size={particle.size}
+              showVectors={particle.showVectors}
+              trails={particle.trails}
+              onDelete={() => {
+                setParticles(particles.filter((p) => p.id !== particle.id));
+              }}
+            />
+          ))}
+
+        <SimulatorSettings onSettingsChange={updateSettings} />
+      </div>
+    </>
   );
 };
