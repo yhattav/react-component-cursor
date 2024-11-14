@@ -14,6 +14,8 @@ import { getContainerOffset } from '../../utils/dom/domUtils';
 import { INITIAL_GRAVITY_POINTS } from '../../constants/physics';
 import { SimulatorSettings } from '../SimulatorSettings/SimulatorSettings';
 import { useSettings } from '../../hooks/useSettings';
+import { throttle } from 'lodash';
+
 interface ParticleMechanics {
   position: Point2D;
   velocity: Point2D;
@@ -37,6 +39,7 @@ interface GravitySimulatorProps {
   gravityRef: React.RefObject<HTMLDivElement>;
   pointerPos: Point2D;
   onDebugData?: (data: any) => void;
+  className?: string;
 }
 
 const generatePastelColor = () => {
@@ -50,6 +53,7 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
   gravityRef,
   pointerPos,
   onDebugData,
+  className,
 }) => {
   const [isSimulationStarted, setIsSimulationStarted] = useState(false);
   const [particles, setParticles] = useState<Particle[]>([]);
@@ -58,26 +62,53 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
   );
   const [isDragging, setIsDragging] = useState(false);
   const [isDraggingNewStar, setIsDraggingNewStar] = useState(false);
-  const [dragPosition, setDragPosition] = useState<Point2D | null>(null);
-  const [newStarTemplate, setNewStarTemplate] = useState<StarTemplate | null>(
-    null
-  );
   const { settings: physicsConfig, updateSettings } = useSettings();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [throttledPointerPos, setThrottledPointerPos] = useState(pointerPos);
 
-  const handleDrag = useCallback((point: Point2D, index: number) => {
-    console.log('handleDrag');
-    setIsDragging(true);
-    const offset = getContainerOffset(gravityRef);
-    if (!offset) return;
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      gravityRef.current?.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  }, [gravityRef]);
 
-    setGravityPoints((points) =>
-      points.map((point2, i) =>
-        i === index
-          ? { ...point2, x: point.x - offset.x, y: point.y - offset.y }
-          : point2
-      )
-    );
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () =>
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
+
+  const handleDrag = throttle(() => {
+    console.log('handleDrag');
+    setTimeout(() => {
+      setIsDragging(true);
+    }, 0);
+  });
+
+  const handleReportNewPosition = useCallback(
+    throttle((point: Point2D, index: number) => {
+      console.log('handleReportNewPosition');
+      const offset = getContainerOffset(gravityRef);
+      if (!offset) return;
+
+      setGravityPoints((points) =>
+        points.map((point2, i) =>
+          i === index
+            ? { ...point2, x: point.x - offset.x, y: point.y - offset.y }
+            : point2
+        )
+      );
+    }, 16),
+    [gravityRef]
+  );
 
   const handleDragEnd = () => {
     console.log('handleDragEnd');
@@ -88,13 +119,23 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
 
   const offset = getContainerOffset(gravityRef);
 
+  useEffect(() => {
+    const throttledUpdate = throttle((newPos: Point2D) => {
+      console.log('Moving mouse');
+      setThrottledPointerPos(newPos);
+    }, physicsConfig.DELTA_TIME * 1000);
+
+    throttledUpdate(pointerPos);
+    return () => throttledUpdate.cancel();
+  }, [pointerPos, physicsConfig.DELTA_TIME]);
+
   const updateParticleMechanics = useCallback(
     (
       particle: ParticleMechanics & { trails: TrailPoint[] }
     ): ParticleMechanics => {
       const force = calculateTotalForce(
         particle.position,
-        pointerPos,
+        throttledPointerPos,
         gravityPoints,
         offset,
         physicsConfig.POINTER_MASS
@@ -127,18 +168,23 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
         trails: newTrails,
       };
     },
-    [pointerPos, gravityPoints, offset, physicsConfig]
+    [throttledPointerPos, gravityPoints, offset, physicsConfig]
   );
 
   useEffect(() => {
     if (!isSimulationStarted) return;
 
     let animationFrameId: number;
-    let lastTime = performance.now();
+    //const lastTime = performance.now();
+    // let accumulator = 0;
 
     const updateParticles = (currentTime: number) => {
-      const deltaTime = (currentTime - lastTime) / 1000;
-      lastTime = currentTime;
+      // const frameTime = (currentTime - lastTime) / 1000;
+      // lastTime = currentTime;
+      // accumulator += frameTime;
+
+      // if (accumulator >= physicsConfig.DELTA_TIME) {
+      //   accumulator = 0;
 
       setParticles((currentParticles) =>
         currentParticles.map((particle) => {
@@ -146,13 +192,14 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
           return { ...particle, ...mechanics };
         })
       );
+      // }
 
       animationFrameId = requestAnimationFrame(updateParticles);
     };
 
     animationFrameId = requestAnimationFrame(updateParticles);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [isSimulationStarted, updateParticleMechanics]);
+  }, [isSimulationStarted, updateParticleMechanics, physicsConfig.DELTA_TIME]);
 
   const createParticle = useCallback(
     (
@@ -205,9 +252,8 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
     });
   }, [particles, pointerPos, onDebugData]);
 
-  const handleStarDragStart = useCallback((template: StarTemplate) => {
+  const handleStarDragStart = useCallback(() => {
     setIsDraggingNewStar(true);
-    setNewStarTemplate(template);
   }, []);
 
   const handleStarDragEnd = useCallback(
@@ -239,8 +285,6 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
       }
 
       setIsDraggingNewStar(false);
-      setNewStarTemplate(null);
-      setDragPosition(null);
     },
     []
   );
@@ -250,55 +294,99 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
   }, []);
 
   return (
-    <div
-      ref={gravityRef}
-      onClick={handleContainerClick}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        zIndex: 1,
-      }}
-    >
-      <StarPalette
-        onStarDragStart={handleStarDragStart}
-        onStarDragEnd={handleStarDragEnd}
-        containerRef={gravityRef}
-        setDragPosition={setDragPosition}
-      />
+    <>
+      <style>
+        {`
+          @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+          }
+          
+          .star-label {
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+          }
+          
+          div:hover .star-label {
+            opacity: 1;
+          }
+        `}
+      </style>
+      <div
+        ref={gravityRef}
+        onClick={handleContainerClick}
+        className={className}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'linear-gradient(45deg, #1a1a1a, #2a2a2a)',
 
-      {gravityPoints.map((point, index) => (
-        <GravityPointComponent
-          key={point.id}
-          point={point}
-          index={index}
-          onDrag={handleDrag}
-          onDragEnd={handleDragEnd}
-          onDelete={handlePointDelete}
+          zIndex: 1,
+        }}
+      >
+        <button
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent particle creation
+            toggleFullscreen();
+          }}
+          style={{
+            position: 'absolute',
+            top: '1rem',
+            right: '1rem',
+            zIndex: 2,
+            padding: '0.5rem',
+            cursor: 'pointer',
+            background: 'rgba(255, 255, 255, 0.2)',
+            border: 'none',
+            borderRadius: '4px',
+            color: 'white',
+          }}
+        >
+          {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+        </button>
+
+        <StarPalette
+          onStarDragStart={handleStarDragStart}
+          onStarDragEnd={handleStarDragEnd}
           containerRef={gravityRef}
         />
-      ))}
 
-      {isSimulationStarted &&
-        particles.map((particle) => (
-          <ParticleRenderer
-            key={particle.id}
-            position={particle.position}
-            velocity={particle.velocity}
-            force={particle.force}
-            color={particle.color}
-            size={particle.size}
-            showVectors={particle.showVectors}
-            trails={particle.trails}
-            onDelete={() => {
-              setParticles(particles.filter((p) => p.id !== particle.id));
-            }}
+        {gravityPoints.map((point, index) => (
+          <GravityPointComponent
+            key={point.id}
+            point={point}
+            index={index}
+            onDrag={handleDrag}
+            reportNewPosition={handleReportNewPosition}
+            onDragEnd={handleDragEnd}
+            onDelete={handlePointDelete}
+            containerRef={gravityRef}
           />
         ))}
 
-      <SimulatorSettings onSettingsChange={updateSettings} />
-    </div>
+        {isSimulationStarted &&
+          particles.map((particle) => (
+            <ParticleRenderer
+              key={particle.id}
+              position={particle.position}
+              velocity={particle.velocity}
+              force={particle.force}
+              color={particle.color}
+              size={particle.size}
+              showVectors={particle.showVectors}
+              trails={particle.trails}
+              onDelete={() => {
+                setParticles(particles.filter((p) => p.id !== particle.id));
+              }}
+            />
+          ))}
+
+        <SimulatorSettings onSettingsChange={updateSettings} />
+      </div>
+    </>
   );
 };

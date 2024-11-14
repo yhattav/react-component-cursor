@@ -22,29 +22,11 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
 
   return (
     <>
-      <style>
-        {`
-          @keyframes pulse {
-            0% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.1); }
-            100% { transform: translate(-50%, -50%) scale(1); }
-          }
-          
-          .star-label {
-            opacity: 0;
-          }
-          
-          div:hover .star-label {
-            opacity: 1;
-          }
-        `}
-      </style>
       <Card
         onDragOver={(e) => e.preventDefault()}
         style={{
           height: '100%',
           position: 'relative',
-          background: 'linear-gradient(45deg, #1a1a1a, #2a2a2a)',
           border: 'none',
           overflow: 'hidden',
         }}
