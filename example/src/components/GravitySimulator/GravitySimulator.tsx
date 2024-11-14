@@ -14,6 +14,8 @@ import { getContainerOffset } from '../../utils/dom/domUtils';
 import { INITIAL_GRAVITY_POINTS } from '../../constants/physics';
 import { SimulatorSettings } from '../SimulatorSettings/SimulatorSettings';
 import { useSettings } from '../../hooks/useSettings';
+import { throttle } from 'lodash';
+
 interface ParticleMechanics {
   position: Point2D;
   velocity: Point2D;
@@ -60,12 +62,9 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
   );
   const [isDragging, setIsDragging] = useState(false);
   const [isDraggingNewStar, setIsDraggingNewStar] = useState(false);
-  const [dragPosition, setDragPosition] = useState<Point2D | null>(null);
-  const [newStarTemplate, setNewStarTemplate] = useState<StarTemplate | null>(
-    null
-  );
   const { settings: physicsConfig, updateSettings } = useSettings();
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [throttledPointerPos, setThrottledPointerPos] = useState(pointerPos);
 
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
@@ -87,20 +86,29 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  const handleDrag = useCallback((point: Point2D, index: number) => {
+  const handleDrag = throttle(() => {
     console.log('handleDrag');
-    setIsDragging(true);
-    const offset = getContainerOffset(gravityRef);
-    if (!offset) return;
+    setTimeout(() => {
+      setIsDragging(true);
+    }, 0);
+  });
 
-    setGravityPoints((points) =>
-      points.map((point2, i) =>
-        i === index
-          ? { ...point2, x: point.x - offset.x, y: point.y - offset.y }
-          : point2
-      )
-    );
-  }, []);
+  const handleReportNewPosition = useCallback(
+    throttle((point: Point2D, index: number) => {
+      console.log('handleReportNewPosition');
+      const offset = getContainerOffset(gravityRef);
+      if (!offset) return;
+
+      setGravityPoints((points) =>
+        points.map((point2, i) =>
+          i === index
+            ? { ...point2, x: point.x - offset.x, y: point.y - offset.y }
+            : point2
+        )
+      );
+    }, 16),
+    [gravityRef]
+  );
 
   const handleDragEnd = () => {
     console.log('handleDragEnd');
@@ -111,13 +119,23 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
 
   const offset = getContainerOffset(gravityRef);
 
+  useEffect(() => {
+    const throttledUpdate = throttle((newPos: Point2D) => {
+      console.log('Moving mouse');
+      setThrottledPointerPos(newPos);
+    }, physicsConfig.DELTA_TIME * 1000);
+
+    throttledUpdate(pointerPos);
+    return () => throttledUpdate.cancel();
+  }, [pointerPos, physicsConfig.DELTA_TIME]);
+
   const updateParticleMechanics = useCallback(
     (
       particle: ParticleMechanics & { trails: TrailPoint[] }
     ): ParticleMechanics => {
       const force = calculateTotalForce(
         particle.position,
-        pointerPos,
+        throttledPointerPos,
         gravityPoints,
         offset,
         physicsConfig.POINTER_MASS
@@ -150,18 +168,23 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
         trails: newTrails,
       };
     },
-    [pointerPos, gravityPoints, offset, physicsConfig]
+    [throttledPointerPos, gravityPoints, offset, physicsConfig]
   );
 
   useEffect(() => {
     if (!isSimulationStarted) return;
 
     let animationFrameId: number;
-    let lastTime = performance.now();
+    //const lastTime = performance.now();
+    // let accumulator = 0;
 
     const updateParticles = (currentTime: number) => {
-      const deltaTime = (currentTime - lastTime) / 1000;
-      lastTime = currentTime;
+      // const frameTime = (currentTime - lastTime) / 1000;
+      // lastTime = currentTime;
+      // accumulator += frameTime;
+
+      // if (accumulator >= physicsConfig.DELTA_TIME) {
+      //   accumulator = 0;
 
       setParticles((currentParticles) =>
         currentParticles.map((particle) => {
@@ -169,13 +192,14 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
           return { ...particle, ...mechanics };
         })
       );
+      // }
 
       animationFrameId = requestAnimationFrame(updateParticles);
     };
 
     animationFrameId = requestAnimationFrame(updateParticles);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [isSimulationStarted, updateParticleMechanics]);
+  }, [isSimulationStarted, updateParticleMechanics, physicsConfig.DELTA_TIME]);
 
   const createParticle = useCallback(
     (
@@ -228,9 +252,8 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
     });
   }, [particles, pointerPos, onDebugData]);
 
-  const handleStarDragStart = useCallback((template: StarTemplate) => {
+  const handleStarDragStart = useCallback(() => {
     setIsDraggingNewStar(true);
-    setNewStarTemplate(template);
   }, []);
 
   const handleStarDragEnd = useCallback(
@@ -262,8 +285,6 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
       }
 
       setIsDraggingNewStar(false);
-      setNewStarTemplate(null);
-      setDragPosition(null);
     },
     []
   );
@@ -332,7 +353,6 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
           onStarDragStart={handleStarDragStart}
           onStarDragEnd={handleStarDragEnd}
           containerRef={gravityRef}
-          setDragPosition={setDragPosition}
         />
 
         {gravityPoints.map((point, index) => (
@@ -341,6 +361,7 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
             point={point}
             index={index}
             onDrag={handleDrag}
+            reportNewPosition={handleReportNewPosition}
             onDragEnd={handleDragEnd}
             onDelete={handlePointDelete}
             containerRef={gravityRef}
