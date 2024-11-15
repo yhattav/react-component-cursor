@@ -56,7 +56,6 @@ export const GravityPointComponent: React.FC<GravityPointComponentProps> = ({
     <motion.div
       ref={elementRef}
       onUpdate={(latest) => {
-        console.log('LATEST', latest);
         reportPosition({ x: Number(latest.x), y: Number(latest.y) });
       }}
       drag

@@ -15,7 +15,8 @@
     "noImplicitReturns": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "types": ["jest", "@testing-library/jest-dom", "node"]
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

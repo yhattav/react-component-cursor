@@ -87,7 +87,6 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
   }, []);
 
   const handleDrag = throttle(() => {
-    console.log('handleDrag');
     setTimeout(() => {
       setIsDragging(true);
     }, 0);
@@ -95,7 +94,6 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
 
   const handleReportNewPosition = useCallback(
     throttle((point: Point2D, index: number) => {
-      console.log('handleReportNewPosition');
       const offset = getContainerOffset(gravityRef);
       if (!offset) return;
 
@@ -111,7 +109,6 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
   );
 
   const handleDragEnd = () => {
-    console.log('handleDragEnd');
     setTimeout(() => {
       setIsDragging(false);
     }, 0);
@@ -121,7 +118,6 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
 
   useEffect(() => {
     const throttledUpdate = throttle((newPos: Point2D) => {
-      console.log('Moving mouse');
       setThrottledPointerPos(newPos);
     }, physicsConfig.DELTA_TIME * 1000);
 
@@ -221,8 +217,6 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
   );
 
   const handleContainerClick = useCallback(() => {
-    console.log('handleContainerClick');
-    console.log(isDragging, isDraggingNewStar);
     if (isDragging || isDraggingNewStar) return;
 
     if (!isSimulationStarted) {
@@ -290,6 +284,11 @@ export const GravitySimulator: React.FC<GravitySimulatorProps> = ({
   );
 
   const handlePointDelete = useCallback((index: number) => {
+    console.log(
+      index,
+      gravityPoints,
+      gravityPoints.filter((_, i) => i !== index)
+    );
     setGravityPoints((points) => points.filter((_, i) => i !== index));
   }, []);
 

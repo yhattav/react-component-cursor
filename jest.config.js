@@ -14,4 +14,5 @@ module.exports = {
   testEnvironmentOptions: {
     // Add custom JSDOM options if needed
   },
+  fakeTimers: { enableGlobally: true },
 };

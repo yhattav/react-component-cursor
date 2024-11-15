@@ -92,7 +92,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
   }) => {
     const { position, setPosition, targetPosition, isVisible } =
       useMousePosition(containerRef, offsetX, offsetY);
-
+    console.log('>>>>>>>>>>>>isVisible', isVisible);
     useSmoothAnimation(position, targetPosition, smoothFactor, setPosition);
 
     const [portalContainer, setPortalContainer] =
@@ -176,7 +176,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     //     !portalContainer
     //   ),
     // });
-
+    console.log('>>>>>>>>>>>>position', position);
     if (
       !isVisible ||
       position.x === null ||
