@@ -46,17 +46,18 @@ function App() {
 
 ## Props
 
-| Prop           | Type                             | Default | Description                                              |
-| -------------- | -------------------------------- | ------- | -------------------------------------------------------- |
-| `children`     | `ReactNode`                      | -       | The component to use as cursor                           |
-| `className`    | `string`                         | `''`    | Additional CSS classes                                   |
-| `style`        | `CSSProperties`                  | `{}`    | Additional inline styles                                 |
-| `offsetX`      | `number`                         | `0`     | Horizontal offset from cursor position                   |
-| `offsetY`      | `number`                         | `0`     | Vertical offset from cursor position                     |
-| `zIndex`       | `number`                         | `9999`  | Z-index of the cursor element                            |
-| `smoothFactor` | `number`                         | `1`     | Movement smoothing (1 = no smoothing, higher = smoother) |
-| `containerRef` | `RefObject<HTMLElement>`         | -       | Reference to container element for bounded cursor        |
-| `onMove`       | `(x: number, y: number) => void` | -       | Callback fired on cursor movement                        |
+| Prop                  | Type                             | Default | Description                                              |
+| --------------------- | -------------------------------- | ------- | -------------------------------------------------------- |
+| `children`            | `ReactNode`                      | -       | The component to use as cursor                           |
+| `className`           | `string`                         | `''`    | Additional CSS classes                                   |
+| `style`               | `CSSProperties`                  | `{}`    | Additional inline styles                                 |
+| `offsetX`             | `number`                         | `0`     | Horizontal offset from cursor position                   |
+| `offsetY`             | `number`                         | `0`     | Vertical offset from cursor position                     |
+| `zIndex`              | `number`                         | `9999`  | Z-index of the cursor element                            |
+| `smoothFactor`        | `number`                         | `1`     | Movement smoothing (1 = no smoothing, higher = smoother) |
+| `containerRef`        | `RefObject<HTMLElement>`         | -       | Reference to container element for bounded cursor        |
+| `onMove`              | `(x: number, y: number) => void` | -       | Callback fired on cursor movement                        |
+| `onVisibilityChanged` | `(isVisible: boolean) => void`   | -       | Callback fired when cursor visibility changes            |
 
 ## Advanced Usage
 
@@ -120,6 +121,30 @@ function InteractiveCursor() {
 }
 ```
 
+### Visibility Change Handler
+
+```tsx
+function VisibilityAwareCursor() {
+  const handleVisibilityChange = (isVisible: boolean) => {
+    console.log('Cursor visibility:', isVisible);
+  };
+
+  return (
+    <CustomCursor onVisibilityChanged={handleVisibilityChange}>
+      <div
+        style={{
+          width: '20px',
+          height: '20px',
+          backgroundColor: '#3b82f6',
+          borderRadius: '50%',
+          transform: 'translate(-50%, -50%)',
+        }}
+      />
+    </CustomCursor>
+  );
+}
+```
+
 ## Development
 
 To start development, you can run both the component and the example app concurrently using:
@@ -157,6 +182,9 @@ const MyComponent: React.FC = () => {
       containerRef={containerRef}
       smoothFactor={2}
       onMove={(x: number, y: number) => console.log(x, y)}
+      onVisibilityChanged={(isVisible: boolean) =>
+        console.log('Visible:', isVisible)
+      }
     >
       {/* Your cursor content */}
     </CustomCursor>

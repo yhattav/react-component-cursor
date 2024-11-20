@@ -14,6 +14,7 @@ export interface CustomCursorProps {
   containerRef?: React.RefObject<HTMLElement>;
   onMove?: (x: number, y: number) => void;
   hideNativeCursor?: boolean;
+  onVisibilityChanged?: (isVisible: boolean) => void;
 }
 
 const ANIMATION_DURATION = '0.3s';
@@ -89,10 +90,10 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     containerRef,
     onMove,
     hideNativeCursor = true,
+    onVisibilityChanged,
   }) => {
     const { position, setPosition, targetPosition, isVisible } =
       useMousePosition(containerRef, offsetX, offsetY);
-    console.log('>>>>>>>>>>>>isVisible', isVisible);
     useSmoothAnimation(position, targetPosition, smoothFactor, setPosition);
 
     const [portalContainer, setPortalContainer] =
@@ -145,6 +146,10 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       }
     }, [position, onMove]);
 
+    React.useEffect(() => {
+      onVisibilityChanged?.(isVisible);
+    }, [isVisible, onVisibilityChanged]);
+
     const cursorStyle = React.useMemo(
       () =>
         ({
@@ -176,7 +181,6 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     //     !portalContainer
     //   ),
     // });
-    console.log('>>>>>>>>>>>>position', position);
     if (
       !isVisible ||
       position.x === null ||
