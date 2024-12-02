@@ -94,7 +94,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
   }) => {
     const { position, setPosition, targetPosition, isVisible } =
       useMousePosition(containerRef, offsetX, offsetY);
-    useSmoothAnimation(position, targetPosition, smoothFactor, setPosition);
+    useSmoothAnimation(targetPosition, smoothFactor, setPosition);
 
     const [portalContainer, setPortalContainer] =
       React.useState<HTMLElement | null>(null);

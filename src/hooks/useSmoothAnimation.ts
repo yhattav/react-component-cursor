@@ -4,11 +4,10 @@ import { Position, TargetPosition } from '../types';
 const SMOOTHING_THRESHOLD = 0.1;
 
 export function useSmoothAnimation(
-  position: Position,
   targetPosition: TargetPosition,
   smoothFactor: number,
   setPosition: React.Dispatch<React.SetStateAction<Position>>
-) {
+): void {
   // Memoize the smoothing calculation
   const calculateNewPosition = useCallback(
     (currentPosition: Position) => {
@@ -69,20 +68,6 @@ export function useSmoothAnimation(
       return;
     }
 
-    // Skip animation if position is null
-    if (position.x === null || position.y === null) {
-      return;
-    }
-
     return animate();
-  }, [
-    smoothFactor,
-    position.x,
-    position.y,
-    targetPosition,
-    animate,
-    setPosition,
-  ]);
-
-  return null;
+  }, [smoothFactor, targetPosition, animate, setPosition]);
 }
