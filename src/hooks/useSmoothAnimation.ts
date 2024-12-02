@@ -4,11 +4,10 @@ import { Position, TargetPosition } from '../types';
 const SMOOTHING_THRESHOLD = 0.1;
 
 export function useSmoothAnimation(
-  position: Position,
   targetPosition: TargetPosition,
   smoothFactor: number,
   setPosition: React.Dispatch<React.SetStateAction<Position>>
-) {
+): void {
   // Memoize the smoothing calculation
   const calculateNewPosition = useCallback(
     (currentPosition: Position) => {
