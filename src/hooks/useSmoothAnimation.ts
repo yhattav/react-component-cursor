@@ -70,6 +70,4 @@ export function useSmoothAnimation(
 
     return animate();
   }, [smoothFactor, targetPosition, animate, setPosition]);
-
-  return null;
 }
