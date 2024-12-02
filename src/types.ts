@@ -1,5 +1,3 @@
-import type { ReactNode } from 'react';
-
 export type Position = {
   x: number | null;
   y: number | null;

@@ -69,20 +69,8 @@ export function useSmoothAnimation(
       return;
     }
 
-    // Skip animation if position is null
-    if (position.x === null || position.y === null) {
-      return;
-    }
-
     return animate();
-  }, [
-    smoothFactor,
-    position.x,
-    position.y,
-    targetPosition,
-    animate,
-    setPosition,
-  ]);
+  }, [smoothFactor, targetPosition, animate, setPosition]);
 
   return null;
 }
