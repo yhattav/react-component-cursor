@@ -31,12 +31,11 @@ export function useMousePosition(
             x: e.clientX + offsetX,
             y: e.clientY + offsetY,
           };
-          setTargetPosition(newPosition);
           if (
-            positionRef.current.x === null ||
-            positionRef.current.y === null
+            newPosition.x !== targetPosition.x ||
+            newPosition.y !== targetPosition.y
           ) {
-            setPosition(newPosition);
+            setTargetPosition(newPosition);
           }
         }
       } else {
@@ -44,14 +43,39 @@ export function useMousePosition(
           x: e.clientX + offsetX,
           y: e.clientY + offsetY,
         };
-        setTargetPosition(newPosition);
-        if (positionRef.current.x === null || positionRef.current.y === null) {
-          setPosition(newPosition);
+        if (
+          newPosition.x !== targetPosition.x ||
+          newPosition.y !== targetPosition.y
+        ) {
+          setTargetPosition(newPosition);
         }
       }
     },
     [containerRef, offsetX, offsetY]
   );
+  // useEffect(() => {
+  //   console.log('targetPosition', targetPosition);
+  // }, [targetPosition]);
+
+  // useEffect(() => {
+  //   console.log('position', position);
+  // }, [position]);
+
+  // useEffect(() => {
+  //   console.log('isVisible', isVisible);
+  // }, [isVisible]);
+
+  // useEffect(() => {
+  //   console.log('offsetX', offsetX);
+  // }, [offsetX]);
+
+  // useEffect(() => {
+  //   console.log('offsetY', offsetY);
+  // }, [offsetY]);
+
+  // useEffect(() => {
+  //   console.log('containerRef', containerRef);
+  // }, [containerRef]);
 
   useEffect(() => {
     const handleMouseLeave = () => {
@@ -94,6 +118,13 @@ export function useMousePosition(
       }
     };
   }, [containerRef, updateTargetPosition]);
+
+  // Initialize position when we get the first valid targetPosition
+  useEffect(() => {
+    if (position.x === null && position.y === null) {
+      setPosition(targetPosition);
+    }
+  }, [targetPosition]);
 
   return { position, setPosition, targetPosition, isVisible };
 }
