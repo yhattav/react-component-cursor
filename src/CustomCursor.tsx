@@ -141,8 +141,8 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     }, [id]);
 
     React.useEffect(() => {
-      if (onMove && position.x !== null && position.y !== null) {
-        onMove(position.x, position.y);
+      if (position.x !== null && position.y !== null) {
+        onMove?.(position.x, position.y);
       }
     }, [position, onMove]);
 

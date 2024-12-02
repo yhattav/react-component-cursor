@@ -11,6 +11,9 @@ export function useSmoothAnimation(
 ) {
   useEffect(() => {
     if (position.x === null || position.y === null) return;
+    if (position.x === targetPosition.x && position.y === targetPosition.y) {
+      return;
+    }
 
     let animationFrameId: number;
 
