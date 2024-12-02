@@ -1,15 +1,20 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Position, TargetPosition } from '../types';
+import { Position } from '../types';
 
 export function useMousePosition(
   containerRef: React.RefObject<HTMLElement> | undefined,
   offsetX: number,
   offsetY: number
-) {
+): {
+  position: Position;
+  setPosition: React.Dispatch<React.SetStateAction<Position>>;
+  targetPosition: Position;
+  isVisible: boolean;
+} {
   const [position, setPosition] = useState<Position>({ x: null, y: null });
-  const [targetPosition, setTargetPosition] = useState<TargetPosition>({
-    x: 0,
-    y: 0,
+  const [targetPosition, setTargetPosition] = useState<Position>({
+    x: null,
+    y: null,
   });
   const [isVisible, setIsVisible] = useState(containerRef?.current !== null);
 
