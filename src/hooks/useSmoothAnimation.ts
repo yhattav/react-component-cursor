@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from 'react';
-import { Position, TargetPosition } from '../types';
+import { Position } from '../types';
 
 const SMOOTHING_THRESHOLD = 0.1;
 
