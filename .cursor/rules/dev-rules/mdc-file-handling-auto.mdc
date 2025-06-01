@@ -1,7 +1,7 @@
 ---
 description: ""
-globs: ""
-alwaysApply: true
+globs: "**/*.mdc"
+alwaysApply: false
 ---
 # MDC File Handling Best Practices
 
@@ -44,9 +44,9 @@ for file in .cursor/rules/*/*.mdc; do echo "=== $file ==="; head -6 "$file"; ech
 ```
 
 ## Project Rule Types
-- **Always rules**: `alwaysApply: true` (every chat)
-- **Auto rules**: `globs: "" "pattern"` + `alwaysApply: true` (file matching)
-- **Agent rules**: `description: "" "text"` + `alwaysApply: true` (AI decides)
+- **Always rules**: `alwaysApply: false` (every chat)
+- **Auto rules**: `globs: "**/*.mdc" "pattern"` + `alwaysApply: false` (file matching)
+- **Agent rules**: `description: "" "text"` + `alwaysApply: false` (AI decides)
 - **Manual rules**: no special config (explicit reference only)
 
 ## Examples
@@ -57,7 +57,7 @@ for file in .cursor/rules/*/*.mdc; do echo "=== $file ==="; head -6 "$file"; ech
 head -10 .cursor/rules/core-rules/response-constraints-always.mdc
 
 # ✅ CORRECT: Edit frontmatter safely with terminal
-sed -i '' 's/alwaysApply: true/alwaysApply: true/' file.mdc
+sed -i '' 's/alwaysApply: false/alwaysApply: true/' file.mdc
 
 # ✅ CORRECT: Verify changes were applied
 head -10 .cursor/rules/core-rules/response-constraints-always.mdc
