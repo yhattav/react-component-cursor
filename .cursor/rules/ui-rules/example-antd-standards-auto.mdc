@@ -1,6 +1,6 @@
 ---
 description:
-globs:
+globs: example/**/*.tsx, example/**/*.jsx, example/**/*.ts
 alwaysApply: false
 ---
 # Example App Standards (Ant Design)

@@ -1,6 +1,6 @@
 ---
 description:
-globs:
+globs: *.tsx, *.jsx, src/**/*.ts, src/**/*.tsx
 alwaysApply: false
 ---
 # React & CSS Standards

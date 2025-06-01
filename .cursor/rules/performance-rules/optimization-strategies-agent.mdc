@@ -1,7 +1,7 @@
 ---
-description:
-globs:
-alwaysApply: true
+description: "Performance optimization strategies and best practices for React components and applications"
+globs: 
+alwaysApply: false
 ---
 # Performance Optimization Strategies
 
