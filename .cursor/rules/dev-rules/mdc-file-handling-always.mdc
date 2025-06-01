@@ -1,0 +1,78 @@
+---
+description: ""
+globs: ""
+alwaysApply: true
+---
+# MDC File Handling Best Practices
+
+## Critical Tool Limitations
+- **NEVER use `read_file` tool for .mdc frontmatter verification** - it skips/hides YAML frontmatter sections
+- **AVOID `edit_file` tool for frontmatter changes** - it can strip or corrupt YAML frontmatter
+- **ALWAYS verify .mdc frontmatter** with terminal commands before and after edits
+
+## Recommended Tools for .mdc Files
+
+### ✅ SAFE for Reading Frontmatter
+- `run_terminal_cmd` with `head -10 file.mdc` (shows first 10 lines including frontmatter)
+- `run_terminal_cmd` with `cat file.mdc` (shows entire file)
+- `run_terminal_cmd` with `grep -A5 -B5 "^---" file.mdc` (shows frontmatter sections)
+
+### ✅ SAFE for Editing Frontmatter
+- `run_terminal_cmd` with `sed`, `awk`, or `printf` commands
+- Manual editing by user (most reliable)
+- `run_terminal_cmd` with `echo` and redirection for simple changes
+
+### ⚠️ LIMITED SAFE Usage
+- `edit_file` tool - ONLY for content below frontmatter (after the second `---` line)
+- Always verify frontmatter preservation after using `edit_file`
+
+## Standard Verification Workflow
+
+### Before Making Changes
+```bash
+head -10 file.mdc  # Verify current frontmatter
+```
+
+### After Making Changes  
+```bash
+head -10 file.mdc  # Confirm frontmatter is intact
+```
+
+### Checking All Rule Files
+```bash
+for file in .cursor/rules/*/*.mdc; do echo "=== $file ==="; head -6 "$file"; echo; done
+```
+
+## Project Rule Types
+- **Always rules**: `alwaysApply: true` (every chat)
+- **Auto rules**: `globs: "" "pattern"` + `alwaysApply: true` (file matching)
+- **Agent rules**: `description: "" "text"` + `alwaysApply: true` (AI decides)
+- **Manual rules**: no special config (explicit reference only)
+
+## Examples
+
+<example>
+```bash
+# ✅ CORRECT: Verify frontmatter before editing
+head -10 .cursor/rules/core-rules/response-constraints-always.mdc
+
+# ✅ CORRECT: Edit frontmatter safely with terminal
+sed -i '' 's/alwaysApply: true/alwaysApply: true/' file.mdc
+
+# ✅ CORRECT: Verify changes were applied
+head -10 .cursor/rules/core-rules/response-constraints-always.mdc
+```
+</example>
+
+<example type="invalid">
+```bash
+# ❌ WRONG: Using read_file for frontmatter verification
+read_file("file.mdc", lines 1-6)  # Will miss frontmatter!
+
+# ❌ WRONG: Using edit_file for frontmatter changes  
+edit_file("file.mdc", "change alwaysApply to true")  # May strip frontmatter!
+
+# ❌ WRONG: Not verifying after changes
+# Making changes without checking the result
+```
+</example>
