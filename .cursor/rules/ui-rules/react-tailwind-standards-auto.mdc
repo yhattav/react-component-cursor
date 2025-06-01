@@ -1,0 +1,56 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# React & UI Standards
+
+## Critical Rules
+- Use declarative JSX
+- Use Tailwind for components and styling
+- Use lowercase with dashes for directories (e.g., components/auth-wizard)
+- Favor named exports for components
+- Write concise, technical code with accurate examples
+
+## Examples
+
+<example>
+```tsx
+// Directory: src/components/user-profile/
+interface UserCardProps {
+  userName: string;
+  isActive: boolean;
+}
+
+function UserCard({ userName, isActive }: UserCardProps) {
+  return (
+    <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+      <h3 className="text-lg font-semibold text-gray-900">{userName}</h3>
+      <span className={`inline-block px-2 py-1 rounded text-sm ${
+        isActive 
+          ? 'bg-green-100 text-green-800' 
+          : 'bg-gray-100 text-gray-600'
+      }`}>
+        {isActive ? 'Active' : 'Inactive'}
+      </span>
+    </div>
+  );
+}
+
+export { UserCard };
+```
+</example>
+
+<example type="invalid">
+```tsx
+// Directory: src/components/UserProfile/ (wrong casing)
+// Using default export instead of named export
+export default function UserCard() {
+  return (
+    <div style={{ backgroundColor: 'white', padding: '16px' }}>
+      User Card
+    </div>
+  );
+}
+```
+</example>
