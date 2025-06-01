@@ -1,0 +1,64 @@
+---
+description:
+globs: *.ts, *.tsx, *.js, *.jsx
+alwaysApply: false
+---
+# TypeScript Standards
+
+## Critical Rules
+- Use TypeScript for all code; prefer interfaces over types
+- Avoid enums; use maps instead
+- Use functional components with TypeScript interfaces
+- Use the "function" keyword for pure functions
+- Use curly braces for all conditionals. Favor simplicity over cleverness
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
+- Use functional and declarative programming patterns; avoid classes
+- Prefer iteration and modularization over code duplication
+
+## Code Structure
+- Structure files: exported component, subcomponents, helpers, static content, types
+
+## Examples
+
+<example>
+```typescript
+interface UserProps {
+  isLoading: boolean;
+  hasError: boolean;
+}
+
+function UserProfile({ isLoading, hasError }: UserProps) {
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+  
+  if (hasError) {
+    return <ErrorMessage />;
+  }
+  
+  return <UserDetails />;
+}
+
+export { UserProfile };
+```
+</example>
+
+<example type="invalid">
+```typescript
+// Using enum instead of map
+enum Status {
+  LOADING = 'loading',
+  ERROR = 'error'
+}
+
+// Using class instead of functional component
+class UserProfile extends React.Component {
+  render() {
+    return <div>User</div>;
+  }
+}
+
+// Missing curly braces
+if (loading) return <div>Loading</div>;
+```
+</example>

@@ -1,0 +1,91 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Tech Stack Expertise
+
+## Core Technologies
+You are an expert in:
+- **TypeScript**: Modern TypeScript with strict typing for library development
+- **React**: Functional components with hooks, React.memo, and performance optimization
+- **Vite**: Fast build tool and development server
+- **tsup**: Library bundling and TypeScript compilation
+- **Library Development**: Creating reusable React components with minimal dependencies
+
+## Current Project Stack
+- **Library**: Pure React + TypeScript (minimal external dependencies)
+- **Example App**: Ant Design (planned migration to Tailwind CSS)
+- **Build Tools**: Vite, tsup, Jest for testing
+- **Development**: Storybook for component documentation
+
+## Technical Approach
+- Focus on performance and smooth animations
+- Maintain minimal bundle size (<10KB target)
+- Provide flexible, well-typed APIs
+- Keep library code framework-agnostic
+- Use latest React patterns and TypeScript best practices
+
+## Examples
+
+<example>
+```typescript
+// Library component with proper TypeScript and performance optimization
+interface CustomCursorProps {
+  children?: React.ReactNode;
+  smoothFactor?: number;
+  onMove?: (x: number, y: number) => void;
+  style?: React.CSSProperties;
+}
+
+const CustomCursor: React.FC<CustomCursorProps> = React.memo(({
+  children,
+  smoothFactor = 1,
+  onMove,
+  style = {},
+}) => {
+  const { position } = useMousePosition();
+  
+  const cursorStyle = React.useMemo(() => ({
+    position: 'fixed' as const,
+    transform: `translate(${position.x}px, ${position.y}px)`,
+    pointerEvents: 'none' as const,
+    ...style,
+  }), [position.x, position.y, style]);
+
+  React.useEffect(() => {
+    onMove?.(position.x, position.y);
+  }, [position, onMove]);
+
+  return (
+    <div style={cursorStyle}>
+      {children}
+    </div>
+  );
+});
+
+export { CustomCursor };
+```
+</example>
+
+<example type="invalid">
+```javascript
+// Outdated approach: JavaScript, external dependencies, poor performance
+import { Button } from 'some-ui-library'; // ❌ External UI dependency in library
+
+class CustomCursor extends React.Component { // ❌ Class component
+  render() {
+    return (
+      <Button // ❌ External component in library
+        style={{ position: 'absolute' }} // ❌ Not using proper positioning
+        onMouseMove={this.handleMove} // ❌ Not optimized for performance
+      >
+        {this.props.children}
+      </Button>
+    );
+  }
+}
+
+export default CustomCursor; // ❌ Default export
+```
+</example>

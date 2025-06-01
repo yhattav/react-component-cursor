@@ -1,0 +1,86 @@
+---
+description: "Performance optimization strategies and best practices for React components and applications"
+globs: 
+alwaysApply: false
+---
+# Performance Optimization Strategies
+
+## Critical Rules
+- Use immutable data structures
+- Use efficient data fetching strategies
+- Optimize network requests
+- Use efficient data structures
+- Use efficient algorithms
+- Use efficient rendering strategies
+- Use efficient state management
+
+## Performance Strategies
+
+### Data & Network
+- Implement proper caching strategies
+- Use React Query or SWR for data fetching
+- Batch network requests when possible
+- Implement pagination for large datasets
+
+### Rendering Optimization
+- Use React.memo for expensive components
+- Implement proper key props for lists
+- Use lazy loading for large components
+- Optimize re-renders with useMemo and useCallback
+
+### State Management
+- Keep state as close to where it's needed as possible
+- Use context sparingly to avoid unnecessary re-renders
+- Consider state management libraries for complex state
+
+## Examples
+
+<example>
+```tsx
+// Optimized component with memoization
+const ExpensiveUserList = React.memo(({ users, onUserClick }: UserListProps) => {
+  const sortedUsers = useMemo(() => 
+    users.sort((a, b) => a.name.localeCompare(b.name)), 
+    [users]
+  );
+
+  const handleUserClick = useCallback((userId: string) => {
+    onUserClick(userId);
+  }, [onUserClick]);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {sortedUsers.map(user => (
+        <UserCard 
+          key={user.id} 
+          user={user} 
+          onClick={handleUserClick}
+        />
+      ))}
+    </div>
+  );
+});
+```
+</example>
+
+<example type="invalid">
+```tsx
+// Unoptimized component causing unnecessary re-renders
+function UserList({ users, onUserClick }: UserListProps) {
+  // Sorting on every render
+  const sortedUsers = users.sort((a, b) => a.name.localeCompare(b.name));
+
+  return (
+    <div>
+      {sortedUsers.map(user => (
+        // Missing key prop, inline function creating new reference
+        <UserCard 
+          user={user} 
+          onClick={() => onUserClick(user.id)}
+        />
+      ))}
+    </div>
+  );
+}
+```
+</example>

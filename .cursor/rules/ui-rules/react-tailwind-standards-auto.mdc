@@ -1,0 +1,77 @@
+---
+description:
+globs: example/**/*.tsx, example/**/*.jsx
+alwaysApply: false
+---
+# React & Tailwind Standards (Future Migration)
+
+## Critical Rules
+- Use declarative JSX
+- Use Tailwind CSS for styling when migrating from Ant Design
+- Use lowercase with dashes for directories (e.g., components/auth-wizard)
+- Favor named exports for components
+- Write concise, technical code with accurate examples
+- Keep library code separate - this rule applies only to example app
+- Maintain responsive design with Tailwind utilities
+
+## Tailwind Approach
+- Use utility classes for styling
+- Use responsive prefixes (sm:, md:, lg:) for responsive design
+- Combine utilities with custom CSS when needed
+- Use Tailwind's color system and spacing scale
+- Apply hover: and focus: states appropriately
+
+## Examples
+
+<example>
+```tsx
+// Example app using Tailwind CSS properly
+import { CustomCursor } from '@yhattav/react-component-cursor';
+
+interface DemoSectionProps {
+  title: string;
+  isActive: boolean;
+}
+
+function DemoSection({ title, isActive }: DemoSectionProps) {
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">{title}</h1>
+        <div className={`
+          rounded-lg p-6 transition-colors duration-200
+          ${isActive 
+            ? 'bg-blue-100 border-2 border-blue-500' 
+            : 'bg-white border border-gray-200 hover:border-gray-300'
+          }
+        `}>
+          <CustomCursor>
+            <div className="w-5 h-5 bg-blue-600 rounded-full transform -translate-x-1/2 -translate-y-1/2" />
+          </CustomCursor>
+          {/* Demo content */}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export { DemoSection };
+```
+</example>
+
+<example type="invalid">
+```tsx
+// Using inline styles when Tailwind is available
+function DemoSection() {
+  return (
+    <div style={{ backgroundColor: 'white', padding: '16px' }}> {/* ❌ Use Tailwind classes */}
+      <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>Title</h1> {/* ❌ Use Tailwind */}
+      <CustomCursor>...</CustomCursor>
+    </div>
+  );
+}
+
+// Using default export
+export default DemoSection; // ❌ Use named export
+```
+</example>

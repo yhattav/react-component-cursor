@@ -1,0 +1,22 @@
+---
+description: ""
+globs: ""
+alwaysApply: true
+---
+# Response Constraints
+
+## Critical Rules
+- Do not remove any existing code unless necessary
+- Do not remove my comments or commented-out code unless necessary
+- Do not change the formatting of my imports
+- Do not change the formatting of my code unless important for new functionality
+
+## Examples
+
+<example>
+When adding a new feature to an existing component, preserve all existing imports, comments, and code structure while only adding the necessary new functionality.
+</example>
+
+<example type="invalid">
+Removing existing comments, reorganizing import statements, or reformatting existing code when only adding a small new feature.
+</example>
