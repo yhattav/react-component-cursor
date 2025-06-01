@@ -3,3 +3,85 @@ description:
 globs:
 alwaysApply: false
 ---
+# React & CSS Standards
+
+## Critical Rules
+- Use declarative JSX
+- Use inline styles and CSS-in-JS for component styling (no external UI frameworks in library)
+- Use lowercase with dashes for directories (e.g., components/auth-wizard)
+- Favor named exports for components
+- Write concise, technical code with accurate examples
+- Keep library dependencies minimal - avoid external UI frameworks
+- Use React.memo for performance optimization where appropriate
+- Use proper TypeScript interfaces for component props
+
+## Styling Approach
+- Use inline styles for dynamic styling
+- Use CSS custom properties (CSS variables) for themeable values
+- Create CSS animations using keyframes when needed
+- Use transform and position properties for smooth animations
+- Avoid external CSS frameworks in the library code
+
+## Examples
+
+<example>
+```tsx
+// Library component with inline styles and CSS variables
+interface CustomCursorProps {
+  className?: string;
+  style?: React.CSSProperties;
+  zIndex?: number;
+  smoothFactor?: number;
+}
+
+const CustomCursor: React.FC<CustomCursorProps> = React.memo(({
+  className = '',
+  style = {},
+  zIndex = 9999,
+  smoothFactor = 1,
+}) => {
+  const cursorStyle = React.useMemo(
+    () => ({
+      position: 'fixed' as const,
+      top: 0,
+      left: 0,
+      transform: `translate(${position.x}px, ${position.y}px)`,
+      pointerEvents: 'none' as const,
+      zIndex,
+      '--cursor-x': `${position.x}px`,
+      '--cursor-y': `${position.y}px`,
+      ...style,
+    }),
+    [position.x, position.y, zIndex, style]
+  );
+
+  return (
+    <div 
+      className={className}
+      style={cursorStyle}
+    >
+      {children}
+    </div>
+  );
+});
+
+export { CustomCursor };
+```
+</example>
+
+<example type="invalid">
+```tsx
+// Using external UI framework in library code
+import { Button } from 'antd'; // ❌ External dependency in library
+import 'tailwind.css'; // ❌ External CSS framework
+
+// Using default export instead of named export
+export default function CustomCursor() { // ❌ Default export
+  return (
+    <Button className="cursor-component"> // ❌ External component
+      Cursor
+    </Button>
+  );
+}
+```
+</example>

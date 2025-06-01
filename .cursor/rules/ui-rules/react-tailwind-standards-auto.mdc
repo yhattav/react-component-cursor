@@ -1,56 +1,77 @@
 ---
 description:
-globs:
+globs: example/**/*.tsx, example/**/*.jsx
 alwaysApply: false
 ---
-# React & UI Standards
+# React & Tailwind Standards (Future Migration)
 
 ## Critical Rules
 - Use declarative JSX
-- Use Tailwind for components and styling
+- Use Tailwind CSS for styling when migrating from Ant Design
 - Use lowercase with dashes for directories (e.g., components/auth-wizard)
 - Favor named exports for components
 - Write concise, technical code with accurate examples
+- Keep library code separate - this rule applies only to example app
+- Maintain responsive design with Tailwind utilities
+
+## Tailwind Approach
+- Use utility classes for styling
+- Use responsive prefixes (sm:, md:, lg:) for responsive design
+- Combine utilities with custom CSS when needed
+- Use Tailwind's color system and spacing scale
+- Apply hover: and focus: states appropriately
 
 ## Examples
 
 <example>
 ```tsx
-// Directory: src/components/user-profile/
-interface UserCardProps {
-  userName: string;
+// Example app using Tailwind CSS properly
+import { CustomCursor } from '@yhattav/react-component-cursor';
+
+interface DemoSectionProps {
+  title: string;
   isActive: boolean;
 }
 
-function UserCard({ userName, isActive }: UserCardProps) {
+function DemoSection({ title, isActive }: DemoSectionProps) {
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-900">{userName}</h3>
-      <span className={`inline-block px-2 py-1 rounded text-sm ${
-        isActive 
-          ? 'bg-green-100 text-green-800' 
-          : 'bg-gray-100 text-gray-600'
-      }`}>
-        {isActive ? 'Active' : 'Inactive'}
-      </span>
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">{title}</h1>
+        <div className={`
+          rounded-lg p-6 transition-colors duration-200
+          ${isActive 
+            ? 'bg-blue-100 border-2 border-blue-500' 
+            : 'bg-white border border-gray-200 hover:border-gray-300'
+          }
+        `}>
+          <CustomCursor>
+            <div className="w-5 h-5 bg-blue-600 rounded-full transform -translate-x-1/2 -translate-y-1/2" />
+          </CustomCursor>
+          {/* Demo content */}
+        </div>
+      </div>
     </div>
   );
 }
 
-export { UserCard };
+export { DemoSection };
 ```
 </example>
 
 <example type="invalid">
 ```tsx
-// Directory: src/components/UserProfile/ (wrong casing)
-// Using default export instead of named export
-export default function UserCard() {
+// Using inline styles when Tailwind is available
+function DemoSection() {
   return (
-    <div style={{ backgroundColor: 'white', padding: '16px' }}>
-      User Card
+    <div style={{ backgroundColor: 'white', padding: '16px' }}> {/* ❌ Use Tailwind classes */}
+      <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>Title</h1> {/* ❌ Use Tailwind */}
+      <CustomCursor>...</CustomCursor>
     </div>
   );
 }
+
+// Using default export
+export default DemoSection; // ❌ Use named export
 ```
 </example>

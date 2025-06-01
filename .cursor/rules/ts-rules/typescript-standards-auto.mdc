@@ -1,6 +1,6 @@
 ---
 description:
-globs:
+globs: *.ts, *.tsx, *.js, *.jsx
 alwaysApply: false
 ---
 # TypeScript Standards
