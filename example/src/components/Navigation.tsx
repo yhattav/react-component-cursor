@@ -1,8 +1,12 @@
 import React from 'react';
-import { Section } from '../types/Section';
+
+interface NavigationSection {
+  id: string;
+  title: string;
+}
 
 interface NavigationProps {
-  sections: Section[];
+  sections: NavigationSection[];
   activeSection: string;
   onSectionChange: (sectionId: string) => void;
 }
