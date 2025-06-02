@@ -1,30 +1,18 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { CustomCursor } from '@yhattav/react-component-cursor';
 import { CustomCursorButton } from '../components/CustomCursorButton';
-import { Button, Typography, Card, Space } from 'antd';
+import { Button, Typography, Card } from '../components/ui';
 import {
   ExperimentOutlined,
   AimOutlined,
   GlobalOutlined,
-} from '@ant-design/icons';
+} from '../components/ui/Icons';
 
 const { Title, Paragraph } = Typography;
 
-// Move static styles outside component
-const containerStyle = {
-  height: '100%',
-  padding: '2rem',
-  position: 'relative',
-  boxSizing: 'border-box',
-} as const;
-
-const buttonSpaceStyle = {
-  marginBottom: '2rem',
-} as const;
-
 // Add props interface
 interface DemoSectionProps {
-  onDebugData?: (data: any) => void;
+  onDebugData?: (data: Record<string, unknown>) => void;
 }
 
 export const DemoSection: React.FC<DemoSectionProps> = React.memo(
@@ -93,29 +81,11 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
           return <CustomCursorButton text="Click me!" />;
         case 'hover':
           return (
-            <div
-              style={{
-                width: '60px',
-                height: '60px',
-                backgroundColor: 'transparent',
-                border: '2px solid #3b82f6',
-                borderRadius: '50%',
-                transform: 'translate(-50%, -50%)',
-                transition: 'all 0.2s ease',
-              }}
-            />
+            <div className="w-15 h-15 border-2 border-primary-500 rounded-full -translate-x-1/2 -translate-y-1/2 transition-all duration-200" />
           );
         default:
           return (
-            <div
-              style={{
-                width: '20px',
-                height: '20px',
-                backgroundColor: '#3b82f6',
-                borderRadius: '50%',
-                transform: 'translate(-50%, -50%)',
-              }}
-            />
+            <div className="w-5 h-5 bg-primary-500 rounded-full -translate-x-1/2 -translate-y-1/2" />
           );
       }
     }, []);
@@ -153,42 +123,42 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
     ]);
 
     return (
-      <div style={containerStyle}>
-        <Typography>
-          <Title>Custom Cursor Component Demo</Title>
-          <Paragraph>
+      <div className="h-full p-8 relative box-border">
+        <div className="mb-8">
+          <Title level={1}>Custom Cursor Component Demo</Title>
+          <Paragraph className="text-lg mt-4">
             Explore the possibilities of using any React component as a custom
             cursor! This demo showcases different cursor modes and
             container-specific behaviors.
           </Paragraph>
-        </Typography>
+        </div>
 
         {/* Control Buttons */}
-        <Space size="middle" style={buttonSpaceStyle}>
+        <div className="flex gap-4 mb-8 flex-wrap">
           <Button
-            type={globalCursorMode === 'simple' ? 'primary' : 'default'}
-            icon={<AimOutlined />}
+            variant={globalCursorMode === 'simple' ? 'primary' : 'secondary'}
+            icon={<AimOutlined size={16} />}
             onClick={() => handleCursorModeChange('simple')}
           >
             Simple Cursor
           </Button>
 
           <Button
-            type={globalCursorMode === 'button' ? 'primary' : 'default'}
-            icon={<ExperimentOutlined />}
+            variant={globalCursorMode === 'button' ? 'primary' : 'secondary'}
+            icon={<ExperimentOutlined size={16} />}
             onClick={() => handleCursorModeChange('button')}
           >
             Button Cursor
           </Button>
 
           <Button
-            type={useContainer ? 'primary' : 'default'}
-            icon={<GlobalOutlined />}
+            variant={useContainer ? 'primary' : 'secondary'}
+            icon={<GlobalOutlined size={16} />}
             onClick={() => setUseContainer((prev) => !prev)}
           >
             {useContainer ? 'Container Only' : 'Global Cursor'}
           </Button>
-        </Space>
+        </div>
 
         {/* Global Cursor */}
         {!useContainer && (
@@ -201,11 +171,16 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
             {renderCursor(globalCursorMode)}
           </CustomCursor>
         )}
+
         {/* Container Demo Section */}
-        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <div className="space-y-8">
           {/* First Container */}
           <Card
             ref={mainContainerRef}
+            title="First Container"
+            subtitle="This container follows the global cursor mode!"
+            hover
+            className="cursor-default"
             onMouseEnter={handleContainer1Enter}
             onMouseLeave={handleContainer1Leave}
           >
@@ -221,18 +196,14 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
               </CustomCursor>
             )}
 
-            <Title level={2}>First Container</Title>
-            <Paragraph>
-              This container follows the global cursor mode!
-            </Paragraph>
-
             <Card
-              type="inner"
-              style={{ cursor: 'default' }}
+              title="Interactive Area"
+              shadow="sm"
+              padding="md"
+              className="cursor-default bg-neutral-50"
               onMouseEnter={() => handleContainerHover(true)}
               onMouseLeave={() => handleContainerHover(false)}
             >
-              <Title level={3}>Interactive Area</Title>
               <Paragraph>Hover over me to see the cursor change!</Paragraph>
             </Card>
           </Card>
@@ -240,6 +211,10 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
           {/* Second Container */}
           <Card
             ref={secondContainerRef}
+            title="Second Container"
+            subtitle="This container has its own independent cursor!"
+            hover
+            className="cursor-default"
             onMouseEnter={handleContainer2Enter}
             onMouseLeave={handleContainer2Leave}
           >
@@ -251,37 +226,29 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
                 hideNativeCursor={true}
               >
                 <div
-                  style={{
-                    width: hoveredSecond ? '60px' : '20px',
-                    height: hoveredSecond ? '60px' : '20px',
-                    backgroundColor: hoveredSecond ? 'transparent' : '#ff4d4f',
-                    border: hoveredSecond ? '2px solid #ff4d4f' : 'none',
-                    borderRadius: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    transition: 'all 0.2s ease',
-                  }}
+                  className={`
+                    ${hoveredSecond ? 'w-15 h-15' : 'w-5 h-5'}
+                    ${hoveredSecond ? 'bg-transparent border-2 border-red-500' : 'bg-red-500'}
+                    rounded-full -translate-x-1/2 -translate-y-1/2 transition-all duration-200
+                  `}
                 />
               </CustomCursor>
             )}
 
-            <Title level={2}>Second Container</Title>
-            <Paragraph>
-              This container has its own independent cursor!
-            </Paragraph>
-
             <Card
-              type="inner"
-              style={{ cursor: 'default' }}
+              title="Hover Effect"
+              shadow="sm"
+              padding="md"
+              className="cursor-default bg-neutral-50"
               onMouseEnter={() => setHoveredSecond(true)}
               onMouseLeave={() => setHoveredSecond(false)}
             >
-              <Title level={3}>Hover Effect</Title>
               <Paragraph>
                 Watch the cursor scale up when hovering here!
               </Paragraph>
             </Card>
           </Card>
-        </Space>
+        </div>
       </div>
     );
   }

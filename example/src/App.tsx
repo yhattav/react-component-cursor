@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Layout, Tabs } from 'antd';
 import {
   DemoSection,
   GravitySection,
@@ -9,10 +8,8 @@ import {
   GallerySection,
 } from './sections';
 import { Section } from './types/Section';
-import { DebugInfo } from './components/DebugInfo';
-
-const { Content, Header } = Layout;
-const { TabPane } = Tabs;
+import { Navigation } from './components/Navigation';
+import { Sidebar } from './components/Sidebar';
 
 // Define all sections
 const sections: Section[] = [
@@ -56,7 +53,7 @@ const sections: Section[] = [
 
 // Add type for debug data
 interface DebugData {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 function App() {
@@ -66,6 +63,7 @@ function App() {
   });
 
   const [debugData, setDebugData] = useState<DebugData | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     localStorage.setItem('activeSection', activeSection);
@@ -78,6 +76,10 @@ function App() {
   const handleDebugData = useCallback((data: DebugData) => {
     setDebugData(data);
   }, []);
+
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen(!sidebarOpen);
+  }, [sidebarOpen]);
 
   useEffect(() => {
     // Create a container for cursors if it doesn't exist
@@ -101,48 +103,33 @@ function App() {
   }, []);
 
   return (
-    <Layout style={{ height: '100vh' }}>
-      <Header
-        style={{
-          background: '#fff',
-          padding: '0 16px',
-          height: 'auto',
-          lineHeight: 'normal',
-        }}
-      >
-        <Tabs
-          activeKey={activeSection}
-          onChange={setActiveSection}
-          style={{ marginBottom: 0 }}
-        >
-          {sections.map(({ id, title }) => (
-            <TabPane tab={title} key={id} />
-          ))}
-        </Tabs>
-      </Header>
-      <Layout>
-        <Content
-          style={{
-            position: 'relative',
-            height: 'calc(100vh - 64px)',
-            overflow: 'hidden',
-          }}
-        >
-          {CurrentSection && <CurrentSection onDebugData={handleDebugData} />}
-        </Content>
-        <Layout.Sider
-          width="20%"
-          style={{
-            background: '#fff',
-            minWidth: '300px',
-            height: 'calc(100vh - 64px)',
-            overflow: 'auto',
-          }}
-        >
-          {debugData && <DebugInfo data={debugData} />}
-        </Layout.Sider>
-      </Layout>
-    </Layout>
+    <div className="h-screen flex flex-col bg-gradient-to-br from-neutral-50 to-neutral-100">
+      {/* Header with Navigation */}
+      <header className="relative z-20">
+        <Navigation
+          sections={sections}
+          activeSection={activeSection}
+          onSectionChange={setActiveSection}
+        />
+      </header>
+
+      {/* Main Layout */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Main Content Area */}
+        <main className="flex-1 relative overflow-hidden">
+          <div className="h-full animate-fade-in">
+            {CurrentSection && <CurrentSection onDebugData={handleDebugData} />}
+          </div>
+        </main>
+
+        {/* Sidebar */}
+        <Sidebar
+          debugData={debugData}
+          isOpen={sidebarOpen}
+          onToggle={toggleSidebar}
+        />
+      </div>
+    </div>
   );
 }
 
