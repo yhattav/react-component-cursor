@@ -1,6 +1,6 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { CustomCursor } from '@yhattav/react-component-cursor';
-import { Card, Typography, Button } from 'antd';
+import { Card, Typography, Button } from '../components/ui';
 
 const { Title, Paragraph } = Typography;
 
@@ -38,6 +38,9 @@ export const PaintSection: React.FC = () => {
             height: '10px',
             backgroundColor: '#ff6b6b',
             borderRadius: '50%',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
             boxShadow: '0 0 10px rgba(255,107,107,0.5)',
           }}
         />

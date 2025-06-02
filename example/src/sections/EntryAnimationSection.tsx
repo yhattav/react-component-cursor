@@ -1,11 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { CustomCursor } from '@yhattav/react-component-cursor';
-import { Card, Typography } from 'antd';
+import { Card, Typography } from '../components/ui';
 
 const { Title, Paragraph } = Typography;
 
 interface EntryAnimationSectionProps {
-  onDebugData?: (data: any) => void;
+  onDebugData?: (data: Record<string, unknown>) => void;
 }
 
 const containerStyle = {

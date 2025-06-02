@@ -5,7 +5,7 @@ This directory contains the modernized Project Rules for this **React Custom Cur
 ## Project Overview
 - **Library**: Pure React + TypeScript with minimal dependencies
 - **Styling**: Inline styles and CSS-in-JS (no external UI frameworks in library code)
-- **Example App**: Currently uses Ant Design (planned migration to Tailwind)
+- **Example App**: Uses Tailwind CSS with custom components
 - **Build**: Vite + tsup for library bundling
 
 ## Structure
@@ -39,8 +39,7 @@ This directory contains the modernized Project Rules for this **React Custom Cur
 
 ### UI Rules (Auto-attached to React files)
 - `react-standards-auto.mdc` - Pure React and CSS standards for library components
-- `react-tailwind-standards-auto.mdc` - Future Tailwind standards (ready for migration)
-- `example-antd-standards-auto.mdc` - Current Ant Design standards for example app
+- `react-tailwind-standards-auto.mdc` - Tailwind CSS standards for example app
 
 ### Performance Rules (Agent-requested)
 - `optimization-strategies-agent.mdc` - Performance optimization guidelines
@@ -54,8 +53,7 @@ This directory contains the modernized Project Rules for this **React Custom Cur
 - Provide flexible APIs for consumers
 
 ### Example App (`example/`)
-- **Current**: Uses Ant Design for demonstrations
-- **Future**: Will migrate to Tailwind CSS
+- **Current**: Uses Tailwind CSS with custom components for demonstrations
 - Should showcase library capabilities effectively
 - Maintain clean separation from library code
 
@@ -76,15 +74,8 @@ Add this to your Cursor settings for better `.mdc` file handling:
 }
 ```
 
-## Migration Planning
-
-### Ant Design → Tailwind Migration
-When ready to migrate the example app:
-1. The `react-tailwind-standards-auto.mdc` rule is ready to use
-2. Update `example-antd-standards-auto.mdc` → rename or archive
-3. Update example app dependencies
-4. Library code remains unchanged (no UI framework dependencies)
-
 ## Migration Status
 
-✅ **Migrated from `.cursorrules`** - The legacy `.cursorrules` file has been replaced with this organized Project Rules system for better maintainability and more precise rule application. 
+✅ **Migrated from `.cursorrules`** - The legacy `.cursorrules` file has been replaced with this organized Project Rules system for better maintainability and more precise rule application.
+
+✅ **Ant Design → Tailwind Migration Complete** - The example app has been fully migrated from Ant Design to Tailwind CSS with custom components. 

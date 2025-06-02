@@ -15,7 +15,7 @@ You are an expert in:
 
 ## Current Project Stack
 - **Library**: Pure React + TypeScript (minimal external dependencies)
-- **Example App**: Ant Design (planned migration to Tailwind CSS)
+- **Example App**: Tailwind CSS with custom components
 - **Build Tools**: Vite, tsup, Jest for testing
 - **Development**: Storybook for component documentation
 

@@ -1,12 +1,12 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { CustomCursor } from '@yhattav/react-component-cursor';
-import { Typography, Button } from 'antd';
+import { Typography, Button } from '../components/ui';
 import {
+  ExpandAltOutlined,
   RightOutlined,
   LeftOutlined,
-  ExpandAltOutlined,
   CloseOutlined,
-} from '@ant-design/icons';
+} from '../components/ui/Icons';
 
 const { Title, Paragraph } = Typography;
 
@@ -20,7 +20,7 @@ const ITEM_WIDTH = 300; // Width of each gallery item
 const ITEM_GAP = 20; // Gap between items
 
 interface GallerySectionProps {
-  onDebugData?: (data: any) => void;
+  onDebugData?: (data: Record<string, unknown>) => void;
 }
 
 interface GalleryItem {
@@ -162,32 +162,48 @@ export const GallerySection: React.FC<GallerySectionProps> = React.memo(
                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
                 borderRadius: '8px',
                 display: 'flex',
+                alignItems: 'flex-start',
                 justifyContent: 'flex-end',
                 padding: '1rem',
               }}
             >
               <Button
-                icon={<ExpandAltOutlined />}
+                variant="ghost"
+                size="sm"
+                className="w-8 h-8 p-0 bg-white/20 hover:bg-white/30 text-white border-0 rounded-md backdrop-blur-sm !flex !items-center !justify-center"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleExpand(item.id);
                 }}
-              />
+              >
+                <ExpandAltOutlined className="!w-6 !h-6 flex-shrink-0" style={{ strokeWidth: 1 }} />
+              </Button>
             </div>
           )}
         </div>
       );
     };
 
+    // Send debug data
+    React.useEffect(() => {
+      onDebugData?.({
+        activeContainer,
+        expandedItem,
+        scrollPosition,
+        isLeftSide,
+        galleryItemsCount: GALLERY_ITEMS.length,
+      });
+    }, [activeContainer, expandedItem, scrollPosition, isLeftSide, onDebugData]);
+
     return (
       <div style={{ padding: '2rem', height: '100%', boxSizing: 'border-box' }}>
-        <Typography>
-          <Title>Gallery Demo</Title>
-          <Paragraph>
+        <div className="mb-8">
+          <Title level={1}>Gallery Demo</Title>
+          <Paragraph className="text-lg mt-4">
             Move your cursor to either side of the gallery to navigate through
             items. Click to scroll!
           </Paragraph>
-        </Typography>
+        </div>
 
         <CustomCursor
           containerRef={
