@@ -162,17 +162,22 @@ export const GallerySection: React.FC<GallerySectionProps> = React.memo(
                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
                 borderRadius: '8px',
                 display: 'flex',
+                alignItems: 'flex-start',
                 justifyContent: 'flex-end',
                 padding: '1rem',
               }}
             >
               <Button
-                icon={<ExpandAltOutlined />}
+                variant="ghost"
+                size="sm"
+                className="w-8 h-8 p-0 bg-white/20 hover:bg-white/30 text-white border-0 rounded-md backdrop-blur-sm !flex !items-center !justify-center"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleExpand(item.id);
                 }}
-              />
+              >
+                <ExpandAltOutlined className="!w-6 !h-6 flex-shrink-0" style={{ strokeWidth: 1 }} />
+              </Button>
             </div>
           )}
         </div>
