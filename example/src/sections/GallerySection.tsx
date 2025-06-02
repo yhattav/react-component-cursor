@@ -1,10 +1,9 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { CustomCursor } from '@yhattav/react-component-cursor';
-import { Typography, Button } from 'antd';
+import { Typography, Button, ExpandAltOutlined } from '../components/ui';
 import {
   RightOutlined,
   LeftOutlined,
-  ExpandAltOutlined,
   CloseOutlined,
 } from '@ant-design/icons';
 

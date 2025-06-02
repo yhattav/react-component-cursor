@@ -1,6 +1,6 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { CustomCursor } from '@yhattav/react-component-cursor';
-import { Card, Typography } from 'antd';
+import { Card, Typography } from '../components/ui';
 
 const { Title, Paragraph } = Typography;
 

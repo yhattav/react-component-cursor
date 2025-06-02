@@ -1,11 +1,11 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { CustomCursor } from '@yhattav/react-component-cursor';
-import { Card } from 'antd';
+import { Card } from '../components/ui';
 import { Point2D } from '../utils/types/physics';
 import { GravitySimulator } from '../components/GravitySimulator/GravitySimulator';
 
 interface GravitySectionProps {
-  onDebugData?: (data: any) => void;
+  onDebugData?: (data: Record<string, unknown>) => void;
 }
 
 export const GravitySection: React.FC<GravitySectionProps> = ({
