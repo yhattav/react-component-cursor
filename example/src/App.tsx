@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Navigation, Sidebar } from './components';
-import { DemoSection } from './sections/DemoSection';
+import { getNavigationSections, getSectionComponent } from './sections/registry';
 
 function App() {
   const [activeSection, setActiveSection] = useState('demo');
@@ -10,58 +10,24 @@ function App() {
     setDebugData(data);
   }, []);
 
-  // Simple sections for navigation only
-  const navigationSections = [
-    { id: 'demo', name: 'Demo', title: 'Demo' },
-    { id: 'gravity', name: 'Gravity', title: 'Gravity' },
-    { id: 'content-reveal', name: 'Content Reveal', title: 'Content Reveal' },
-    { id: 'entry-animation', name: 'Entry Animation', title: 'Entry Animation' },
-    { id: 'paint', name: 'Paint', title: 'Paint' },
-    { id: 'gallery', name: 'Gallery', title: 'Gallery' },
-  ];
+  // Get navigation sections from registry
+  const navigationSections = getNavigationSections();
 
   const renderActiveSection = () => {
-    switch (activeSection) {
-      case 'demo':
-        return <DemoSection onDebugData={handleDebugData} />;
-      case 'gravity':
-        return (
-          <div className="p-8">
-            <h2 className="text-2xl font-bold text-neutral-900">Gravity Section</h2>
-            <p className="text-neutral-600 mt-2">Coming soon...</p>
-          </div>
-        );
-      case 'content-reveal':
-        return (
-          <div className="p-8">
-            <h2 className="text-2xl font-bold text-neutral-900">Content Reveal Section</h2>
-            <p className="text-neutral-600 mt-2">Coming soon...</p>
-          </div>
-        );
-      case 'entry-animation':
-        return (
-          <div className="p-8">
-            <h2 className="text-2xl font-bold text-neutral-900">Entry Animation Section</h2>
-            <p className="text-neutral-600 mt-2">Coming soon...</p>
-          </div>
-        );
-      case 'paint':
-        return (
-          <div className="p-8">
-            <h2 className="text-2xl font-bold text-neutral-900">Paint Section</h2>
-            <p className="text-neutral-600 mt-2">Coming soon...</p>
-          </div>
-        );
-      case 'gallery':
-        return (
-          <div className="p-8">
-            <h2 className="text-2xl font-bold text-neutral-900">Gallery Section</h2>
-            <p className="text-neutral-600 mt-2">Coming soon...</p>
-          </div>
-        );
-      default:
-        return <div className="p-8">Section not found</div>;
+    const SectionComponent = getSectionComponent(activeSection);
+    
+    if (!SectionComponent) {
+      return (
+        <div className="p-8">
+          <h2 className="text-2xl font-bold text-neutral-900">Section Not Found</h2>
+          <p className="text-neutral-600 mt-2">
+            The section "{activeSection}" could not be found.
+          </p>
+        </div>
+      );
     }
+
+    return <SectionComponent onDebugData={handleDebugData} />;
   };
 
   return (

@@ -1,11 +1,12 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { CustomCursor } from '@yhattav/react-component-cursor';
-import { Typography, Button, ExpandAltOutlined } from '../components/ui';
+import { Typography, Button } from '../components/ui';
 import {
+  ExpandAltOutlined,
   RightOutlined,
   LeftOutlined,
   CloseOutlined,
-} from '@ant-design/icons';
+} from '../components/ui/Icons';
 
 const { Title, Paragraph } = Typography;
 
@@ -19,7 +20,7 @@ const ITEM_WIDTH = 300; // Width of each gallery item
 const ITEM_GAP = 20; // Gap between items
 
 interface GallerySectionProps {
-  onDebugData?: (data: any) => void;
+  onDebugData?: (data: Record<string, unknown>) => void;
 }
 
 interface GalleryItem {
@@ -178,15 +179,26 @@ export const GallerySection: React.FC<GallerySectionProps> = React.memo(
       );
     };
 
+    // Send debug data
+    React.useEffect(() => {
+      onDebugData?.({
+        activeContainer,
+        expandedItem,
+        scrollPosition,
+        isLeftSide,
+        galleryItemsCount: GALLERY_ITEMS.length,
+      });
+    }, [activeContainer, expandedItem, scrollPosition, isLeftSide, onDebugData]);
+
     return (
       <div style={{ padding: '2rem', height: '100%', boxSizing: 'border-box' }}>
-        <Typography>
-          <Title>Gallery Demo</Title>
-          <Paragraph>
+        <div className="mb-8">
+          <Title level={1}>Gallery Demo</Title>
+          <Paragraph className="text-lg mt-4">
             Move your cursor to either side of the gallery to navigate through
             items. Click to scroll!
           </Paragraph>
-        </Typography>
+        </div>
 
         <CustomCursor
           containerRef={

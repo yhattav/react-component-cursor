@@ -62,6 +62,45 @@ export const ExpandAltOutlined: React.FC<IconProps> = ({ className = '', size = 
   </svg>
 );
 
+export const RightOutlined: React.FC<IconProps> = ({ className = '', size = 16 }) => (
+  <svg
+    width={size}
+    height={size}
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+  </svg>
+);
+
+export const LeftOutlined: React.FC<IconProps> = ({ className = '', size = 16 }) => (
+  <svg
+    width={size}
+    height={size}
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+  </svg>
+);
+
+export const CloseOutlined: React.FC<IconProps> = ({ className = '', size = 16 }) => (
+  <svg
+    width={size}
+    height={size}
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
+
 export const PlayCircleOutlined: React.FC<IconProps> = ({ className = '', size = 16 }) => (
   <svg
     width={size}
