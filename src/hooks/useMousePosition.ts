@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { NullablePosition } from '../types';
+import { NullablePosition } from '../types.js';
 
 // Throttle utility function
 const throttle = <T extends (...args: never[]) => void>(

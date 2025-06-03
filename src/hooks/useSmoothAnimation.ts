@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from 'react';
-import { NullablePosition } from '../types';
+import { NullablePosition } from '../types.js';
 
 const SMOOTHING_THRESHOLD = 0.1;
 

@@ -6,9 +6,9 @@ import {
   CursorOffset,
   CursorMoveHandler,
   CursorVisibilityHandler,
-} from './types';
+} from './types.js';
 
-// Simplified props interface
+// Clean props interface
 export interface CustomCursorProps {
   // Core Configuration
   id?: string;
@@ -32,31 +32,10 @@ export interface CustomCursorProps {
   // Event Handlers
   onMove?: CursorMoveHandler;
   onVisibilityChange?: CursorVisibilityHandler;
-
-  // Legacy props (deprecated but supported)
-  /** @deprecated Use offset.x instead */
-  offsetX?: number;
-  /** @deprecated Use offset.y instead */
-  offsetY?: number;
-  /** @deprecated Use smoothness instead */
-  smoothFactor?: number;
-  /** @deprecated Use showNativeCursor={false} instead */
-  hideNativeCursor?: boolean;
-  /** @deprecated Use onVisibilityChange instead */
-  onVisibilityChanged?: (isVisible: boolean) => void;
 }
 
 const ANIMATION_DURATION = '0.3s';
 const ANIMATION_NAME = 'cursorFadeIn';
-
-// Utility to show deprecation warnings
-const warnDeprecated = (oldProp: string, newProp: string) => {
-  if (process.env.NODE_ENV === 'development') {
-    console.warn(
-      `react-component-cursor: "${oldProp}" is deprecated. Use "${newProp}" instead.`
-    );
-  }
-};
 
 // Create a memoized portal target
 const getPortalContainer = () => {
@@ -117,52 +96,23 @@ const createGlobalStyle = () => `
 
 export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
   ({
-    // New API props with defaults
     id = 'unnamed-cursor',
     enabled = true,
     children,
     className = '',
     style = {},
-    zIndex = 999, // Lower default zIndex
-    offset,
-    smoothness,
+    zIndex = 999,
+    offset = { x: 0, y: 0 },
+    smoothness = 1,
     containerRef,
-    showNativeCursor = false, // Default to false (hide native cursor)
+    showNativeCursor = false,
     throttleMs = 0,
     onMove,
     onVisibilityChange,
-    
-    // Legacy props (deprecated)
-    offsetX,
-    offsetY,
-    smoothFactor,
-    hideNativeCursor,
-    onVisibilityChanged,
   }) => {
-    // Handle legacy props with warnings
-    React.useEffect(() => {
-      if (offsetX !== undefined) warnDeprecated('offsetX', 'offset.x');
-      if (offsetY !== undefined) warnDeprecated('offsetY', 'offset.y');
-      if (smoothFactor !== undefined) warnDeprecated('smoothFactor', 'smoothness');
-      if (hideNativeCursor !== undefined) warnDeprecated('hideNativeCursor', 'showNativeCursor');
-      if (onVisibilityChanged !== undefined) warnDeprecated('onVisibilityChanged', 'onVisibilityChange');
-    }, [offsetX, offsetY, smoothFactor, hideNativeCursor, onVisibilityChanged]);
-
-    // Resolve props (new API takes precedence over legacy)
-    const resolvedOffset = React.useMemo(() => {
-      if (offset) return offset;
-      return {
-        x: offsetX ?? 0,
-        y: offsetY ?? 0,
-      };
-    }, [offset, offsetX, offsetY]);
-
-    const resolvedSmoothness = smoothness ?? smoothFactor ?? 1;
-    const resolvedShowNativeCursor = showNativeCursor ?? (hideNativeCursor !== undefined ? !hideNativeCursor : false);
-
     const { position, setPosition, targetPosition, isVisible } =
-      useMousePosition(containerRef, resolvedOffset.x, resolvedOffset.y, throttleMs);
-    useSmoothAnimation(targetPosition, resolvedSmoothness, setPosition);
+      useMousePosition(containerRef, offset.x, offset.y, throttleMs);
+    useSmoothAnimation(targetPosition, smoothness, setPosition);
 
     const [portalContainer, setPortalContainer] =
       React.useState<HTMLElement | null>(null);
@@ -208,7 +158,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       };
     }, [id]);
 
-    // Handle move callback with new signature (backward compatible)
+    // Handle move callback
     React.useEffect(() => {
       if (position.x !== null && position.y !== null) {
         const cursorPosition: CursorPosition = { x: position.x, y: position.y };
@@ -216,15 +166,13 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       }
     }, [position, onMove]);
 
-    // Handle visibility callback with new signature and legacy support
+    // Handle visibility callback
     React.useEffect(() => {
       const actuallyVisible = enabled && isVisible;
       const reason: 'container' | 'disabled' = !enabled ? 'disabled' : 'container';
 
       onVisibilityChange?.(actuallyVisible, reason);
-      // Legacy callback support
-      onVisibilityChanged?.(actuallyVisible);
-    }, [enabled, isVisible, onVisibilityChange, onVisibilityChanged]);
+    }, [enabled, isVisible, onVisibilityChange]);
 
     const cursorStyle = React.useMemo(
       () =>
@@ -255,7 +203,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
 
     return (
       <>
-        {!resolvedShowNativeCursor && (
+        {!showNativeCursor && (
           <style id={`cursor-style-global-${id}`}>{createGlobalStyle()}</style>
         )}
         {createPortal(

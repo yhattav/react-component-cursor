@@ -124,54 +124,21 @@ describe('CustomCursor', () => {
     });
   });
 
-  it('supports legacy offsetX/offsetY props with deprecation warning', async () => {
-    const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-    
-    render(<CustomCursor offsetX={10} offsetY={20}>Legacy offset cursor</CustomCursor>);
+  it('supports smoothness prop', async () => {
+    render(<CustomCursor smoothness={2}>Smooth cursor</CustomCursor>);
 
     await waitFor(() => {
-      const cursor = screen.getByText('Legacy offset cursor');
+      const cursor = screen.getByText('Smooth cursor');
       expect(cursor).toBeInTheDocument();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('offsetX" is deprecated')
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('offsetY" is deprecated')
-      );
     });
-
-    consoleSpy.mockRestore();
   });
 
-  it('supports legacy smoothFactor prop with deprecation warning', async () => {
-    const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-    
-    render(<CustomCursor smoothFactor={2}>Legacy smooth cursor</CustomCursor>);
+  it('supports showNativeCursor prop', async () => {
+    render(<CustomCursor showNativeCursor={true}>Native cursor</CustomCursor>);
 
     await waitFor(() => {
-      const cursor = screen.getByText('Legacy smooth cursor');
+      const cursor = screen.getByText('Native cursor');
       expect(cursor).toBeInTheDocument();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('smoothFactor" is deprecated')
-      );
     });
-
-    consoleSpy.mockRestore();
-  });
-
-  it('supports legacy hideNativeCursor prop with deprecation warning', async () => {
-    const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-    
-    render(<CustomCursor hideNativeCursor={true}>Legacy hide cursor</CustomCursor>);
-
-    await waitFor(() => {
-      const cursor = screen.getByText('Legacy hide cursor');
-      expect(cursor).toBeInTheDocument();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('hideNativeCursor" is deprecated')
-      );
-    });
-
-    consoleSpy.mockRestore();
   });
 });

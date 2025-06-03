@@ -176,7 +176,7 @@ export const GallerySection: React.FC<GallerySectionProps> = React.memo(
                   handleExpand(item.id);
                 }}
               >
-                <ExpandAltOutlined className="!w-6 !h-6 flex-shrink-0" style={{ strokeWidth: 1 }} />
+                <ExpandAltOutlined className="!w-6 !h-6 flex-shrink-0" />
               </Button>
             </div>
           )}

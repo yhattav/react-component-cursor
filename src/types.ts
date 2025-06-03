@@ -1,21 +1,10 @@
-// Legacy position types (kept for internal use)
-export type Position = {
-  x: number;
-  y: number;
-};
-
+// Position types
 export type NullablePosition = {
   x: number | null;
   y: number | null;
 };
 
-// Legacy type for backward compatibility
-export type TargetPosition = {
-  x: number;
-  y: number;
-};
-
-// Essential new types (simplified)
+// New API types
 export type CursorPosition = {
   x: number;
   y: number;
@@ -26,7 +15,7 @@ export type CursorOffset = {
   y: number;
 };
 
-// Enhanced event handler types (backward compatible)
+// Event handler types
 export type CursorMoveHandler = (
   position: CursorPosition
 ) => void;

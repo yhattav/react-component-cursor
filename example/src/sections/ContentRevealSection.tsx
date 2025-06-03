@@ -5,7 +5,7 @@ import { Card, Typography } from '../components/ui';
 const { Title, Paragraph } = Typography;
 
 export const ContentRevealSection: React.FC = () => {
-  const revealRef = useRef(null);
+  const revealRef = useRef<HTMLDivElement>(null);
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
 
   const updateCursorPos = useCallback((position: { x: number; y: number }) => {
