@@ -276,25 +276,6 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
             </Card>
           </Card>
         </div>
-
-        {/* API Simplification Info */}
-        <Card className="mt-8 bg-blue-50 border-blue-200">
-          <Title level={3}>✨ Simplified API Benefits</Title>
-          <div className="grid md:grid-cols-3 gap-4 mt-4">
-            <div>
-              <h4 className="font-semibold text-blue-900">🎯 Simple by Default</h4>
-              <p className="text-sm text-blue-700">Works perfectly with minimal props - no overthinking required!</p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-blue-900">⚡ Performance Control</h4>
-              <p className="text-sm text-blue-700">Optional throttling for smooth 60fps when you need it.</p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-blue-900">🔄 Backward Compatible</h4>
-              <p className="text-sm text-blue-700">Old API still works - upgrade at your own pace!</p>
-            </div>
-          </div>
-        </Card>
       </div>
     );
   }
