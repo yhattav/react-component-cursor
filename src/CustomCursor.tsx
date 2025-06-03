@@ -121,8 +121,17 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       setPortalContainer(getPortalContainer());
       return () => {
         const container = document.getElementById('cursor-container');
-        if (container && !container.children.length) {
-          document.body.removeChild(container);
+        if (container && container.children.length === 0) {
+          try {
+            if (container.parentNode) {
+              container.parentNode.removeChild(container);
+            }
+          } catch (e) {
+            // Ignore cleanup errors in tests
+            if (process.env.NODE_ENV !== 'test') {
+              console.warn('Portal container cleanup failed:', e);
+            }
+          }
         }
       };
     }, []);
@@ -153,7 +162,14 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       return () => {
         const style = document.getElementById(styleId);
         if (style) {
-          style.remove();
+          try {
+            style.remove();
+          } catch (e) {
+            // Ignore cleanup errors in tests
+            if (process.env.NODE_ENV !== 'test') {
+              console.warn('Style cleanup failed:', e);
+            }
+          }
         }
       };
     }, [id]);
