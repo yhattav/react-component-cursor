@@ -14,9 +14,9 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
   const gravityRef = useRef<HTMLDivElement>(null);
   const [pointerPos, setPointerPos] = useState<Point2D>({ x: 0, y: 0 });
 
-  const handleCursorMove = useCallback((x: number, y: number) => {
-    if (isFinite(x) && isFinite(y)) {
-      setPointerPos({ x, y });
+  const handleCursorMove = useCallback((position: { x: number; y: number }) => {
+    if (isFinite(position.x) && isFinite(position.y)) {
+      setPointerPos({ x: position.x, y: position.y });
     }
   }, []);
 
@@ -33,9 +33,9 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
       >
         <CustomCursor
           containerRef={gravityRef}
-          smoothFactor={1}
+          smoothness={1}
           onMove={handleCursorMove}
-          hideNativeCursor={false}
+          showNativeCursor={true}
         >
           <div style={{ width: '100vw', height: '100vh' }} />
         </CustomCursor>

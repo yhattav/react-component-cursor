@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { CustomCursor } from '@yhattav/react-component-cursor';
+import { CustomCursor, CursorPosition } from '@yhattav/react-component-cursor';
 import { CustomCursorButton } from '../components/CustomCursorButton';
 import { Button, Typography, Card } from '../components/ui';
 import {
@@ -29,18 +29,27 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
       y: 0,
     });
     const [hoveredSecond, setHoveredSecond] = useState(false);
+    const [isPerformanceMode, setIsPerformanceMode] = useState(false);
 
     // Refs
     const mainContainerRef = useRef(null);
     const secondContainerRef = useRef(null);
 
-    // Memoized handlers
-    const handleGlobalCursorMove = useCallback((x: number, y: number) => {
-      setLastGlobalPosition({ x, y });
+    // Memoized handlers with simplified API
+    const handleGlobalCursorMove = useCallback((position: CursorPosition) => {
+      setLastGlobalPosition({ x: position.x, y: position.y });
     }, []);
 
-    const handleContainer1CursorMove = useCallback((x: number, y: number) => {
-      setCursor1Position({ x, y });
+    const handleContainer1CursorMove = useCallback((position: CursorPosition) => {
+      setCursor1Position({ x: position.x, y: position.y });
+    }, []);
+
+    const handleContainer2CursorMove = useCallback((position: CursorPosition) => {
+      console.log('Container 2 cursor position:', position);
+    }, []);
+
+    const handleCursorVisibilityChange = useCallback((isVisible: boolean, reason: 'container' | 'disabled') => {
+      console.log('Cursor visibility changed:', isVisible, 'reason:', reason);
     }, []);
 
     const handleContainer1Enter = useCallback(() => {
@@ -109,6 +118,7 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
         lastGlobalPosition,
         globalCursorMode,
         container1CursorMode,
+        isPerformanceMode,
         isVisible: isMouseInContainer1 || isMouseInContainer2 || !useContainer,
       });
     }, [
@@ -119,6 +129,7 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
       lastGlobalPosition,
       globalCursorMode,
       container1CursorMode,
+      isPerformanceMode,
       onDebugData,
     ]);
 
@@ -128,8 +139,8 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
           <Title level={1}>Custom Cursor Component Demo</Title>
           <Paragraph className="text-lg mt-4">
             Explore the possibilities of using any React component as a custom
-            cursor! This demo showcases different cursor modes and
-            container-specific behaviors.
+            cursor! This demo showcases different cursor modes with clean,
+            simple API that's easy to use.
           </Paragraph>
         </div>
 
@@ -158,15 +169,24 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
           >
             {useContainer ? 'Container Only' : 'Global Cursor'}
           </Button>
+
+          <Button
+            variant={isPerformanceMode ? 'primary' : 'secondary'}
+            onClick={() => setIsPerformanceMode((prev) => !prev)}
+          >
+            {isPerformanceMode ? '60fps Mode' : 'Performance Mode'}
+          </Button>
         </div>
 
-        {/* Global Cursor */}
+        {/* Global Cursor - Using simplified API */}
         {!useContainer && (
           <CustomCursor
             id="global-cursor"
-            smoothFactor={2}
+            smoothness={2}
             onMove={handleGlobalCursorMove}
-            hideNativeCursor={true}
+            onVisibilityChange={handleCursorVisibilityChange}
+            showNativeCursor={false}
+            throttleMs={isPerformanceMode ? 16 : 0} // 60fps when enabled
           >
             {renderCursor(globalCursorMode)}
           </CustomCursor>
@@ -178,7 +198,7 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
           <Card
             ref={mainContainerRef}
             title="First Container"
-            subtitle="This container follows the global cursor mode!"
+            subtitle="Interactive cursor that follows the global cursor mode!"
             hover
             className="cursor-default"
             onMouseEnter={handleContainer1Enter}
@@ -188,9 +208,11 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
               <CustomCursor
                 id="container-1-cursor"
                 containerRef={mainContainerRef}
-                smoothFactor={2}
+                smoothness={2}
                 onMove={handleContainer1CursorMove}
-                hideNativeCursor={true}
+                onVisibilityChange={handleCursorVisibilityChange}
+                showNativeCursor={false}
+                throttleMs={isPerformanceMode ? 16 : 0}
               >
                 {renderCursor(container1CursorMode)}
               </CustomCursor>
@@ -205,6 +227,11 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
               onMouseLeave={() => handleContainerHover(false)}
             >
               <Paragraph>Hover over me to see the cursor change!</Paragraph>
+              <Paragraph className="text-sm text-neutral-600 mt-2">
+                Performance mode: <span className="font-mono bg-neutral-100 px-2 py-1 rounded">
+                  {isPerformanceMode ? 'Throttled 60fps' : 'No throttling'}
+                </span>
+              </Paragraph>
             </Card>
           </Card>
 
@@ -212,7 +239,7 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
           <Card
             ref={secondContainerRef}
             title="Second Container"
-            subtitle="This container has its own independent cursor!"
+            subtitle="Independent cursor with smooth animations and offset!"
             hover
             className="cursor-default"
             onMouseEnter={handleContainer2Enter}
@@ -222,8 +249,11 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
               <CustomCursor
                 id="container-2-cursor"
                 containerRef={secondContainerRef}
-                smoothFactor={2}
-                hideNativeCursor={true}
+                smoothness={3}
+                showNativeCursor={false}
+                offset={{ x: 0, y: -10 }}
+                onMove={handleContainer2CursorMove}
+                onVisibilityChange={handleCursorVisibilityChange}
               >
                 <div
                   className={`
@@ -236,7 +266,7 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
             )}
 
             <Card
-              title="Hover Effect"
+              title="Hover Effect Demo"
               shadow="sm"
               padding="md"
               className="cursor-default bg-neutral-50"
@@ -244,7 +274,8 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
               onMouseLeave={() => setHoveredSecond(false)}
             >
               <Paragraph>
-                Watch the cursor scale up when hovering here!
+                Watch the cursor scale up when hovering here! This container uses a slight Y offset 
+                and higher smoothness for a different feel.
               </Paragraph>
             </Card>
           </Card>
@@ -252,4 +283,4 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
       </div>
     );
   }
-);
+); 

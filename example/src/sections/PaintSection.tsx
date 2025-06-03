@@ -8,8 +8,8 @@ export const PaintSection: React.FC = () => {
   const paintRef = useRef(null);
   const [trail, setTrail] = useState<Array<{ x: number; y: number }>>([]);
 
-  const addToTrail = useCallback((x: number, y: number) => {
-    setTrail((prev) => [...prev, { x, y }].slice(-50));
+  const addToTrail = useCallback((position: { x: number; y: number }) => {
+    setTrail((prev) => [...prev, { x: position.x, y: position.y }].slice(-50));
   }, []);
 
   const clearTrail = useCallback(() => {
@@ -29,7 +29,7 @@ export const PaintSection: React.FC = () => {
 
       <CustomCursor
         containerRef={paintRef}
-        smoothFactor={1}
+        smoothness={1}
         onMove={addToTrail}
       >
         <div

@@ -1,20 +1,37 @@
 import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { useMousePosition, useSmoothAnimation } from './hooks';
+import {
+  CursorPosition,
+  CursorOffset,
+  CursorMoveHandler,
+  CursorVisibilityHandler,
+} from './types.js';
 
+// Clean props interface
 export interface CustomCursorProps {
+  // Core Configuration
   id?: string;
+  enabled?: boolean;
+  
+  // Content & Styling
   children?: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
-  offsetX?: number;
-  offsetY?: number;
   zIndex?: number;
-  smoothFactor?: number;
+  
+  // Positioning & Movement
+  offset?: CursorOffset | { x: number; y: number };
+  smoothness?: number; // 0 = instant, higher = smoother
   containerRef?: React.RefObject<HTMLElement>;
-  onMove?: (x: number, y: number) => void;
-  hideNativeCursor?: boolean;
-  onVisibilityChanged?: (isVisible: boolean) => void;
+  
+  // Behavior
+  showNativeCursor?: boolean;
+  throttleMs?: number; // Performance throttling
+  
+  // Event Handlers
+  onMove?: CursorMoveHandler;
+  onVisibilityChange?: CursorVisibilityHandler;
 }
 
 const ANIMATION_DURATION = '0.3s';
@@ -55,7 +72,7 @@ const DevIndicator: React.FC<{
         border: '2px solid red',
         borderRadius: '50%',
         pointerEvents: 'none',
-        zIndex: 9999,
+        zIndex: 10000,
         opacity: 0.5,
         // Center the circle around the cursor
         marginLeft: '-25px',
@@ -65,7 +82,7 @@ const DevIndicator: React.FC<{
   );
 };
 
-// Add this at the top level of the file
+// Global style creation
 const createGlobalStyle = () => `
   body, 
   body * {
@@ -80,21 +97,22 @@ const createGlobalStyle = () => `
 export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
   ({
     id = 'unnamed-cursor',
+    enabled = true,
     children,
     className = '',
     style = {},
-    offsetX = 0,
-    offsetY = 0,
-    zIndex = 9999,
-    smoothFactor = 1,
+    zIndex = 999,
+    offset = { x: 0, y: 0 },
+    smoothness = 1,
     containerRef,
+    showNativeCursor = false,
+    throttleMs = 0,
     onMove,
-    hideNativeCursor = true,
-    onVisibilityChanged,
+    onVisibilityChange,
   }) => {
     const { position, setPosition, targetPosition, isVisible } =
-      useMousePosition(containerRef, offsetX, offsetY);
-    useSmoothAnimation(targetPosition, smoothFactor, setPosition);
+      useMousePosition(containerRef, offset.x, offset.y, throttleMs);
+    useSmoothAnimation(targetPosition, smoothness, setPosition);
 
     const [portalContainer, setPortalContainer] =
       React.useState<HTMLElement | null>(null);
@@ -103,8 +121,17 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       setPortalContainer(getPortalContainer());
       return () => {
         const container = document.getElementById('cursor-container');
-        if (container && !container.children.length) {
-          document.body.removeChild(container);
+        if (container && container.children.length === 0) {
+          try {
+            if (container.parentNode) {
+              container.parentNode.removeChild(container);
+            }
+          } catch (e) {
+            // Ignore cleanup errors in tests
+            if (process.env.NODE_ENV !== 'test') {
+              console.warn('Portal container cleanup failed:', e);
+            }
+          }
         }
       };
     }, []);
@@ -135,20 +162,33 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       return () => {
         const style = document.getElementById(styleId);
         if (style) {
-          style.remove();
+          try {
+            style.remove();
+          } catch (e) {
+            // Ignore cleanup errors in tests
+            if (process.env.NODE_ENV !== 'test') {
+              console.warn('Style cleanup failed:', e);
+            }
+          }
         }
       };
     }, [id]);
 
+    // Handle move callback
     React.useEffect(() => {
       if (position.x !== null && position.y !== null) {
-        onMove?.(position.x, position.y);
+        const cursorPosition: CursorPosition = { x: position.x, y: position.y };
+        onMove?.(cursorPosition);
       }
     }, [position, onMove]);
 
+    // Handle visibility callback
     React.useEffect(() => {
-      onVisibilityChanged?.(isVisible);
-    }, [isVisible, onVisibilityChanged]);
+      const actuallyVisible = enabled && isVisible;
+      const reason: 'container' | 'disabled' = !enabled ? 'disabled' : 'container';
+
+      onVisibilityChange?.(actuallyVisible, reason);
+    }, [enabled, isVisible, onVisibilityChange]);
 
     const cursorStyle = React.useMemo(
       () =>
@@ -169,28 +209,17 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       [position.x, position.y, zIndex, style]
     );
 
-    // console.log(`${id} state:`, {
-    //   isVisible,
-    //   position,
-    //   targetPosition,
-    //   portalContainer: !!portalContainer,
-    //   shouldRender: !(
-    //     !isVisible ||
-    //     position.x === null ||
-    //     position.y === null ||
-    //     !portalContainer
-    //   ),
-    // });
-    if (
-      !isVisible ||
-      position.x === null ||
-      position.y === null ||
-      !portalContainer
-    )
-      return null;
+    const shouldRender = enabled && 
+                        isVisible && 
+                        position.x !== null && 
+                        position.y !== null && 
+                        portalContainer;
+
+    if (!shouldRender) return null;
+
     return (
       <>
-        {hideNativeCursor && (
+        {!showNativeCursor && (
           <style id={`cursor-style-global-${id}`}>{createGlobalStyle()}</style>
         )}
         {createPortal(

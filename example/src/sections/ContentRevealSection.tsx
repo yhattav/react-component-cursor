@@ -5,16 +5,16 @@ import { Card, Typography } from '../components/ui';
 const { Title, Paragraph } = Typography;
 
 export const ContentRevealSection: React.FC = () => {
-  const revealRef = useRef(null);
+  const revealRef = useRef<HTMLDivElement>(null);
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
 
-  const updateCursorPos = useCallback((x: number, y: number) => {
+  const updateCursorPos = useCallback((position: { x: number; y: number }) => {
     const containerRect = revealRef.current?.getBoundingClientRect();
     const offsetX = containerRect?.left || 0;
     const offsetY = containerRect?.top || 0;
 
-    const relativeX = x - offsetX;
-    const relativeY = y - offsetY;
+    const relativeX = position.x - offsetX;
+    const relativeY = position.y - offsetY;
 
     setCursorPos({ x: relativeX, y: relativeY });
   }, []);
@@ -55,7 +55,7 @@ export const ContentRevealSection: React.FC = () => {
 
       <CustomCursor
         containerRef={revealRef}
-        smoothFactor={2}
+        smoothness={2}
         onMove={updateCursorPos}
       >
         <div
