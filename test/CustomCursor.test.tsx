@@ -1,8 +1,15 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type { CursorPosition } from '../src';
 import { CustomCursor } from '../src';
+import * as hooks from '../src/hooks';
+
+// Mock createPortal to render directly instead of using portals
+jest.mock('react-dom', () => ({
+  ...jest.requireActual('react-dom'),
+  createPortal: (children: React.ReactNode) => children,
+}));
 
 // Mock the hooks to control the test environment
 jest.mock('../src/hooks', () => ({
@@ -15,136 +22,186 @@ jest.mock('../src/hooks', () => ({
   useSmoothAnimation: jest.fn(),
 }));
 
-// Simple test component wrapper that doesn't use portals
-const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return <div data-testid="test-wrapper">{children}</div>;
-};
+// Get references to mocked functions
+const mockUseMousePosition = hooks.useMousePosition as jest.MockedFunction<typeof hooks.useMousePosition>;
+const mockUseSmoothAnimation = hooks.useSmoothAnimation as jest.MockedFunction<typeof hooks.useSmoothAnimation>;
 
 describe('CustomCursor', () => {
-  // Suppress console errors for DOM cleanup during tests
-  beforeAll(() => {
-    const originalError = console.error;
-    jest.spyOn(console, 'error').mockImplementation((message: any, ...args: any[]) => {
-      if (
-        typeof message === 'string' &&
-        (message.includes('NotFoundError') || 
-         message.includes('The node to be removed is not a child') ||
-         message.includes('Consider adding an error boundary'))
-      ) {
-        return; // Suppress these specific errors
-      }
-      originalError(message, ...args);
+  beforeEach(() => {
+    jest.clearAllMocks();
+    
+    // Reset mock to default values
+    mockUseMousePosition.mockReturnValue({
+      position: { x: 100, y: 100 },
+      setPosition: jest.fn(),
+      targetPosition: { x: 100, y: 100 },
+      isVisible: true,
     });
   });
 
-  afterAll(() => {
-    jest.restoreAllMocks();
+  it('renders the cursor with children', () => {
+    render(<CustomCursor>Test cursor</CustomCursor>);
+    expect(screen.getByText('Test cursor')).toBeInTheDocument();
   });
 
-  it('renders the component without crashing', () => {
-    const { container } = render(
-      <TestWrapper>
-        <CustomCursor>Test cursor</CustomCursor>
-      </TestWrapper>
-    );
-    expect(container).toBeInTheDocument();
+  it('applies custom styles correctly', () => {
+    const customStyle = { backgroundColor: 'red', fontSize: '20px' };
+    render(<CustomCursor style={customStyle}>Styled cursor</CustomCursor>);
+
+    const cursor = screen.getByText('Styled cursor');
+    expect(cursor).toHaveStyle('background-color: red');
+    expect(cursor).toHaveStyle('font-size: 20px');
+    expect(cursor).toHaveStyle('position: fixed');
+    expect(cursor).toHaveStyle('transform: translate(100px, 100px)');
   });
 
-  it('accepts all expected props without errors', () => {
+  it('applies custom className', () => {
+    render(<CustomCursor className="custom-class">Classed cursor</CustomCursor>);
+    const cursor = screen.getByText('Classed cursor');
+    expect(cursor).toHaveClass('custom-class');
+  });
+
+  it('sets correct ID', () => {
+    render(<CustomCursor id="test-cursor">ID cursor</CustomCursor>);
+    const cursor = screen.getByText('ID cursor');
+    expect(cursor).toHaveAttribute('id', 'custom-cursor-test-cursor');
+  });
+
+  it('sets correct zIndex', () => {
+    render(<CustomCursor zIndex={1000}>Z-index cursor</CustomCursor>);
+    const cursor = screen.getByText('Z-index cursor');
+    expect(cursor).toHaveStyle('z-index: 1000');
+  });
+
+  it('calls onMove callback with correct signature', () => {
     const onMove = jest.fn<void, [CursorPosition]>();
+    render(<CustomCursor onMove={onMove}>Callback cursor</CustomCursor>);
+    
+    // Verify the callback was called with the correct signature
+    expect(onMove).toHaveBeenCalledWith({ x: 100, y: 100 });
+  });
+
+  it('calls onVisibilityChange callback', () => {
     const onVisibilityChange = jest.fn<void, [boolean, 'container' | 'disabled']>();
+    render(<CustomCursor onVisibilityChange={onVisibilityChange}>Visibility cursor</CustomCursor>);
     
-    const { container } = render(
-      <TestWrapper>
-        <CustomCursor
-          id="test-cursor"
-          enabled={true}
-          className="custom-class"
-          style={{ backgroundColor: 'red' }}
-          zIndex={1000}
-          offset={{ x: 10, y: 20 }}
-          smoothness={2}
-          showNativeCursor={true}
-          throttleMs={16}
-          onMove={onMove}
-          onVisibilityChange={onVisibilityChange}
-        >
-          Test cursor content
-        </CustomCursor>
-      </TestWrapper>
-    );
-    
-    expect(container).toBeInTheDocument();
+    // Verify the callback was called with the correct signature
+    expect(onVisibilityChange).toHaveBeenCalledWith(true, 'container');
   });
 
-  it('can be disabled', () => {
-    const { container } = render(
-      <TestWrapper>
-        <CustomCursor enabled={false}>Disabled cursor</CustomCursor>
-      </TestWrapper>
-    );
+  it('does not render when disabled', () => {
+    render(<CustomCursor enabled={false}>Disabled cursor</CustomCursor>);
     
-    expect(container).toBeInTheDocument();
+    // When disabled, the component should return null
+    expect(screen.queryByText('Disabled cursor')).not.toBeInTheDocument();
   });
 
-  it('accepts different offset formats', () => {
-    const { container } = render(
-      <TestWrapper>
-        <CustomCursor offset={{ x: 5, y: 10 }}>Offset cursor</CustomCursor>
-      </TestWrapper>
-    );
+  it('applies offset correctly to transform', () => {
+    // Mock position with offset already applied by the hook
+    mockUseMousePosition.mockReturnValue({
+      position: { x: 110, y: 120 }, // 100 + 10, 100 + 20
+      setPosition: jest.fn(),
+      targetPosition: { x: 110, y: 120 },
+      isVisible: true,
+    });
+
+    render(<CustomCursor offset={{ x: 10, y: 20 }}>Offset cursor</CustomCursor>);
     
-    expect(container).toBeInTheDocument();
+    const cursor = screen.getByText('Offset cursor');
+    expect(cursor).toHaveStyle('transform: translate(110px, 120px)');
   });
 
-  it('works with different smoothness values', () => {
-    const { container } = render(
-      <TestWrapper>
-        <CustomCursor smoothness={0.5}>Smooth cursor</CustomCursor>
-      </TestWrapper>
-    );
+  it('applies CSS custom properties correctly', () => {
+    render(<CustomCursor>CSS variables cursor</CustomCursor>);
     
-    expect(container).toBeInTheDocument();
+    const cursor = screen.getByText('CSS variables cursor');
+    expect(cursor).toHaveStyle('--cursor-x: 100px');
+    expect(cursor).toHaveStyle('--cursor-y: 100px');
   });
 
-  it('works with throttling', () => {
-    const { container } = render(
-      <TestWrapper>
-        <CustomCursor throttleMs={100}>Throttled cursor</CustomCursor>
-      </TestWrapper>
-    );
-    
-    expect(container).toBeInTheDocument();
-  });
-
-  it('accepts callback functions', () => {
-    const onMove = jest.fn();
-    const onVisibilityChange = jest.fn();
-    
-    const { container } = render(
-      <TestWrapper>
-        <CustomCursor onMove={onMove} onVisibilityChange={onVisibilityChange}>
-          Callback cursor
-        </CustomCursor>
-      </TestWrapper>
-    );
-    
-    expect(container).toBeInTheDocument();
-  });
-
-  it('renders with container ref', () => {
+  it('passes correct props to useMousePosition hook', () => {
     const containerRef = React.createRef<HTMLDivElement>();
     
-    const { container } = render(
-      <TestWrapper>
-        <div ref={containerRef}>
-          <CustomCursor containerRef={containerRef}>
-            Container cursor
-          </CustomCursor>
-        </div>
-      </TestWrapper>
+    render(
+      <div ref={containerRef}>
+        <CustomCursor 
+          containerRef={containerRef} 
+          offset={{ x: 5, y: 10 }}
+          throttleMs={16}
+        >
+          Hook test cursor
+        </CustomCursor>
+      </div>
     );
     
-    expect(container).toBeInTheDocument();
+    // Verify useMousePosition was called with at least the expected parameters
+    expect(mockUseMousePosition).toHaveBeenCalledWith(
+      containerRef,
+      5,
+      10,
+      16
+    );
+  });
+
+  it('passes correct props to useSmoothAnimation hook', () => {
+    render(<CustomCursor smoothness={2}>Animation cursor</CustomCursor>);
+    
+    // Verify useSmoothAnimation was called with at least the expected parameters
+    expect(mockUseSmoothAnimation).toHaveBeenCalledWith(
+      { x: 100, y: 100 },
+      2,
+      expect.any(Function)
+    );
+  });
+
+  it('handles disabled prop correctly', () => {
+    const { rerender } = render(<CustomCursor enabled={true}>Enabled cursor</CustomCursor>);
+    expect(screen.getByText('Enabled cursor')).toBeInTheDocument();
+    
+    rerender(<CustomCursor enabled={false}>Enabled cursor</CustomCursor>);
+    expect(screen.queryByText('Enabled cursor')).not.toBeInTheDocument();
+  });
+
+  it('handles showNativeCursor prop correctly', () => {
+    const { rerender } = render(<CustomCursor showNativeCursor={false}>Cursor 1</CustomCursor>);
+    expect(screen.getByText('Cursor 1')).toBeInTheDocument();
+    
+    rerender(<CustomCursor showNativeCursor={true}>Cursor 2</CustomCursor>);
+    expect(screen.getByText('Cursor 2')).toBeInTheDocument();
+  });
+
+  it('handles different children types', () => {
+    const { rerender } = render(<CustomCursor>Text content</CustomCursor>);
+    expect(screen.getByText('Text content')).toBeInTheDocument();
+    
+    rerender(
+      <CustomCursor>
+        <div data-testid="custom-element">Custom element</div>
+      </CustomCursor>
+    );
+    expect(screen.getByTestId('custom-element')).toBeInTheDocument();
+    
+    rerender(<CustomCursor>{null}</CustomCursor>);
+    // Should render the cursor container even with null children
+    expect(document.querySelector('[style*="position: fixed"]')).toBeInTheDocument();
+  });
+
+  it('merges styles correctly', () => {
+    const customStyle = { 
+      backgroundColor: 'blue',
+      border: '2px solid red',
+      padding: '10px'
+    };
+    
+    render(<CustomCursor style={customStyle}>Merged styles cursor</CustomCursor>);
+    
+    const cursor = screen.getByText('Merged styles cursor');
+    // Should have both custom styles and default positioning styles
+    expect(cursor).toHaveStyle('background-color: blue');
+    expect(cursor).toHaveStyle('border: 2px solid red');
+    expect(cursor).toHaveStyle('padding: 10px');
+    expect(cursor).toHaveStyle('position: fixed');
+    expect(cursor).toHaveStyle('transform: translate(100px, 100px)');
+    expect(cursor).toHaveStyle('pointer-events: none');
   });
 });
