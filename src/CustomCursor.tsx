@@ -1,24 +1,62 @@
 import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { useMousePosition, useSmoothAnimation } from './hooks';
+import {
+  CursorPosition,
+  CursorOffset,
+  CursorMoveHandler,
+  CursorVisibilityHandler,
+} from './types';
 
+// Simplified props interface
 export interface CustomCursorProps {
+  // Core Configuration
   id?: string;
+  enabled?: boolean;
+  
+  // Content & Styling
   children?: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
-  offsetX?: number;
-  offsetY?: number;
   zIndex?: number;
-  smoothFactor?: number;
+  
+  // Positioning & Movement
+  offset?: CursorOffset | { x: number; y: number };
+  smoothness?: number; // 0 = instant, higher = smoother
   containerRef?: React.RefObject<HTMLElement>;
-  onMove?: (x: number, y: number) => void;
+  
+  // Behavior
+  showNativeCursor?: boolean;
+  throttleMs?: number; // Performance throttling
+  
+  // Event Handlers
+  onMove?: CursorMoveHandler;
+  onVisibilityChange?: CursorVisibilityHandler;
+
+  // Legacy props (deprecated but supported)
+  /** @deprecated Use offset.x instead */
+  offsetX?: number;
+  /** @deprecated Use offset.y instead */
+  offsetY?: number;
+  /** @deprecated Use smoothness instead */
+  smoothFactor?: number;
+  /** @deprecated Use showNativeCursor={false} instead */
   hideNativeCursor?: boolean;
+  /** @deprecated Use onVisibilityChange instead */
   onVisibilityChanged?: (isVisible: boolean) => void;
 }
 
 const ANIMATION_DURATION = '0.3s';
 const ANIMATION_NAME = 'cursorFadeIn';
+
+// Utility to show deprecation warnings
+const warnDeprecated = (oldProp: string, newProp: string) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.warn(
+      `react-component-cursor: "${oldProp}" is deprecated. Use "${newProp}" instead.`
+    );
+  }
+};
 
 // Create a memoized portal target
 const getPortalContainer = () => {
@@ -55,7 +93,7 @@ const DevIndicator: React.FC<{
         border: '2px solid red',
         borderRadius: '50%',
         pointerEvents: 'none',
-        zIndex: 9999,
+        zIndex: 10000,
         opacity: 0.5,
         // Center the circle around the cursor
         marginLeft: '-25px',
@@ -65,7 +103,7 @@ const DevIndicator: React.FC<{
   );
 };
 
-// Add this at the top level of the file
+// Global style creation
 const createGlobalStyle = () => `
   body, 
   body * {
@@ -79,22 +117,52 @@ const createGlobalStyle = () => `
 
 export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
   ({
+    // New API props with defaults
     id = 'unnamed-cursor',
+    enabled = true,
     children,
     className = '',
     style = {},
-    offsetX = 0,
-    offsetY = 0,
-    zIndex = 9999,
-    smoothFactor = 1,
+    zIndex = 999, // Lower default zIndex
+    offset,
+    smoothness,
     containerRef,
+    showNativeCursor = false, // Default to false (hide native cursor)
+    throttleMs = 0,
     onMove,
-    hideNativeCursor = true,
+    onVisibilityChange,
+    
+    // Legacy props (deprecated)
+    offsetX,
+    offsetY,
+    smoothFactor,
+    hideNativeCursor,
     onVisibilityChanged,
   }) => {
+    // Handle legacy props with warnings
+    React.useEffect(() => {
+      if (offsetX !== undefined) warnDeprecated('offsetX', 'offset.x');
+      if (offsetY !== undefined) warnDeprecated('offsetY', 'offset.y');
+      if (smoothFactor !== undefined) warnDeprecated('smoothFactor', 'smoothness');
+      if (hideNativeCursor !== undefined) warnDeprecated('hideNativeCursor', 'showNativeCursor');
+      if (onVisibilityChanged !== undefined) warnDeprecated('onVisibilityChanged', 'onVisibilityChange');
+    }, [offsetX, offsetY, smoothFactor, hideNativeCursor, onVisibilityChanged]);
+
+    // Resolve props (new API takes precedence over legacy)
+    const resolvedOffset = React.useMemo(() => {
+      if (offset) return offset;
+      return {
+        x: offsetX ?? 0,
+        y: offsetY ?? 0,
+      };
+    }, [offset, offsetX, offsetY]);
+
+    const resolvedSmoothness = smoothness ?? smoothFactor ?? 1;
+    const resolvedShowNativeCursor = showNativeCursor ?? (hideNativeCursor !== undefined ? !hideNativeCursor : false);
+
     const { position, setPosition, targetPosition, isVisible } =
-      useMousePosition(containerRef, offsetX, offsetY);
-    useSmoothAnimation(targetPosition, smoothFactor, setPosition);
+      useMousePosition(containerRef, resolvedOffset.x, resolvedOffset.y, throttleMs);
+    useSmoothAnimation(targetPosition, resolvedSmoothness, setPosition);
 
     const [portalContainer, setPortalContainer] =
       React.useState<HTMLElement | null>(null);
@@ -140,15 +208,23 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       };
     }, [id]);
 
+    // Handle move callback with new signature (backward compatible)
     React.useEffect(() => {
       if (position.x !== null && position.y !== null) {
-        onMove?.(position.x, position.y);
+        const cursorPosition: CursorPosition = { x: position.x, y: position.y };
+        onMove?.(cursorPosition);
       }
     }, [position, onMove]);
 
+    // Handle visibility callback with new signature and legacy support
     React.useEffect(() => {
-      onVisibilityChanged?.(isVisible);
-    }, [isVisible, onVisibilityChanged]);
+      const actuallyVisible = enabled && isVisible;
+      const reason: 'container' | 'disabled' = !enabled ? 'disabled' : 'container';
+
+      onVisibilityChange?.(actuallyVisible, reason);
+      // Legacy callback support
+      onVisibilityChanged?.(actuallyVisible);
+    }, [enabled, isVisible, onVisibilityChange, onVisibilityChanged]);
 
     const cursorStyle = React.useMemo(
       () =>
@@ -169,28 +245,17 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       [position.x, position.y, zIndex, style]
     );
 
-    // console.log(`${id} state:`, {
-    //   isVisible,
-    //   position,
-    //   targetPosition,
-    //   portalContainer: !!portalContainer,
-    //   shouldRender: !(
-    //     !isVisible ||
-    //     position.x === null ||
-    //     position.y === null ||
-    //     !portalContainer
-    //   ),
-    // });
-    if (
-      !isVisible ||
-      position.x === null ||
-      position.y === null ||
-      !portalContainer
-    )
-      return null;
+    const shouldRender = enabled && 
+                        isVisible && 
+                        position.x !== null && 
+                        position.y !== null && 
+                        portalContainer;
+
+    if (!shouldRender) return null;
+
     return (
       <>
-        {hideNativeCursor && (
+        {!resolvedShowNativeCursor && (
           <style id={`cursor-style-global-${id}`}>{createGlobalStyle()}</style>
         )}
         {createPortal(

@@ -1,18 +1,43 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { Position } from '../types';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { NullablePosition } from '../types';
+
+// Throttle utility function
+const throttle = <T extends (...args: never[]) => void>(
+  func: T,
+  delay: number
+): T => {
+  let timeoutId: NodeJS.Timeout | null = null;
+  let lastExecTime = 0;
+  
+  return ((...args: Parameters<T>) => {
+    const currentTime = Date.now();
+    
+    if (currentTime - lastExecTime > delay) {
+      func(...args);
+      lastExecTime = currentTime;
+    } else {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func(...args);
+        lastExecTime = Date.now();
+      }, delay - (currentTime - lastExecTime));
+    }
+  }) as T;
+};
 
 export function useMousePosition(
   containerRef: React.RefObject<HTMLElement> | undefined,
   offsetX: number,
-  offsetY: number
+  offsetY: number,
+  throttleMs = 0
 ): {
-  position: Position;
-  setPosition: React.Dispatch<React.SetStateAction<Position>>;
-  targetPosition: Position;
+  position: NullablePosition;
+  setPosition: React.Dispatch<React.SetStateAction<NullablePosition>>;
+  targetPosition: NullablePosition;
   isVisible: boolean;
 } {
-  const [position, setPosition] = useState<Position>({ x: null, y: null });
-  const [targetPosition, setTargetPosition] = useState<Position>({
+  const [position, setPosition] = useState<NullablePosition>({ x: null, y: null });
+  const [targetPosition, setTargetPosition] = useState<NullablePosition>({
     x: null,
     y: null,
   });
@@ -56,31 +81,13 @@ export function useMousePosition(
         }
       }
     },
-    [containerRef, offsetX, offsetY]
+    [containerRef, offsetX, offsetY, targetPosition.x, targetPosition.y]
   );
-  // useEffect(() => {
-  //   console.log('targetPosition', targetPosition);
-  // }, [targetPosition]);
 
-  // useEffect(() => {
-  //   console.log('position', position);
-  // }, [position]);
-
-  // useEffect(() => {
-  //   console.log('isVisible', isVisible);
-  // }, [isVisible]);
-
-  // useEffect(() => {
-  //   console.log('offsetX', offsetX);
-  // }, [offsetX]);
-
-  // useEffect(() => {
-  //   console.log('offsetY', offsetY);
-  // }, [offsetY]);
-
-  // useEffect(() => {
-  //   console.log('containerRef', containerRef);
-  // }, [containerRef]);
+  // Create throttled version if needed
+  const throttledUpdateTargetPosition = React.useMemo(() => {
+    return throttleMs > 0 ? throttle(updateTargetPosition, throttleMs) : updateTargetPosition;
+  }, [updateTargetPosition, throttleMs]);
 
   useEffect(() => {
     const handleMouseLeave = () => {
@@ -96,20 +103,22 @@ export function useMousePosition(
     };
 
     const element = containerRef?.current || document;
+    
+    // Always listen to mousemove (simplified)
     element.addEventListener(
       'mousemove',
-      updateTargetPosition as EventListener
+      throttledUpdateTargetPosition as EventListener
     );
 
     if (containerRef?.current) {
       containerRef.current.addEventListener('mouseleave', handleMouseLeave);
-      containerRef.current.addEventListener('mouseenter', handleMouseEnter);
+      containerRef.current.addEventListener('mouseenter', handleMouseEnter as EventListener);
     }
 
     return () => {
       element.removeEventListener(
         'mousemove',
-        updateTargetPosition as EventListener
+        throttledUpdateTargetPosition as EventListener
       );
       if (containerRef?.current) {
         containerRef.current.removeEventListener(
@@ -118,18 +127,18 @@ export function useMousePosition(
         );
         containerRef.current.removeEventListener(
           'mouseenter',
-          handleMouseEnter
+          handleMouseEnter as EventListener
         );
       }
     };
-  }, [containerRef, updateTargetPosition]);
+  }, [containerRef, throttledUpdateTargetPosition]);
 
   // Initialize position when we get the first valid targetPosition
   useEffect(() => {
     if (position.x === null && position.y === null) {
       setPosition(targetPosition);
     }
-  }, [targetPosition]);
+  }, [targetPosition, position.x, position.y]);
 
   return { position, setPosition, targetPosition, isVisible };
 }

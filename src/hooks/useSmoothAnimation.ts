@@ -1,16 +1,16 @@
 import { useEffect, useCallback } from 'react';
-import { Position } from '../types';
+import { NullablePosition } from '../types';
 
 const SMOOTHING_THRESHOLD = 0.1;
 
 export function useSmoothAnimation(
-  targetPosition: Position,
+  targetPosition: NullablePosition,
   smoothFactor: number,
-  setPosition: React.Dispatch<React.SetStateAction<Position>>
+  setPosition: React.Dispatch<React.SetStateAction<NullablePosition>>
 ): void {
   // Memoize the smoothing calculation
   const calculateNewPosition = useCallback(
-    (currentPosition: Position) => {
+    (currentPosition: NullablePosition) => {
       if (
         currentPosition.x === null ||
         currentPosition.y === null ||

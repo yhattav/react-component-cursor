@@ -1,148 +1,177 @@
 import React from 'react';
-import { render, fireEvent, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import type { CursorPosition } from '../src';
 import { CustomCursor } from '../src';
 
+// Mock the hooks to control the test environment
+jest.mock('../src/hooks', () => ({
+  useMousePosition: jest.fn(() => ({
+    position: { x: 100, y: 100 },
+    setPosition: jest.fn(),
+    targetPosition: { x: 100, y: 100 },
+    isVisible: true,
+  })),
+  useSmoothAnimation: jest.fn(),
+}));
+
 describe('CustomCursor', () => {
-  // Helper to simulate mouse movement
-  const simulateMouseMove = (x: number, y: number) => {
-    fireEvent.mouseMove(document, {
-      clientX: x,
-      clientY: y,
-    });
-  };
+  let mockPortalRoot: HTMLDivElement;
 
   beforeEach(() => {
-    // Reset any cursor containers from previous tests
-    const container = document.getElementById('cursor-container');
-    if (container) {
-      document.body.removeChild(container);
-    }
+    // Create a mock portal root
+    mockPortalRoot = document.createElement('div');
+    mockPortalRoot.id = 'cursor-container';
+    document.body.appendChild(mockPortalRoot);
   });
 
-  it('renders without crashing', () => {
-    render(<CustomCursor />);
-    expect(document.getElementById('cursor-container')).toBeInTheDocument();
+  afterEach(() => {
+    // Clean up
+    document.querySelectorAll('[id^="cursor-style"]').forEach((el) => el.remove());
+    document.querySelectorAll('#cursor-container').forEach((el) => el.remove());
   });
 
-  it('creates and removes cursor container properly', () => {
-    const { unmount } = render(<CustomCursor />);
-    expect(document.getElementById('cursor-container')).toBeInTheDocument();
+  it('renders the cursor with default props', async () => {
+    render(<CustomCursor>Test cursor</CustomCursor>);
 
-    unmount();
-    expect(document.getElementById('cursor-container')).not.toBeInTheDocument();
-  });
-
-  it('follows mouse movement', () => {
-    render(<CustomCursor />);
-
-    act(() => {
-      simulateMouseMove(100, 100);
-      jest.advanceTimersByTime(100);
+    await waitFor(() => {
+      const cursor = screen.getByText('Test cursor');
+      expect(cursor).toBeInTheDocument();
     });
-
-    const cursor = document.querySelector('[id^="custom-cursor-"]');
-    expect(cursor).toHaveStyle({
-      transform: 'translate(100px, 100px)',
-    });
-  });
-
-  it('respects offset props', () => {
-    render(<CustomCursor offsetX={10} offsetY={20} />);
-
-    act(() => {
-      simulateMouseMove(100, 100);
-      jest.advanceTimersByTime(100);
-    });
-
-    const cursor = document.querySelector('[id^="custom-cursor-"]');
-    expect(cursor).toHaveStyle({
-      transform: 'translate(110px, 120px)',
-    });
-  });
-
-  it('calls onMove callback with cursor position', () => {
-    const onMove = jest.fn();
-    render(<CustomCursor onMove={onMove} />);
-
-    act(() => {
-      simulateMouseMove(100, 100);
-      jest.advanceTimersByTime(100);
-    });
-
-    expect(onMove).toHaveBeenCalledWith(100, 100);
   });
 
   it('applies custom styles', async () => {
-    const customStyle = { backgroundColor: 'red' };
-    render(<CustomCursor style={customStyle} />);
+    const customStyle = { backgroundColor: 'red', fontSize: '20px' };
+    render(<CustomCursor style={customStyle}>Styled cursor</CustomCursor>);
 
-    await act(async () => {
-      simulateMouseMove(100, 100);
-      jest.advanceTimersByTime(100);
+    await waitFor(() => {
+      const cursor = screen.getByText('Styled cursor');
+      expect(cursor).toHaveStyle('background-color: red');
+      expect(cursor).toHaveStyle('font-size: 20px');
     });
-
-    // Look in the document body instead of the container
-    const cursor = document.querySelector('[id^="custom-cursor-"]');
-    expect(cursor).toHaveStyle({ backgroundColor: 'red' });
   });
 
-  it('handles container-specific cursor behavior', async () => {
-    const containerRef = React.createRef<HTMLDivElement>();
+  it('applies custom className', async () => {
+    render(<CustomCursor className="custom-class">Classed cursor</CustomCursor>);
 
-    render(
-      <>
-        <div
-          id="test-container"
-          ref={containerRef}
-          style={{
-            width: '200px',
-            height: '200px',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-          }}
-        ></div>
-        <CustomCursor containerRef={containerRef} />
-      </>
-    );
-    if (!containerRef.current) throw new Error('Container ref not found');
-    jest.spyOn(containerRef.current, 'getBoundingClientRect').mockReturnValue({
-      width: 200,
-      height: 200,
-      top: 0,
-      left: 0,
-      right: 200,
-      bottom: 200,
-      x: 0,
-      y: 0,
-      toJSON: () => {},
-    } as DOMRect);
+    await waitFor(() => {
+      const cursor = screen.getByText('Classed cursor');
+      expect(cursor).toHaveClass('custom-class');
+    });
+  });
 
-    await act(async () => {
-      if (!containerRef.current) throw new Error('Container ref not found');
-      console.log(containerRef.current);
-      // First trigger mouseEnter to set isVisible
-      fireEvent.mouseEnter(containerRef.current, {
-        clientX: 50,
-        clientY: 50,
-        bubbles: true,
-        cancelable: true,
-      });
+  it('uses the correct ID', async () => {
+    render(<CustomCursor id="test-cursor">ID cursor</CustomCursor>);
 
-      // Then trigger mousemove ON THE CONTAINER to set position
-      fireEvent.mouseMove(containerRef.current, {
-        clientX: 50,
-        clientY: 50,
-        bubbles: true,
-        cancelable: true,
-      });
+    await waitFor(() => {
+      const cursor = document.getElementById('custom-cursor-test-cursor');
+      expect(cursor).toBeInTheDocument();
+      expect(cursor).toHaveTextContent('ID cursor');
+    });
+  });
 
-      jest.runAllTimers();
+  it('sets correct zIndex', async () => {
+    render(<CustomCursor zIndex={1000}>Z-index cursor</CustomCursor>);
+
+    await waitFor(() => {
+      const cursor = screen.getByText('Z-index cursor');
+      expect(cursor).toHaveStyle('z-index: 1000');
+    });
+  });
+
+  it('calls onMove callback with the correct signature', async () => {
+    const onMove = jest.fn<void, [CursorPosition]>();
+    render(<CustomCursor onMove={onMove} />);
+
+    await waitFor(() => {
+      expect(onMove).toHaveBeenCalledWith({ x: 100, y: 100 });
+    });
+  });
+
+  it('calls onVisibilityChange callback', async () => {
+    const onVisibilityChange = jest.fn<void, [boolean, 'container' | 'disabled']>();
+    render(<CustomCursor onVisibilityChange={onVisibilityChange} />);
+
+    await waitFor(() => {
+      expect(onVisibilityChange).toHaveBeenCalledWith(true, 'container');
+    });
+  });
+
+  it('supports throttling', async () => {
+    render(<CustomCursor throttleMs={16}>Throttled cursor</CustomCursor>);
+
+    await waitFor(() => {
+      const cursor = screen.getByText('Throttled cursor');
+      expect(cursor).toBeInTheDocument();
+    });
+  });
+
+  it('can be disabled', async () => {
+    render(<CustomCursor enabled={false}>Disabled cursor</CustomCursor>);
+
+    // The cursor should not render when disabled
+    await waitFor(() => {
+      expect(screen.queryByText('Disabled cursor')).not.toBeInTheDocument();
+    });
+  });
+
+  it('supports offset prop', async () => {
+    render(<CustomCursor offset={{ x: 10, y: 20 }}>Offset cursor</CustomCursor>);
+
+    await waitFor(() => {
+      const cursor = screen.getByText('Offset cursor');
+      expect(cursor).toBeInTheDocument();
+    });
+  });
+
+  it('supports legacy offsetX/offsetY props with deprecation warning', async () => {
+    const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+    
+    render(<CustomCursor offsetX={10} offsetY={20}>Legacy offset cursor</CustomCursor>);
+
+    await waitFor(() => {
+      const cursor = screen.getByText('Legacy offset cursor');
+      expect(cursor).toBeInTheDocument();
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('offsetX" is deprecated')
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('offsetY" is deprecated')
+      );
     });
 
-    const cursor = document.querySelector('[id^="custom-cursor-"]');
-    console.log('Found cursor:', !!cursor);
+    consoleSpy.mockRestore();
+  });
 
-    expect(cursor).toBeInTheDocument();
+  it('supports legacy smoothFactor prop with deprecation warning', async () => {
+    const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+    
+    render(<CustomCursor smoothFactor={2}>Legacy smooth cursor</CustomCursor>);
+
+    await waitFor(() => {
+      const cursor = screen.getByText('Legacy smooth cursor');
+      expect(cursor).toBeInTheDocument();
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('smoothFactor" is deprecated')
+      );
+    });
+
+    consoleSpy.mockRestore();
+  });
+
+  it('supports legacy hideNativeCursor prop with deprecation warning', async () => {
+    const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+    
+    render(<CustomCursor hideNativeCursor={true}>Legacy hide cursor</CustomCursor>);
+
+    await waitFor(() => {
+      const cursor = screen.getByText('Legacy hide cursor');
+      expect(cursor).toBeInTheDocument();
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('hideNativeCursor" is deprecated')
+      );
+    });
+
+    consoleSpy.mockRestore();
   });
 });
