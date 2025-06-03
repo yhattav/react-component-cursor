@@ -209,7 +209,7 @@ export const GallerySection: React.FC<GallerySectionProps> = React.memo(
           containerRef={
             activeContainer === 'expanded' ? expandedContainerRef : containerRef
           }
-          smoothFactor={2}
+          smoothness={2}
         >
           {renderCursorContent()}
         </CustomCursor>

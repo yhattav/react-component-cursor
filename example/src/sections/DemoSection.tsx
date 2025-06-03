@@ -44,6 +44,10 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
       setCursor1Position({ x: position.x, y: position.y });
     }, []);
 
+    const handleContainer2CursorMove = useCallback((position: CursorPosition) => {
+      console.log('Container 2 cursor position:', position);
+    }, []);
+
     const handleCursorVisibilityChange = useCallback((isVisible: boolean, reason: 'container' | 'disabled') => {
       console.log('Cursor visibility changed:', isVisible, 'reason:', reason);
     }, []);
@@ -135,8 +139,8 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
           <Title level={1}>Custom Cursor Component Demo</Title>
           <Paragraph className="text-lg mt-4">
             Explore the possibilities of using any React component as a custom
-            cursor! This demo showcases different cursor modes with the
-            simplified, user-friendly API.
+            cursor! This demo showcases different cursor modes with clean,
+            simple API that's easy to use.
           </Paragraph>
         </div>
 
@@ -193,8 +197,8 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
           {/* First Container */}
           <Card
             ref={mainContainerRef}
-            title="First Container (Simplified API)"
-            subtitle="Clean, simple API that's easy to understand!"
+            title="First Container"
+            subtitle="Interactive cursor that follows the global cursor mode!"
             hover
             className="cursor-default"
             onMouseEnter={handleContainer1Enter}
@@ -234,8 +238,8 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
           {/* Second Container */}
           <Card
             ref={secondContainerRef}
-            title="Second Container (Legacy Support)"
-            subtitle="The old API still works with deprecation warnings!"
+            title="Second Container"
+            subtitle="Independent cursor with smooth animations and offset!"
             hover
             className="cursor-default"
             onMouseEnter={handleContainer2Enter}
@@ -245,11 +249,11 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
               <CustomCursor
                 id="container-2-cursor"
                 containerRef={secondContainerRef}
-                // Using legacy props (deprecated but still functional)
-                smoothFactor={3}
-                hideNativeCursor={true}
-                offsetX={0}
-                offsetY={-10}
+                smoothness={3}
+                showNativeCursor={false}
+                offset={{ x: 0, y: -10 }}
+                onMove={handleContainer2CursorMove}
+                onVisibilityChange={handleCursorVisibilityChange}
               >
                 <div
                   className={`
@@ -262,7 +266,7 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
             )}
 
             <Card
-              title="Legacy Props Demo"
+              title="Hover Effect Demo"
               shadow="sm"
               padding="md"
               className="cursor-default bg-neutral-50"
@@ -270,8 +274,8 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
               onMouseLeave={() => setHoveredSecond(false)}
             >
               <Paragraph>
-                This cursor uses the old API props with deprecation warnings (check console).
-                Watch the cursor scale up when hovering here!
+                Watch the cursor scale up when hovering here! This container uses a slight Y offset 
+                and higher smoothness for a different feel.
               </Paragraph>
             </Card>
           </Card>
