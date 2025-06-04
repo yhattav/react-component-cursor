@@ -1,7 +1,7 @@
 ---
-description:
-globs:
-alwaysApply: false
+description: 
+globs: 
+alwaysApply: true
 ---
 # React Component Cursor Library - Project Context
 
@@ -39,7 +39,7 @@ This is a **React component library** that provides a flexible, customizable cur
 2. **Container-Scoped Cursors**: Custom cursors that only work within specific containers
 3. **Smooth Movement**: Configurable smoothing/easing for cursor movement
 4. **Visibility Management**: Handle cursor show/hide states automatically
-5. **Event Callbacks**: `onMove`, `onVisibilityChanged` callbacks for integrations
+5. **Event Callbacks**: `onMove`, `onVisibilityChange` callbacks for integrations
 6. **Performance Optimization**: Minimize re-renders and optimize mouse tracking
 
 ## Development Context
