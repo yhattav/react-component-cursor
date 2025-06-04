@@ -60,7 +60,7 @@ function App() {
 | `showNativeCursor`    | `boolean`                        | `false` | Whether to show the native cursor alongside the custom one |
 | `throttleMs`          | `number`                         | `0`     | Throttle mouse events in milliseconds (0 = no throttling) |
 | `onMove`              | `(position: { x: number, y: number }) => void` | -       | Callback fired on cursor movement                        |
-| `onVisibilityChange` | `(isVisible: boolean, reason: string) => void`   | -       | Callback fired when cursor visibility changes. Reason indicates why ('container', 'disabled', etc.) |
+| `onVisibilityChange` | `(isVisible: boolean, reason: CursorVisibilityReason) => void`   | -       | Callback fired when cursor visibility changes. Reason indicates why ('container', 'disabled', etc.) |
 
 ## Advanced Usage
 
@@ -175,6 +175,7 @@ Example with TypeScript:
 import {
   CustomCursor,
   CustomCursorProps,
+  CursorVisibilityReason,
 } from '@yhattav/react-component-cursor';
 
 // All props are properly typed
@@ -186,7 +187,7 @@ const MyComponent: React.FC = () => {
       containerRef={containerRef}
       smoothness={2}
       onMove={(position: { x: number, y: number }) => console.log(position.x, position.y)}
-      onVisibilityChange={(isVisible: boolean, reason: string) =>
+      onVisibilityChange={(isVisible: boolean, reason: CursorVisibilityReason) =>
         console.log('Visible:', isVisible, 'Reason:', reason)
       }
     >
