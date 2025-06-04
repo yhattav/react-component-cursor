@@ -6,6 +6,7 @@ import {
   CursorOffset,
   CursorMoveHandler,
   CursorVisibilityHandler,
+  CursorVisibilityReason,
 } from './types.js';
 
 // Clean props interface
@@ -252,7 +253,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     // Memoize visibility callback to avoid recreation
     const handleVisibilityChange = React.useCallback(() => {
       const actuallyVisible = enabled && isVisible;
-      const reason: 'container' | 'disabled' = !enabled ? 'disabled' : 'container';
+      const reason: CursorVisibilityReason = !enabled ? 'disabled' : 'container';
       onVisibilityChange?.(actuallyVisible, reason);
     }, [enabled, isVisible, onVisibilityChange]);
 

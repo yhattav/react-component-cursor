@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import type { CursorPosition } from '../src';
+import type { CursorPosition, CursorVisibilityReason } from '../src';
 import { CustomCursor } from '../src';
 import * as hooks from '../src/hooks';
 
@@ -82,7 +82,7 @@ describe('CustomCursor', () => {
   });
 
   it('calls onVisibilityChange callback', () => {
-    const onVisibilityChange = jest.fn<void, [boolean, 'container' | 'disabled']>();
+    const onVisibilityChange = jest.fn<void, [boolean, CursorVisibilityReason]>();
     render(<CustomCursor onVisibilityChange={onVisibilityChange}>Visibility cursor</CustomCursor>);
     
     // Verify the callback was called with the correct signature

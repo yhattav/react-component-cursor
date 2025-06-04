@@ -7,5 +7,8 @@ export type {
   CursorOffset,
   CursorMoveHandler,
   CursorVisibilityHandler,
+  CursorVisibilityReason,
+  CursorState,
+  CursorMode,
   NullablePosition,
 } from './types.js';
