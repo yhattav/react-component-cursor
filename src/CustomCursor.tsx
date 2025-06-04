@@ -38,24 +38,6 @@ const ANIMATION_DURATION = '0.3s';
 const ANIMATION_NAME = 'cursorFadeIn';
 const DEFAULT_Z_INDEX = 9999;
 
-// Create a memoized portal target
-const getPortalContainer = () => {
-  const existingContainer = document.getElementById('cursor-container');
-  if (existingContainer) {
-    return existingContainer;
-  }
-
-  const container = document.createElement('div');
-  container.id = 'cursor-container';
-  container.style.position = 'fixed';
-  container.style.top = '0';
-  container.style.left = '0';
-  container.style.pointerEvents = 'none';
-  container.style.zIndex = DEFAULT_Z_INDEX.toString();
-  document.body.appendChild(container);
-  return container;
-};
-
 const DevIndicator: React.FC<{
   position: { x: number | null; y: number | null };
 }> = ({ position }) => {
@@ -83,17 +65,69 @@ const DevIndicator: React.FC<{
   );
 };
 
-// Global style creation
-const createGlobalStyle = () => `
-  body, 
-  body * {
-    cursor: none !important;
+// Custom comparison function for React.memo
+const arePropsEqual = (
+  prevProps: CustomCursorProps,
+  nextProps: CustomCursorProps
+): boolean => {
+  // Check primitive props
+  if (
+    prevProps.id !== nextProps.id ||
+    prevProps.enabled !== nextProps.enabled ||
+    prevProps.className !== nextProps.className ||
+    prevProps.zIndex !== nextProps.zIndex ||
+    prevProps.smoothness !== nextProps.smoothness ||
+    prevProps.showNativeCursor !== nextProps.showNativeCursor ||
+    prevProps.throttleMs !== nextProps.throttleMs
+  ) {
+    return false;
+  }
+
+  // Check offset object
+  if (
+    prevProps.offset?.x !== nextProps.offset?.x ||
+    prevProps.offset?.y !== nextProps.offset?.y
+  ) {
+    return false;
+  }
+
+  // Check containerRef
+  if (prevProps.containerRef?.current !== nextProps.containerRef?.current) {
+    return false;
+  }
+
+  // Check style object (shallow comparison)
+  const prevStyle = prevProps.style || {};
+  const nextStyle = nextProps.style || {};
+  const prevStyleKeys = Object.keys(prevStyle);
+  const nextStyleKeys = Object.keys(nextStyle);
+  
+  if (prevStyleKeys.length !== nextStyleKeys.length) {
+    return false;
   }
   
-  #cursor-container {
-    pointer-events: none !important;
+  for (const key of prevStyleKeys) {
+    if (prevStyle[key as keyof React.CSSProperties] !== nextStyle[key as keyof React.CSSProperties]) {
+      return false;
+    }
   }
-`;
+
+  // Function props are assumed to be stable (should be wrapped in useCallback by consumers)
+  // We'll do reference equality check
+  if (
+    prevProps.onMove !== nextProps.onMove ||
+    prevProps.onVisibilityChange !== nextProps.onVisibilityChange
+  ) {
+    return false;
+  }
+
+  // Children comparison (basic reference check)
+  if (prevProps.children !== nextProps.children) {
+    return false;
+  }
+
+  return true;
+};
 
 export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
   ({
@@ -111,15 +145,39 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     onMove,
     onVisibilityChange,
   }) => {
+    // Memoize offset values to avoid recreating object
+    const offsetValues = React.useMemo(() => ({
+      x: typeof offset === 'object' ? offset.x : 0,
+      y: typeof offset === 'object' ? offset.y : 0,
+    }), [offset]);
+
     const { position, setPosition, targetPosition, isVisible } =
-      useMousePosition(containerRef, offset.x, offset.y, throttleMs);
+      useMousePosition(containerRef, offsetValues.x, offsetValues.y, throttleMs);
     useSmoothAnimation(targetPosition, smoothness, setPosition);
 
     const [portalContainer, setPortalContainer] =
       React.useState<HTMLElement | null>(null);
 
+    // Memoize portal container creation
+    const getPortalContainerMemo = React.useCallback(() => {
+      const existingContainer = document.getElementById('cursor-container');
+      if (existingContainer) {
+        return existingContainer;
+      }
+
+      const container = document.createElement('div');
+      container.id = 'cursor-container';
+      container.style.position = 'fixed';
+      container.style.top = '0';
+      container.style.left = '0';
+      container.style.pointerEvents = 'none';
+      container.style.zIndex = DEFAULT_Z_INDEX.toString();
+      document.body.appendChild(container);
+      return container;
+    }, []);
+
     React.useEffect(() => {
-      setPortalContainer(getPortalContainer());
+      setPortalContainer(getPortalContainerMemo());
       return () => {
         const container = document.getElementById('cursor-container');
         if (container && container.children.length === 0) {
@@ -135,7 +193,21 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
           }
         }
       };
-    }, []);
+    }, [getPortalContainerMemo]);
+
+    // Memoize style sheet content
+    const styleSheetContent = React.useMemo(() => `
+      @keyframes ${ANIMATION_NAME} {
+        from {
+          opacity: 0;
+          transform: translate(var(--cursor-x), var(--cursor-y)) scale(0.8);
+        }
+        to {
+          opacity: 1;
+          transform: translate(var(--cursor-x), var(--cursor-y)) scale(1);
+        }
+      }
+    `, []);
 
     React.useEffect(() => {
       const styleId = `cursor-style-${id}`;
@@ -146,18 +218,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
 
       const styleSheet = document.createElement('style');
       styleSheet.id = styleId;
-      styleSheet.textContent = `
-        @keyframes ${ANIMATION_NAME} {
-          from {
-            opacity: 0;
-            transform: translate(var(--cursor-x), var(--cursor-y)) scale(0.8);
-          }
-          to {
-            opacity: 1;
-            transform: translate(var(--cursor-x), var(--cursor-y)) scale(1);
-          }
-        }
-      `;
+      styleSheet.textContent = styleSheetContent;
       document.head.appendChild(styleSheet);
 
       return () => {
@@ -173,23 +234,32 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
           }
         }
       };
-    }, [id]);
+    }, [id, styleSheetContent]);
 
-    // Handle move callback
-    React.useEffect(() => {
+    // Memoize move callback to avoid recreation
+    const handleMove = React.useCallback(() => {
       if (position.x !== null && position.y !== null) {
         const cursorPosition: CursorPosition = { x: position.x, y: position.y };
         onMove?.(cursorPosition);
       }
-    }, [position, onMove]);
+    }, [position.x, position.y, onMove]);
+
+    // Handle move callback
+    React.useEffect(() => {
+      handleMove();
+    }, [handleMove]);
+
+    // Memoize visibility callback to avoid recreation
+    const handleVisibilityChange = React.useCallback(() => {
+      const actuallyVisible = enabled && isVisible;
+      const reason: 'container' | 'disabled' = !enabled ? 'disabled' : 'container';
+      onVisibilityChange?.(actuallyVisible, reason);
+    }, [enabled, isVisible, onVisibilityChange]);
 
     // Handle visibility callback
     React.useEffect(() => {
-      const actuallyVisible = enabled && isVisible;
-      const reason: 'container' | 'disabled' = !enabled ? 'disabled' : 'container';
-
-      onVisibilityChange?.(actuallyVisible, reason);
-    }, [enabled, isVisible, onVisibilityChange]);
+      handleVisibilityChange();
+    }, [handleVisibilityChange]);
 
     const cursorStyle = React.useMemo(
       () =>
@@ -210,6 +280,18 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       [position.x, position.y, zIndex, style]
     );
 
+    // Memoize global style content
+    const globalStyleContent = React.useMemo(() => `
+      body, 
+      body * {
+        cursor: none !important;
+      }
+      
+      #cursor-container {
+        pointer-events: none !important;
+      }
+    `, []);
+
     const shouldRender = enabled && 
                         isVisible && 
                         position.x !== null && 
@@ -221,7 +303,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     return (
       <>
         {!showNativeCursor && (
-          <style id={`cursor-style-global-${id}`}>{createGlobalStyle()}</style>
+          <style id={`cursor-style-global-${id}`}>{globalStyleContent}</style>
         )}
         {createPortal(
           <React.Fragment key={`cursor-${id}`}>
@@ -239,7 +321,8 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
         )}
       </>
     );
-  }
+  },
+  arePropsEqual
 );
 
 CustomCursor.displayName = 'CustomCursor';
