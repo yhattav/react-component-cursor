@@ -20,7 +20,7 @@ This roadmap outlines all necessary tasks to transition react-component-cursor f
 
 ### 🔧 Component Architecture & API
 - [ ] **API Stability Review**
-  - [ ] Audit all prop names and types for consistency
+  - [x] Audit all prop names and types for consistency
   - [ ] Review prop defaults and ensure they make sense
   - [ ] Consider deprecating any experimental props
   - [ ] Ensure forward compatibility for future features
