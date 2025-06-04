@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { CustomCursor, CursorPosition } from '@yhattav/react-component-cursor';
+import { CustomCursor, CursorPosition, CursorVisibilityReason } from '@yhattav/react-component-cursor';
 import { CustomCursorButton } from '../components/CustomCursorButton';
 import { Button, Typography, Card } from '../components/ui';
 import {
@@ -48,7 +48,7 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
       console.log('Container 2 cursor position:', position);
     }, []);
 
-    const handleCursorVisibilityChange = useCallback((isVisible: boolean, reason: 'container' | 'disabled') => {
+    const handleCursorVisibilityChange = useCallback((isVisible: boolean, reason: CursorVisibilityReason) => {
       console.log('Cursor visibility changed:', isVisible, 'reason:', reason);
     }, []);
 
