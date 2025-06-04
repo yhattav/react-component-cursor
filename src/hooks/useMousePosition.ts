@@ -46,10 +46,13 @@ export function useMousePosition(
   const positionRef = useRef(position);
   positionRef.current = position;
 
+  // Memoize container element to avoid re-creating listeners
+  const containerElement = React.useMemo(() => containerRef?.current, [containerRef?.current]);
+
   const updateTargetPosition = useCallback(
     (e: MouseEvent) => {
-      if (containerRef?.current) {
-        const rect = containerRef.current.getBoundingClientRect();
+      if (containerElement) {
+        const rect = containerElement.getBoundingClientRect();
         const isInside =
           e.clientX >= rect.left &&
           e.clientX <= rect.right &&
@@ -61,48 +64,51 @@ export function useMousePosition(
             x: e.clientX + offsetX,
             y: e.clientY + offsetY,
           };
-          if (
-            newPosition.x !== targetPosition.x ||
-            newPosition.y !== targetPosition.y
-          ) {
-            setTargetPosition(newPosition);
-          }
+          setTargetPosition(prev => {
+            // Only update if position actually changed
+            if (prev.x !== newPosition.x || prev.y !== newPosition.y) {
+              return newPosition;
+            }
+            return prev;
+          });
         }
       } else {
         const newPosition = {
           x: e.clientX + offsetX,
           y: e.clientY + offsetY,
         };
-        if (
-          newPosition.x !== targetPosition.x ||
-          newPosition.y !== targetPosition.y
-        ) {
-          setTargetPosition(newPosition);
-        }
+        setTargetPosition(prev => {
+          // Only update if position actually changed
+          if (prev.x !== newPosition.x || prev.y !== newPosition.y) {
+            return newPosition;
+          }
+          return prev;
+        });
       }
     },
-    [containerRef, offsetX, offsetY, targetPosition.x, targetPosition.y]
+    [containerElement, offsetX, offsetY]
   );
 
-  // Create throttled version if needed
+  // Create throttled version if needed - memoize to avoid recreation
   const throttledUpdateTargetPosition = React.useMemo(() => {
     return throttleMs > 0 ? throttle(updateTargetPosition, throttleMs) : updateTargetPosition;
   }, [updateTargetPosition, throttleMs]);
 
+  // Memoize mouse event handlers to prevent recreation
+  const handleMouseLeave = React.useCallback(() => {
+    if (containerElement) {
+      setIsVisible(false);
+    }
+  }, [containerElement]);
+
+  const handleMouseEnter = React.useCallback(() => {
+    if (containerElement) {
+      setIsVisible(true);
+    }
+  }, [containerElement]);
+
   useEffect(() => {
-    const handleMouseLeave = () => {
-      if (containerRef?.current) {
-        setIsVisible(false);
-      }
-    };
-
-    const handleMouseEnter = () => {
-      if (containerRef?.current) {
-        setIsVisible(true);
-      }
-    };
-
-    const element = containerRef?.current || document;
+    const element = containerElement || document;
     
     // Always listen to mousemove (simplified)
     element.addEventListener(
@@ -110,9 +116,9 @@ export function useMousePosition(
       throttledUpdateTargetPosition as EventListener
     );
 
-    if (containerRef?.current) {
-      containerRef.current.addEventListener('mouseleave', handleMouseLeave);
-      containerRef.current.addEventListener('mouseenter', handleMouseEnter as EventListener);
+    if (containerElement) {
+      containerElement.addEventListener('mouseleave', handleMouseLeave);
+      containerElement.addEventListener('mouseenter', handleMouseEnter as EventListener);
     }
 
     return () => {
@@ -120,22 +126,22 @@ export function useMousePosition(
         'mousemove',
         throttledUpdateTargetPosition as EventListener
       );
-      if (containerRef?.current) {
-        containerRef.current.removeEventListener(
+      if (containerElement) {
+        containerElement.removeEventListener(
           'mouseleave',
           handleMouseLeave
         );
-        containerRef.current.removeEventListener(
+        containerElement.removeEventListener(
           'mouseenter',
           handleMouseEnter as EventListener
         );
       }
     };
-  }, [containerRef, throttledUpdateTargetPosition]);
+  }, [containerElement, throttledUpdateTargetPosition, handleMouseLeave, handleMouseEnter]);
 
-  // Initialize position when we get the first valid targetPosition
+  // Initialize position when we get the first valid targetPosition - optimize to avoid unnecessary updates
   useEffect(() => {
-    if (position.x === null && position.y === null) {
+    if (position.x === null && position.y === null && targetPosition.x !== null && targetPosition.y !== null) {
       setPosition(targetPosition);
     }
   }, [targetPosition, position.x, position.y]);
