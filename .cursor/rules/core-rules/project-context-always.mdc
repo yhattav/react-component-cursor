@@ -1,0 +1,62 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# React Component Cursor Library - Project Context
+
+## What This Project Is
+This is a **React component library** that provides a flexible, customizable cursor replacement system. The main export is a `CustomCursor` component that allows developers to replace the default browser cursor with any React component.
+
+## Key Project Goals
+1. **Lightweight**: Keep bundle size under 10KB
+2. **Flexible**: Support any React component as cursor content
+3. **Performant**: Smooth animations with optimized re-renders
+4. **TypeScript-first**: Comprehensive type safety
+5. **Zero Dependencies**: Only React as peer dependency (no external UI libraries)
+
+## Project Architecture
+
+### Core Library (`src/`)
+- **Primary Component**: `CustomCursor` - Main component that tracks mouse and renders custom cursor
+- **Hooks**: `useMousePosition` - Core hook for mouse tracking with performance optimization
+- **Types**: Comprehensive TypeScript interfaces for all props and configurations
+- **Styling**: Pure CSS-in-JS approach with inline styles (no external styling dependencies)
+
+### Example App (`example/`)
+- **Purpose**: Demonstrates library capabilities and serves as development playground
+- **Stack**: Vite + React + Tailwind CSS
+- **Scope**: Only for demonstrations - completely separate from library code
+
+### Build & Distribution
+- **Bundler**: tsup for efficient TypeScript compilation and bundling
+- **Output**: ES modules and CommonJS builds
+- **Testing**: Jest for unit tests
+- **Documentation**: Storybook for component documentation
+
+## Core Features Being Built
+1. **Global Cursor Replacement**: Replace default cursor site-wide
+2. **Container-Scoped Cursors**: Custom cursors that only work within specific containers
+3. **Smooth Movement**: Configurable smoothing/easing for cursor movement
+4. **Visibility Management**: Handle cursor show/hide states automatically
+5. **Event Callbacks**: `onMove`, `onVisibilityChanged` callbacks for integrations
+6. **Performance Optimization**: Minimize re-renders and optimize mouse tracking
+
+## Development Context
+- **Current Phase**: Mature library with active development and refinement
+- **Target Audience**: React developers who want custom cursor experiences
+- **Use Cases**: Interactive websites, games, creative applications, branded experiences
+- **Distribution**: NPM package `@yhattav/react-component-cursor`
+
+## Technical Constraints
+- **No External UI Dependencies**: Library must not depend on Ant Design, Material-UI, etc.
+- **Minimal Runtime**: Focus on performance and small bundle size
+- **Browser Support**: Modern browsers with pointer events support
+- **React Compatibility**: Support React 16.8+ (hooks era)
+
+## Code Quality Standards
+- **TypeScript**: Strict typing throughout
+- **Testing**: Unit tests for core functionality
+- **Documentation**: Comprehensive README with examples
+- **Performance**: Optimized for 60fps cursor tracking
+- **API Design**: Simple, intuitive props with sensible defaults

@@ -3,10 +3,16 @@
 This directory contains the modernized Project Rules for this **React Custom Cursor Library** project.
 
 ## Project Overview
-- **Library**: Pure React + TypeScript with minimal dependencies
-- **Styling**: Inline styles and CSS-in-JS (no external UI frameworks in library code)
-- **Example App**: Uses Tailwind CSS with custom components
+This is a **React component library** that creates flexible, customizable cursor replacement systems. The main export is a `CustomCursor` component allowing developers to replace browser cursors with any React component.
+
+**Key Details:**
+- **Library**: Pure React + TypeScript with minimal dependencies (<10KB target)
+- **Styling**: Inline styles and CSS-in-JS (no external UI frameworks in library code)  
+- **Example App**: Uses Tailwind CSS with custom components for demonstrations
 - **Build**: Vite + tsup for library bundling
+- **Distribution**: NPM package `@yhattav/react-component-cursor`
+
+> 📋 **Complete project context** is available in `core-rules/project-context-always.mdc`
 
 ## Structure
 
@@ -31,6 +37,7 @@ This directory contains the modernized Project Rules for this **React Custom Cur
 ## Current Rules
 
 ### Core Rules (Always Applied)
+- `project-context-always.mdc` - Comprehensive project context and goals
 - `response-constraints-always.mdc` - Code preservation guidelines
 - `tech-stack-expertise-always.mdc` - Tech stack expertise declaration
 
