@@ -36,6 +36,7 @@ export interface CustomCursorProps {
 
 const ANIMATION_DURATION = '0.3s';
 const ANIMATION_NAME = 'cursorFadeIn';
+const DEFAULT_Z_INDEX = 9999;
 
 // Create a memoized portal target
 const getPortalContainer = () => {
@@ -50,7 +51,7 @@ const getPortalContainer = () => {
   container.style.top = '0';
   container.style.left = '0';
   container.style.pointerEvents = 'none';
-  container.style.zIndex = '9999';
+  container.style.zIndex = DEFAULT_Z_INDEX.toString();
   document.body.appendChild(container);
   return container;
 };
@@ -101,7 +102,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     children,
     className = '',
     style = {},
-    zIndex = 999,
+    zIndex = DEFAULT_Z_INDEX,
     offset = { x: 0, y: 0 },
     smoothness = 1,
     containerRef,
