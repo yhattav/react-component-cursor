@@ -54,37 +54,14 @@ export function useSmoothAnimation(
         return newPosition;
       });
 
-      // Handle missing requestAnimationFrame gracefully
-      if (typeof requestAnimationFrame === 'function') {
-        animationFrameId = requestAnimationFrame(smoothing);
-      } else {
-        // Fallback to setTimeout if RAF is not available
-        animationFrameId = setTimeout(smoothing, 16) as unknown as number;
-      }
+      animationFrameId = requestAnimationFrame(smoothing);
     };
 
-    // Handle missing requestAnimationFrame gracefully
-    try {
-      if (typeof requestAnimationFrame === 'function') {
-        animationFrameId = requestAnimationFrame(smoothing);
-      } else {
-        // Fallback to setTimeout if RAF is not available
-        animationFrameId = setTimeout(smoothing, 16) as unknown as number;
-      }
-    } catch (error) {
-      // Handle RAF errors gracefully
-      console.error('Animation frame error:', error);
-      // Fallback to direct position setting
-      setPosition(targetPosition);
-    }
+    animationFrameId = requestAnimationFrame(smoothing);
 
     return () => {
       if (animationFrameId) {
-        if (typeof cancelAnimationFrame === 'function') {
-          cancelAnimationFrame(animationFrameId);
-        } else {
-          clearTimeout(animationFrameId);
-        }
+        cancelAnimationFrame(animationFrameId);
       }
     };
   }, [calculateNewPosition, setPosition, targetPosition]);
