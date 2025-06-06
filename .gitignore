@@ -5,3 +5,4 @@ node_modules
 dist
 example/.parcel-cache
 coverage/
+performance-results/

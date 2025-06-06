@@ -1,0 +1,230 @@
+name: Performance Monitoring
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  performance:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+        
+    - name: Run performance benchmark
+      run: npm run perf:benchmark
+      env:
+        NODE_ENV: production
+        
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-results
+        path: performance-results/
+        retention-days: 30
+        
+    - name: Run performance monitoring
+      if: github.ref == 'refs/heads/main'
+      run: npm run perf:monitor
+      continue-on-error: true
+
+  performance-monitoring:
+    runs-on: ubuntu-latest
+    needs: performance
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Download performance results
+      uses: actions/download-artifact@v4
+      with:
+        name: performance-results
+        path: performance-results/
+        
+    - name: Restore performance history
+      uses: actions/cache/restore@v4
+      with:
+        path: performance-results/history.json
+        key: performance-history-${{ github.repository }}
+        restore-keys: |
+          performance-history-
+          
+    - name: Restore performance baseline
+      uses: actions/cache/restore@v4
+      with:
+        path: performance-results/baseline.json
+        key: performance-baseline-${{ github.repository }}
+        restore-keys: |
+          performance-baseline-
+          
+    - name: Run performance monitoring
+      run: npm run perf:monitor
+      continue-on-error: true
+      id: monitoring
+      
+    - name: Save performance history
+      uses: actions/cache/save@v4
+      with:
+        path: performance-results/history.json
+        key: performance-history-${{ github.repository }}-${{ github.run_id }}
+        
+    - name: Set baseline on first run
+      if: steps.monitoring.outcome == 'failure'
+      run: |
+        echo "Setting performance baseline..."
+        npm run perf:baseline
+        
+    - name: Save performance baseline
+      if: steps.monitoring.outcome == 'failure'
+      uses: actions/cache/save@v4
+      with:
+        path: performance-results/baseline.json
+        key: performance-baseline-${{ github.repository }}-${{ github.run_id }}
+        
+    - name: Create performance issue on regression
+      if: steps.monitoring.outcome == 'failure' && github.event_name != 'schedule'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          try {
+            const latestPath = path.join(process.cwd(), 'performance-results', 'latest.json');
+            if (fs.existsSync(latestPath)) {
+              const results = JSON.parse(fs.readFileSync(latestPath, 'utf8'));
+              
+              github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '🚨 Performance Regression Detected',
+                body: `## Performance Regression Alert
+
+                A performance regression has been detected in commit ${context.sha}.
+                
+                **Timestamp**: ${results.timestamp}
+                **Status**: ${results.status}
+                **Failed Checks**: ${results.failed}
+                **Errors**: ${results.errors.join(', ')}
+                
+                Please investigate and address the performance issues.
+                
+                [View full benchmark results](${context.payload.repository.html_url}/actions/runs/${context.runId})`,
+                labels: ['performance', 'regression', 'bug']
+              });
+            }
+          } catch (error) {
+            console.error('Failed to create performance issue:', error);
+          }
+
+  performance-report:
+    runs-on: ubuntu-latest
+    needs: [performance, performance-monitoring]
+    if: always() && github.event_name == 'schedule'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Download performance results
+      uses: actions/download-artifact@v4
+      with:
+        name: performance-results
+        path: performance-results/
+        
+    - name: Restore performance history
+      uses: actions/cache/restore@v4
+      with:
+        path: performance-results/history.json
+        key: performance-history-${{ github.repository }}
+        restore-keys: |
+          performance-history-
+          
+    - name: Generate weekly performance report
+      run: |
+        echo "## 📊 Weekly Performance Report" > performance-report.md
+        echo "" >> performance-report.md
+        echo "Generated on: $(date)" >> performance-report.md
+        echo "" >> performance-report.md
+        
+        # Add trend analysis
+        if [ -f "performance-results/latest.json" ]; then
+          node -e "
+            const fs = require('fs');
+            const { PerformanceMonitor } = require('./scripts/performance-monitor.js');
+            const monitor = new PerformanceMonitor();
+            const latest = JSON.parse(fs.readFileSync('performance-results/latest.json', 'utf8'));
+            const report = monitor.generateTrendReport();
+            console.log('### Trend Analysis');
+            report.analysis.forEach(item => console.log('- ' + item));
+          " >> performance-report.md
+        fi
+        
+    - name: Create or update performance tracking issue
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          const report = fs.readFileSync('performance-report.md', 'utf8');
+          
+          // Look for existing performance tracking issue
+          const issues = await github.rest.issues.listForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            labels: 'performance-tracking',
+            state: 'open'
+          });
+          
+          if (issues.data.length > 0) {
+            // Update existing issue
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issues.data[0].number,
+              body: report
+            });
+          } else {
+            // Create new tracking issue
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '📊 Performance Tracking Dashboard',
+              body: report + '\n\n_This issue is automatically updated with weekly performance reports._',
+              labels: ['performance-tracking', 'enhancement']
+            });
+          } 
