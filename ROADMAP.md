@@ -19,7 +19,7 @@ This roadmap outlines all necessary tasks to transition react-component-cursor f
 ## 📚 Core Library Development
 
 ### 🔧 Component Architecture & API
-- [ ] **API Stability Review**
+- [x] **API Stability Review**
   - [x] Audit all prop names and types for consistency
   - [x] Review prop defaults and ensure they make sense
   - [x] Consider deprecating any experimental props
@@ -42,7 +42,7 @@ This roadmap outlines all necessary tasks to transition react-component-cursor f
   - [ ] Custom cursor themes/presets
 
 ### 🧪 Testing & Quality Assurance
-- [ ] **Unit Testing (Target: 100% coverage)**
+- [x] **Unit Testing (Target: 100% coverage)**
   - [x] Complete CustomCursor component tests
   - [x] Test all hooks (useMousePosition, useSmoothAnimation)
   - [x] Test edge cases and error conditions

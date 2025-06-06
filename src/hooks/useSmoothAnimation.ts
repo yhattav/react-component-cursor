@@ -54,17 +54,40 @@ export function useSmoothAnimation(
         return newPosition;
       });
 
-      animationFrameId = requestAnimationFrame(smoothing);
+      // Handle missing requestAnimationFrame gracefully
+      if (typeof requestAnimationFrame === 'function') {
+        animationFrameId = requestAnimationFrame(smoothing);
+      } else {
+        // Fallback to setTimeout if RAF is not available
+        animationFrameId = setTimeout(smoothing, 16) as any;
+      }
     };
 
-    animationFrameId = requestAnimationFrame(smoothing);
+    // Handle missing requestAnimationFrame gracefully
+    try {
+      if (typeof requestAnimationFrame === 'function') {
+        animationFrameId = requestAnimationFrame(smoothing);
+      } else {
+        // Fallback to setTimeout if RAF is not available
+        animationFrameId = setTimeout(smoothing, 16) as any;
+      }
+    } catch (error) {
+      // Handle RAF errors gracefully
+      console.error('Animation frame error:', error);
+      // Fallback to direct position setting
+      setPosition(targetPosition);
+    }
 
     return () => {
       if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
+        if (typeof cancelAnimationFrame === 'function') {
+          cancelAnimationFrame(animationFrameId);
+        } else {
+          clearTimeout(animationFrameId);
+        }
       }
     };
-  }, [calculateNewPosition, setPosition]);
+  }, [calculateNewPosition, setPosition, targetPosition]);
 
   useEffect(() => {
     // If smoothFactor is 1, just set position directly

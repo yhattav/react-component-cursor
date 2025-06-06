@@ -76,14 +76,8 @@ document.createElement = jest.fn((tagName: string) => {
   return element;
 });
 
-// Track appendChild calls with proper typing
-(document.body.appendChild as jest.Mock) = jest.fn(<T extends Node>(node: T): T => {
-  return originalBodyAppendChild.call(document.body, node) as T;
-});
-
-(document.head.appendChild as jest.Mock) = jest.fn(<T extends Node>(node: T): T => {
-  return originalHeadAppendChild.call(document.head, node) as T;
-});
+// Track appendChild calls with proper typing - only mock when needed
+// Don't override by default, let tests handle mocking when needed
 
 // Mock window object properties
 Object.defineProperty(window, 'innerWidth', {
@@ -213,11 +207,15 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.runOnlyPendingTimers();
-  jest.useRealTimers();
+  // Just use real timers, don't try to run pending
+  try {
+    jest.useRealTimers();
+  } catch (e) {
+    // Ignore timer errors in cleanup
+  }
   
   // Restore RAF mocks if they've been overridden
-  if (typeof global.requestAnimationFrame !== 'function') {
+  if (!global.requestAnimationFrame || typeof global.requestAnimationFrame !== 'function') {
     global.requestAnimationFrame = jest.fn((callback: FrameRequestCallback) => {
       const id = ++rafId;
       rafCallbacks.set(id, callback);
@@ -228,10 +226,18 @@ afterEach(() => {
     });
   }
   
-  if (typeof global.cancelAnimationFrame !== 'function') {
+  if (!global.cancelAnimationFrame || typeof global.cancelAnimationFrame !== 'function') {
     global.cancelAnimationFrame = jest.fn((id: number) => {
       rafCallbacks.delete(id);
     });
+  }
+  
+  // Reset appendChild behavior
+  if (document.body.appendChild !== originalBodyAppendChild) {
+    document.body.appendChild = originalBodyAppendChild;
+  }
+  if (document.head.appendChild !== originalHeadAppendChild) {
+    document.head.appendChild = originalHeadAppendChild;
   }
   
   // Clean up created elements
