@@ -50,7 +50,7 @@ const measureRenderPerformance = (renderFn: () => void): PerformanceMetrics => {
   return {
     renderTime,
     reRenderCount,
-    memoryUsage: (performance as any).memory?.usedJSHeapSize || undefined,
+    memoryUsage: (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize || undefined,
   };
 };
 
@@ -219,7 +219,7 @@ describe('CustomCursor Performance Tests', () => {
 
   describe('Memory Performance', () => {
     it('does not leak memory with mount/unmount cycles', () => {
-      const initialMemory = (performance as any).memory?.usedJSHeapSize || 0;
+      const initialMemory = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize || 0;
       
       // Mount and unmount multiple times
       for (let i = 0; i < 10; i++) {
@@ -233,7 +233,7 @@ describe('CustomCursor Performance Tests', () => {
         global.gc();
       }
       
-      const finalMemory = (performance as any).memory?.usedJSHeapSize || 0;
+      const finalMemory = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize || 0;
       const memoryIncrease = finalMemory - initialMemory;
       
       // Memory increase should be minimal (under 1MB for 10 cycles)
