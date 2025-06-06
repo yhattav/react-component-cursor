@@ -219,7 +219,7 @@ describe('CustomCursor Performance Tests', () => {
 
   describe('Memory Performance', () => {
     it('does not leak memory with mount/unmount cycles', () => {
-      const initialMemory = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize || 0;
+      const initialMemory = getUsedJSHeapSize();
       
       // Mount and unmount multiple times
       for (let i = 0; i < 10; i++) {
