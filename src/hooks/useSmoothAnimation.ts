@@ -64,7 +64,7 @@ export function useSmoothAnimation(
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [calculateNewPosition, setPosition]);
+  }, [calculateNewPosition, setPosition, targetPosition]);
 
   useEffect(() => {
     // If smoothFactor is 1, just set position directly
@@ -74,5 +74,5 @@ export function useSmoothAnimation(
     }
 
     return animate();
-  }, [smoothFactor, targetPosition, animate, setPosition]);
+  }, [smoothFactor, targetPosition.x, targetPosition.y, animate, setPosition]);
 }
