@@ -46,7 +46,12 @@
     "dev": "concurrently \"npm start\" \"cd example && npm run dev\"",
     "build-all": "npm run build && cd example && npm run build",
     "setup": "node scripts/setup.js",
-    "cleanup": "node scripts/cleanup.js"
+    "cleanup": "node scripts/cleanup.js",
+    "perf:benchmark": "node scripts/performance-benchmark.js",
+    "perf:monitor": "node scripts/performance-monitor.js",
+    "perf:baseline": "node scripts/performance-monitor.js --set-baseline",
+    "perf:ci": "npm run perf:benchmark && npm run perf:monitor",
+    "perf:dashboard": "node scripts/generate-dashboard.js"
   },
   "peerDependencies": {
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0",

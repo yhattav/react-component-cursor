@@ -555,7 +555,7 @@ describe('CustomCursor', () => {
   describe('Cleanup and error handling', () => {
     it('handles DOM cleanup errors gracefully', () => {
       // Mock console.warn to capture warnings
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(jest.fn());
       
       // Create a cursor that will trigger cleanup
       const { unmount } = render(<CustomCursor id="cleanup-test">Test</CustomCursor>);
