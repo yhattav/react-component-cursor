@@ -12,3 +12,12 @@ export type {
   CursorMode,
   NullablePosition,
 } from './types.js';
+
+// SSR utilities for advanced use cases
+export {
+  isSSR,
+  isBrowser,
+  browserOnly,
+  safeDocument,
+  safeWindow,
+} from './utils/ssr';

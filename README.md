@@ -166,6 +166,64 @@ This project was bootstrapped with [TSDX](https://github.com/jaredpalmer/tsdx). 
 
 MIT © [yhattav](https://github.com/yhattav)
 
+## Server-Side Rendering (SSR) Support
+
+This library works seamlessly with all SSR frameworks including Next.js, Gatsby, Remix, and more.
+
+### ✅ Zero Configuration
+
+The component automatically handles SSR by returning `null` during server-side rendering, preventing hydration mismatches:
+
+```tsx
+// Works out of the box in Next.js, Gatsby, etc.
+import { CustomCursor } from '@yhattav/react-component-cursor';
+
+export default function App() {
+  return (
+    <>
+      <YourPageContent />
+      <CustomCursor>
+        <div className="cursor">✨</div>
+      </CustomCursor>
+    </>
+  );
+}
+```
+
+### Key SSR Features
+
+- **Graceful Degradation**: Returns `null` during SSR, no browser APIs called
+- **No Hydration Issues**: Prevents client/server mismatches
+- **Minimal Bundle Impact**: ~250 bytes for SSR utilities, often offset by tree-shaking
+- **Framework Agnostic**: Works with any React SSR framework
+
+### Framework Examples
+
+**Next.js** (recommended approach):
+```tsx
+import { CustomCursor } from '@yhattav/react-component-cursor';
+
+// Direct usage - SSR handled automatically
+<CustomCursor>
+  <div className="cursor">🎯</div>
+</CustomCursor>
+```
+
+**Gatsby**:
+```tsx
+// gatsby-browser.js
+export const wrapRootElement = ({ element }) => (
+  <>
+    {element}
+    <CustomCursor>
+      <div className="cursor">🌟</div>
+    </CustomCursor>
+  </>
+);
+```
+
+For detailed SSR integration guides, see our [SSR Documentation](docs/SSR.md).
+
 ## TypeScript Support
 
 The library is written in TypeScript and includes built-in type definitions. No additional @types packages are required.
