@@ -52,30 +52,25 @@ export function useMousePosition(
   const updateTargetPosition = useCallback(
     (e: MouseEvent) => {
       if (containerElement) {
-        try {
-          const rect = containerElement.getBoundingClientRect();
-          const isInside =
-            e.clientX >= rect.left &&
-            e.clientX <= rect.right &&
-            e.clientY >= rect.top &&
-            e.clientY <= rect.bottom;
+        const rect = containerElement.getBoundingClientRect();
+        const isInside =
+          e.clientX >= rect.left &&
+          e.clientX <= rect.right &&
+          e.clientY >= rect.top &&
+          e.clientY <= rect.bottom;
 
-          if (isInside) {
-            const newPosition = {
-              x: e.clientX + offsetX,
-              y: e.clientY + offsetY,
-            };
-            setTargetPosition(prev => {
-              // Only update if position actually changed
-              if (prev.x !== newPosition.x || prev.y !== newPosition.y) {
-                return newPosition;
-              }
-              return prev;
-            });
-          }
-        } catch (error) {
-          // Handle getBoundingClientRect errors gracefully
-          console.warn('Failed to get bounding client rect:', error);
+        if (isInside) {
+          const newPosition = {
+            x: e.clientX + offsetX,
+            y: e.clientY + offsetY,
+          };
+          setTargetPosition(prev => {
+            // Only update if position actually changed
+            if (prev.x !== newPosition.x || prev.y !== newPosition.y) {
+              return newPosition;
+            }
+            return prev;
+          });
         }
       } else {
         const newPosition = {
