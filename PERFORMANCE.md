@@ -57,6 +57,9 @@ npm run perf:monitor
 
 # Complete CI workflow
 npm run perf:ci
+
+# Generate visual dashboard
+npm run perf:dashboard
 ```
 
 ### Individual Commands
@@ -70,6 +73,29 @@ node scripts/performance-monitor.js
 
 # Set new baseline
 node scripts/performance-monitor.js --set-baseline
+```
+
+## 📊 Visual Dashboard
+
+A comprehensive visual dashboard is automatically generated and deployed to GitHub Pages:
+
+**Live Dashboard:** https://yhattav.github.io/react-component-cursor/performance/
+
+### Dashboard Features
+- **Real-time Charts**: Bundle size, memory usage, and performance trends
+- **Color-coded Metrics**: Green (good), yellow (warning), red (critical)
+- **Historical Data**: Tracks performance over the last 100 builds
+- **Responsive Design**: Works on desktop, tablet, and mobile
+- **Auto-updates**: Refreshes on every push to main branch
+
+### Local Dashboard Generation
+
+```bash
+# Generate dashboard locally
+npm run perf:dashboard
+
+# Open in browser
+open docs/index.html
 ```
 
 ## 📈 Interpreting Results

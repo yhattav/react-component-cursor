@@ -50,7 +50,8 @@
     "perf:benchmark": "node scripts/performance-benchmark.js",
     "perf:monitor": "node scripts/performance-monitor.js",
     "perf:baseline": "node scripts/performance-monitor.js --set-baseline",
-    "perf:ci": "npm run perf:benchmark && npm run perf:monitor"
+    "perf:ci": "npm run perf:benchmark && npm run perf:monitor",
+    "perf:dashboard": "node scripts/generate-dashboard.js"
   },
   "peerDependencies": {
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
