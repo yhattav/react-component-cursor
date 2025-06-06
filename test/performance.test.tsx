@@ -29,6 +29,11 @@ jest.mock('../src/utils/validation', () => ({
 // Get references to mocked functions
 const mockUseMousePosition = hooks.useMousePosition as jest.MockedFunction<typeof hooks.useMousePosition>;
 
+// Helper to get Chrome-specific memory usage
+const getHeapSize = (): number => {
+  return (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize || 0;
+};
+
 // Performance measurement utilities
 interface PerformanceMetrics {
   renderTime: number;
@@ -50,7 +55,7 @@ const measureRenderPerformance = (renderFn: () => void): PerformanceMetrics => {
   return {
     renderTime,
     reRenderCount,
-    memoryUsage: (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize || undefined,
+    memoryUsage: getHeapSize() || undefined,
   };
 };
 
@@ -219,7 +224,7 @@ describe('CustomCursor Performance Tests', () => {
 
   describe('Memory Performance', () => {
     it('does not leak memory with mount/unmount cycles', () => {
-      const initialMemory = getUsedJSHeapSize();
+      const initialMemory = getHeapSize();
       
       // Mount and unmount multiple times
       for (let i = 0; i < 10; i++) {
@@ -233,7 +238,7 @@ describe('CustomCursor Performance Tests', () => {
         global.gc();
       }
       
-      const finalMemory = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize || 0;
+      const finalMemory = getHeapSize();
       const memoryIncrease = finalMemory - initialMemory;
       
       // Memory increase should be minimal (under 1MB for 10 cycles)
