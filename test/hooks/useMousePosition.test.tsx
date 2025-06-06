@@ -77,7 +77,10 @@ describe('useMousePosition', () => {
     it('attaches event listeners to container when provided', () => {
       const containerRef = React.createRef<HTMLDivElement>();
       const mockElement = document.createElement('div');
-      (containerRef as any).current = mockElement;
+      Object.defineProperty(containerRef, 'current', { 
+        value: mockElement, 
+        writable: true 
+      });
       
       const addEventListenerSpy = jest.spyOn(mockElement, 'addEventListener');
       
@@ -143,9 +146,12 @@ describe('useMousePosition', () => {
       }));
       
       mockElement.getBoundingClientRect = getBoundingClientRectSpy;
-      (containerRef as any).current = mockElement;
+      Object.defineProperty(containerRef, 'current', { 
+        value: mockElement, 
+        writable: true 
+      });
       
-      const { result } = renderHook(() => 
+      renderHook(() => 
         useMousePosition(containerRef, 0, 0, 0)
       );
 
@@ -165,10 +171,13 @@ describe('useMousePosition', () => {
       mockElement.getBoundingClientRect = () => {
         throw new Error('getBoundingClientRect error');
       };
-      (containerRef as any).current = mockElement;
+      Object.defineProperty(containerRef, 'current', { 
+        value: mockElement, 
+        writable: true 
+      });
 
       expect(() => {
-        const { result } = renderHook(() => 
+        renderHook(() => 
           useMousePosition(containerRef, 0, 0, 0)
         );
 
@@ -181,7 +190,10 @@ describe('useMousePosition', () => {
     it('handles visibility changes for container', () => {
       const containerRef = React.createRef<HTMLDivElement>();
       const mockElement = document.createElement('div');
-      (containerRef as any).current = mockElement;
+      Object.defineProperty(containerRef, 'current', { 
+        value: mockElement, 
+        writable: true 
+      });
       
       const { result } = renderHook(() => 
         useMousePosition(containerRef, 0, 0, 0)
@@ -221,10 +233,14 @@ describe('useMousePosition', () => {
     it('handles missing document object', () => {
       const originalDocument = global.document;
       
-      (global as any).document = {
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-      };
+      Object.defineProperty(global, 'document', {
+        value: {
+          addEventListener: jest.fn(),
+          removeEventListener: jest.fn(),
+        },
+        writable: true,
+        configurable: true
+      });
 
       expect(() => {
         renderHook(() => useMousePosition(undefined, 0, 0, 0));
@@ -241,8 +257,8 @@ describe('useMousePosition', () => {
       act(() => {
         // Event with missing clientX/clientY
         const event = new MouseEvent('mousemove', {});
-        delete (event as any).clientX;
-        delete (event as any).clientY;
+        Object.defineProperty(event, 'clientX', { value: undefined, writable: true });
+        Object.defineProperty(event, 'clientY', { value: undefined, writable: true });
         document.dispatchEvent(event);
       });
 
@@ -295,7 +311,7 @@ describe('useMousePosition', () => {
         return <div>{position.x}</div>;
       };
 
-      const { result } = renderHook(() => <TestComponent />);
+      renderHook(() => <TestComponent />);
       const initialRenderCount = renderCount;
 
       act(() => {
@@ -358,9 +374,9 @@ describe('useMousePosition', () => {
 
       act(() => {
         // Create basic event without modern properties
-        const event = new Event('mousemove') as any;
-        event.clientX = 150;
-        event.clientY = 250;
+        const event = new Event('mousemove');
+        Object.defineProperty(event, 'clientX', { value: 150, writable: true });
+        Object.defineProperty(event, 'clientY', { value: 250, writable: true });
         document.dispatchEvent(event);
       });
 
@@ -369,7 +385,11 @@ describe('useMousePosition', () => {
 
     it('handles missing performance API gracefully', () => {
       const originalPerformance = global.performance;
-      delete (global as any).performance;
+      Object.defineProperty(global, 'performance', {
+        value: undefined,
+        writable: true,
+        configurable: true
+      });
 
       expect(() => {
         renderHook(() => useMousePosition(undefined, 0, 0, 0));

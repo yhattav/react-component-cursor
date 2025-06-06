@@ -113,7 +113,8 @@ Element.prototype.addEventListener = jest.fn(function(
   if (!eventListeners.has(key)) {
     eventListeners.set(key, new Set());
   }
-  eventListeners.get(key)!.add(listener);
+  const listeners = eventListeners.get(key);
+  listeners?.add(listener);
   
   return originalAddEventListener.call(this, type, listener, options);
 });
@@ -141,7 +142,8 @@ document.addEventListener = jest.fn((
   if (!eventListeners.has(key)) {
     eventListeners.set(key, new Set());
   }
-  eventListeners.get(key)!.add(listener);
+  const listeners = eventListeners.get(key);
+  listeners?.add(listener);
   
   return originalDocumentAddEventListener.call(document, type, listener, options);
 });
@@ -189,9 +191,9 @@ global.triggerMouseEvent = (
 
 // Mock missing APIs for SSR testing
 if (typeof window === 'undefined') {
-  global.window = {} as any;
-  global.document = {} as any;
-  global.HTMLElement = class MockHTMLElement {} as any;
+  global.window = {} as unknown as Window & typeof globalThis;
+  global.document = {} as unknown as Document;
+  global.HTMLElement = class MockHTMLElement {} as unknown as typeof HTMLElement;
 }
 
 // ===== TIMER SETUP =====

@@ -59,7 +59,7 @@ export function useSmoothAnimation(
         animationFrameId = requestAnimationFrame(smoothing);
       } else {
         // Fallback to setTimeout if RAF is not available
-        animationFrameId = setTimeout(smoothing, 16) as any;
+        animationFrameId = setTimeout(smoothing, 16) as unknown as number;
       }
     };
 
@@ -69,7 +69,7 @@ export function useSmoothAnimation(
         animationFrameId = requestAnimationFrame(smoothing);
       } else {
         // Fallback to setTimeout if RAF is not available
-        animationFrameId = setTimeout(smoothing, 16) as any;
+        animationFrameId = setTimeout(smoothing, 16) as unknown as number;
       }
     } catch (error) {
       // Handle RAF errors gracefully

@@ -45,8 +45,16 @@ describe('useSmoothAnimation', () => {
     const originalCAF = global.cancelAnimationFrame;
     
     // Remove RAF to test fallback
-    delete (global as any).requestAnimationFrame;
-    delete (global as any).cancelAnimationFrame;
+    Object.defineProperty(global, 'requestAnimationFrame', {
+      value: undefined,
+      writable: true,
+      configurable: true
+    });
+    Object.defineProperty(global, 'cancelAnimationFrame', {
+      value: undefined,
+      writable: true,
+      configurable: true
+    });
 
     const setPosition = jest.fn();
     const targetPosition = { x: 100, y: 100 };

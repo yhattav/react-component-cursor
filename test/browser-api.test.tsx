@@ -20,8 +20,16 @@ describe('Browser API Integration', () => {
       const originalRAF = global.requestAnimationFrame;
       const originalCAF = global.cancelAnimationFrame;
       
-      delete (global as any).requestAnimationFrame;
-      delete (global as any).cancelAnimationFrame;
+      Object.defineProperty(global, 'requestAnimationFrame', {
+        value: undefined,
+        writable: true,
+        configurable: true
+      });
+      Object.defineProperty(global, 'cancelAnimationFrame', {
+        value: undefined,
+        writable: true,
+        configurable: true
+      });
 
       expect(() => {
         render(<CustomCursor smoothness={2}>No RAF</CustomCursor>);
@@ -94,7 +102,11 @@ describe('Browser API Integration', () => {
   describe('SSR Compatibility', () => {
     it('should handle missing window', () => {
       const originalWindow = global.window;
-      delete (global as any).window;
+      Object.defineProperty(global, 'window', {
+        value: undefined,
+        writable: true,
+        configurable: true
+      });
 
       expect(() => {
         render(<CustomCursor>SSR</CustomCursor>);
@@ -105,7 +117,11 @@ describe('Browser API Integration', () => {
 
     it('should handle missing performance.now', () => {
       const originalPerformance = global.performance;
-      delete (global as any).performance;
+      Object.defineProperty(global, 'performance', {
+        value: undefined,
+        writable: true,
+        configurable: true
+      });
 
       expect(() => {
         render(<CustomCursor>No Performance</CustomCursor>);
@@ -139,7 +155,7 @@ describe('Browser API Integration', () => {
       const originalRAF = global.requestAnimationFrame;
       
       global.requestAnimationFrame = (callback: FrameRequestCallback) => {
-        return setTimeout(() => callback(Date.now()), 16) as any;
+        return setTimeout(() => callback(Date.now()), 16) as unknown as number;
       };
 
       expect(() => {
