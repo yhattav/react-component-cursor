@@ -52,25 +52,30 @@ export function useMousePosition(
   const updateTargetPosition = useCallback(
     (e: MouseEvent) => {
       if (containerElement) {
-        const rect = containerElement.getBoundingClientRect();
-        const isInside =
-          e.clientX >= rect.left &&
-          e.clientX <= rect.right &&
-          e.clientY >= rect.top &&
-          e.clientY <= rect.bottom;
+        try {
+          const rect = containerElement.getBoundingClientRect();
+          const isInside =
+            e.clientX >= rect.left &&
+            e.clientX <= rect.right &&
+            e.clientY >= rect.top &&
+            e.clientY <= rect.bottom;
 
-        if (isInside) {
-          const newPosition = {
-            x: e.clientX + offsetX,
-            y: e.clientY + offsetY,
-          };
-          setTargetPosition(prev => {
-            // Only update if position actually changed
-            if (prev.x !== newPosition.x || prev.y !== newPosition.y) {
-              return newPosition;
-            }
-            return prev;
-          });
+          if (isInside) {
+            const newPosition = {
+              x: e.clientX + offsetX,
+              y: e.clientY + offsetY,
+            };
+            setTargetPosition(prev => {
+              // Only update if position actually changed
+              if (prev.x !== newPosition.x || prev.y !== newPosition.y) {
+                return newPosition;
+              }
+              return prev;
+            });
+          }
+        } catch (error) {
+          // Handle getBoundingClientRect errors gracefully
+          console.warn('Failed to get bounding client rect:', error);
         }
       } else {
         const newPosition = {
@@ -110,31 +115,41 @@ export function useMousePosition(
   useEffect(() => {
     const element = containerElement || document;
     
-    // Always listen to mousemove (simplified)
-    element.addEventListener(
-      'mousemove',
-      throttledUpdateTargetPosition as EventListener
-    );
-
-    if (containerElement) {
-      containerElement.addEventListener('mouseleave', handleMouseLeave);
-      containerElement.addEventListener('mouseenter', handleMouseEnter as EventListener);
-    }
-
-    return () => {
-      element.removeEventListener(
+    try {
+      // Always listen to mousemove (simplified)
+      element.addEventListener(
         'mousemove',
         throttledUpdateTargetPosition as EventListener
       );
+
       if (containerElement) {
-        containerElement.removeEventListener(
-          'mouseleave',
-          handleMouseLeave
+        containerElement.addEventListener('mouseleave', handleMouseLeave);
+        containerElement.addEventListener('mouseenter', handleMouseEnter as EventListener);
+      }
+    } catch (error) {
+      // Handle addEventListener errors gracefully
+      console.warn('Failed to add event listeners:', error);
+    }
+
+    return () => {
+      try {
+        element.removeEventListener(
+          'mousemove',
+          throttledUpdateTargetPosition as EventListener
         );
-        containerElement.removeEventListener(
-          'mouseenter',
-          handleMouseEnter as EventListener
-        );
+        if (containerElement) {
+          containerElement.removeEventListener(
+            'mouseleave',
+            handleMouseLeave
+          );
+          containerElement.removeEventListener(
+            'mouseenter',
+            handleMouseEnter as EventListener
+          );
+        }
+      } catch (error) {
+        // Handle removeEventListener errors gracefully
+        console.warn('Failed to remove event listeners:', error);
       }
     };
   }, [containerElement, throttledUpdateTargetPosition, handleMouseLeave, handleMouseEnter]);
