@@ -51,114 +51,139 @@ const mockGetBoundingClientRect = jest.fn(() => ({
   toJSON: () => ({}),
 }));
 
-// Apply to HTMLElement prototype
-Object.defineProperty(HTMLElement.prototype, 'getBoundingClientRect', {
-  value: mockGetBoundingClientRect,
-  writable: true,
-});
+// Apply to HTMLElement prototype (only if in browser environment)
+if (typeof HTMLElement !== 'undefined') {
+  Object.defineProperty(HTMLElement.prototype, 'getBoundingClientRect', {
+    value: mockGetBoundingClientRect,
+    writable: true,
+  });
+}
 
-// Mock document methods used by CustomCursor
-const originalGetElementById = document.getElementById;
-const originalCreateElement = document.createElement;
-const originalBodyAppendChild = document.body.appendChild;
-const originalHeadAppendChild = document.head.appendChild;
+// Mock document methods used by CustomCursor (only if in browser environment)
+let originalGetElementById: typeof document.getElementById;
+let originalCreateElement: typeof document.createElement;
+let originalBodyAppendChild: typeof document.body.appendChild;
+let originalHeadAppendChild: typeof document.head.appendChild;
+
+if (typeof document !== 'undefined') {
+  originalGetElementById = document.getElementById;
+  originalCreateElement = document.createElement;
+  originalBodyAppendChild = document.body.appendChild;
+  originalHeadAppendChild = document.head.appendChild;
+}
 
 // Track created elements for cleanup
 const createdElements = new Set<Element>();
 
-document.getElementById = jest.fn((id: string) => {
-  return originalGetElementById.call(document, id);
-});
+// Mock document methods only if in browser environment
+if (typeof document !== 'undefined') {
+  document.getElementById = jest.fn((id: string) => {
+    return originalGetElementById.call(document, id);
+  });
 
-document.createElement = jest.fn((tagName: string) => {
-  const element = originalCreateElement.call(document, tagName);
-  createdElements.add(element);
-  return element;
-});
+  document.createElement = jest.fn((tagName: string) => {
+    const element = originalCreateElement.call(document, tagName);
+    createdElements.add(element);
+    return element;
+  });
+}
 
 // Track appendChild calls with proper typing - only mock when needed
 // Don't override by default, let tests handle mocking when needed
 
-// Mock window object properties
-Object.defineProperty(window, 'innerWidth', {
-  writable: true,
-  configurable: true,
-  value: 1024,
-});
+// Mock window object properties (only if in browser environment)
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'innerWidth', {
+    writable: true,
+    configurable: true,
+    value: 1024,
+  });
 
-Object.defineProperty(window, 'innerHeight', {
-  writable: true,
-  configurable: true,
-  value: 768,
-});
+  Object.defineProperty(window, 'innerHeight', {
+    writable: true,
+    configurable: true,
+    value: 768,
+  });
+}
 
 // ===== EVENT LISTENER MOCKS =====
 
 // Track event listeners for testing
 const eventListeners = new Map<string, Set<EventListenerOrEventListenerObject>>();
 
-const originalAddEventListener = Element.prototype.addEventListener;
-const originalRemoveEventListener = Element.prototype.removeEventListener;
-const originalDocumentAddEventListener = document.addEventListener;
-const originalDocumentRemoveEventListener = document.removeEventListener;
+// Store original functions (only if in browser environment)
+let originalAddEventListener: typeof Element.prototype.addEventListener;
+let originalRemoveEventListener: typeof Element.prototype.removeEventListener;
+let originalDocumentAddEventListener: typeof document.addEventListener;
+let originalDocumentRemoveEventListener: typeof document.removeEventListener;
 
-// Mock Element.addEventListener
-Element.prototype.addEventListener = jest.fn(function(
-  this: Element,
-  type: string,
-  listener: EventListenerOrEventListenerObject,
-  options?: boolean | AddEventListenerOptions
-) {
-  const key = `${this.tagName || 'ELEMENT'}-${type}`;
-  if (!eventListeners.has(key)) {
-    eventListeners.set(key, new Set());
-  }
-  const listeners = eventListeners.get(key);
-  listeners?.add(listener);
-  
-  return originalAddEventListener.call(this, type, listener, options);
-});
+if (typeof Element !== 'undefined' && typeof document !== 'undefined') {
+  originalAddEventListener = Element.prototype.addEventListener;
+  originalRemoveEventListener = Element.prototype.removeEventListener;
+  originalDocumentAddEventListener = document.addEventListener;
+  originalDocumentRemoveEventListener = document.removeEventListener;
+}
 
-// Mock Element.removeEventListener
-Element.prototype.removeEventListener = jest.fn(function(
-  this: Element,
-  type: string,
-  listener: EventListenerOrEventListenerObject,
-  options?: boolean | EventListenerOptions
-) {
-  const key = `${this.tagName || 'ELEMENT'}-${type}`;
-  eventListeners.get(key)?.delete(listener);
-  
-  return originalRemoveEventListener.call(this, type, listener, options);
-});
+// Mock Element and document methods only if in browser environment
+if (typeof Element !== 'undefined' && typeof document !== 'undefined') {
+  // Mock Element.addEventListener
+  Element.prototype.addEventListener = jest.fn(function(
+    this: Element,
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ) {
+    const key = `${this.tagName || 'ELEMENT'}-${type}`;
+    if (!eventListeners.has(key)) {
+      eventListeners.set(key, new Set());
+    }
+    const listeners = eventListeners.get(key);
+    listeners?.add(listener);
+    
+    return originalAddEventListener.call(this, type, listener, options);
+  });
 
-// Mock document.addEventListener
-document.addEventListener = jest.fn((
-  type: string,
-  listener: EventListenerOrEventListenerObject,
-  options?: boolean | AddEventListenerOptions
-) => {
-  const key = `DOCUMENT-${type}`;
-  if (!eventListeners.has(key)) {
-    eventListeners.set(key, new Set());
-  }
-  const listeners = eventListeners.get(key);
-  listeners?.add(listener);
-  
-  return originalDocumentAddEventListener.call(document, type, listener, options);
-});
+  // Mock Element.removeEventListener
+  Element.prototype.removeEventListener = jest.fn(function(
+    this: Element,
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | EventListenerOptions
+  ) {
+    const key = `${this.tagName || 'ELEMENT'}-${type}`;
+    eventListeners.get(key)?.delete(listener);
+    
+    return originalRemoveEventListener.call(this, type, listener, options);
+  });
 
-// Mock document.removeEventListener
-document.removeEventListener = jest.fn((
-  type: string,
-  listener: EventListenerOrEventListenerObject,
-  options?: boolean | EventListenerOptions
-) => {
-  const key = `DOCUMENT-${type}`;
-  eventListeners.get(key)?.delete(listener);
-  
-  return originalDocumentRemoveEventListener.call(document, type, listener, options);
-});
+  // Mock document.addEventListener
+  document.addEventListener = jest.fn((
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ) => {
+    const key = `DOCUMENT-${type}`;
+    if (!eventListeners.has(key)) {
+      eventListeners.set(key, new Set());
+    }
+    const listeners = eventListeners.get(key);
+    listeners?.add(listener);
+    
+    return originalDocumentAddEventListener.call(document, type, listener, options);
+  });
+
+  // Mock document.removeEventListener
+  document.removeEventListener = jest.fn((
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | EventListenerOptions
+  ) => {
+    const key = `DOCUMENT-${type}`;
+    eventListeners.get(key)?.delete(listener);
+    
+    return originalDocumentRemoveEventListener.call(document, type, listener, options);
+  });
+}
 
 // Helper to trigger events for testing
 global.triggerEvent = (

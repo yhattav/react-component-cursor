@@ -9,6 +9,7 @@ import {
   CursorVisibilityReason,
 } from './types.js';
 import { validateProps } from './utils/validation';
+import { isSSR, safeDocument } from './utils/ssr';
 
 // Clean props interface
 export interface CustomCursorProps {
@@ -153,7 +154,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     onMove,
     onVisibilityChange,
   }) => {
-    // Validate props in development mode
+    // Validate props in development mode (always called first)
     validateProps({
       id,
       enabled,
@@ -171,14 +172,15 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       onVisibilityChange,
     });
 
-    // Memoize offset values to avoid recreating object
+    // Memoize offset values to avoid recreating object (always called)
     const offsetValues = React.useMemo(() => ({
       x: typeof offset === 'object' ? offset.x : 0,
       y: typeof offset === 'object' ? offset.y : 0,
     }), [offset]);
 
-    const { position, setPosition, targetPosition, isVisible } =
-      useMousePosition(containerRef, offsetValues.x, offsetValues.y, throttleMs);
+    // Always call hooks, even if we'll return null (Rules of Hooks)
+    const mousePositionHook = useMousePosition(containerRef, offsetValues.x, offsetValues.y, throttleMs);
+    const { position, setPosition, targetPosition, isVisible } = mousePositionHook;
     useSmoothAnimation(targetPosition, smoothness, setPosition);
 
     const [portalContainer, setPortalContainer] =
@@ -186,26 +188,32 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
 
     // Memoize portal container creation
     const getPortalContainerMemo = React.useCallback(() => {
-      const existingContainer = document.getElementById('cursor-container');
+      const doc = safeDocument();
+      if (!doc) return null;
+
+      const existingContainer = doc.getElementById('cursor-container');
       if (existingContainer) {
         return existingContainer;
       }
 
-      const container = document.createElement('div');
+      const container = doc.createElement('div');
       container.id = 'cursor-container';
       container.style.position = 'fixed';
       container.style.top = '0';
       container.style.left = '0';
       container.style.pointerEvents = 'none';
       container.style.zIndex = DEFAULT_Z_INDEX.toString();
-      document.body.appendChild(container);
+      doc.body.appendChild(container);
       return container;
     }, []);
 
     React.useEffect(() => {
       setPortalContainer(getPortalContainerMemo());
       return () => {
-        const container = document.getElementById('cursor-container');
+        const doc = safeDocument();
+        if (!doc) return;
+        
+        const container = doc.getElementById('cursor-container');
         if (container && container.children.length === 0) {
           try {
             if (container.parentNode) {
@@ -236,19 +244,22 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     `, []);
 
     React.useEffect(() => {
+      const doc = safeDocument();
+      if (!doc) return;
+      
       const styleId = `cursor-style-${id}`;
-      const existingStyle = document.getElementById(styleId);
+      const existingStyle = doc.getElementById(styleId);
       if (existingStyle) {
         existingStyle.remove();
       }
 
-      const styleSheet = document.createElement('style');
+      const styleSheet = doc.createElement('style');
       styleSheet.id = styleId;
       styleSheet.textContent = styleSheetContent;
-      document.head.appendChild(styleSheet);
+      doc.head.appendChild(styleSheet);
 
       return () => {
-        const style = document.getElementById(styleId);
+        const style = doc.getElementById(styleId);
         if (style) {
           try {
             style.remove();
@@ -320,11 +331,13 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       }
     `, []);
 
-    const shouldRender = enabled && 
-                        isVisible && 
-                        position.x !== null && 
-                        position.y !== null && 
-                        portalContainer;
+    // Determine if we should render anything (SSR safety + enabled check)
+    const shouldRender = !isSSR() && 
+                         enabled && 
+                         isVisible && 
+                         position.x !== null && 
+                         position.y !== null && 
+                         portalContainer;
 
     if (!shouldRender) return null;
 

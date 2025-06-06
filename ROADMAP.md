@@ -51,7 +51,7 @@ This roadmap outlines all necessary tasks to transition react-component-cursor f
 
 - [ ] **Integration Testing**
   - [ ] Test with different React versions (16.8+, 17, 18)
-  - [ ] Test SSR compatibility (Next.js, Gatsby)
+  - [x] Test SSR compatibility (Next.js, Gatsby)
   - [ ] Test with different build systems (Vite, Webpack, Rollup)
   - [ ] Test in different browsers (Chrome, Firefox, Safari, Edge)
   - [ ] Mobile browser testing
@@ -115,7 +115,7 @@ This roadmap outlines all necessary tasks to transition react-component-cursor f
   - [ ] Performance optimization guide
   - [ ] Custom animations and effects
   - [ ] Integration with popular UI libraries
-  - [ ] Server-side rendering considerations
+  - [x] Server-side rendering considerations
 
 ### 🔧 Developer Resources
 - [ ] **TypeScript Support**

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { NullablePosition } from '../types.js';
+import { isSSR } from '../utils/ssr';
 
 // Throttle utility function
 const throttle = <T extends (...args: never[]) => void>(
@@ -108,6 +109,9 @@ export function useMousePosition(
   }, [containerElement]);
 
   useEffect(() => {
+    // Skip event listener setup during SSR
+    if (isSSR()) return;
+    
     const element = containerElement || document;
     
     // Always listen to mousemove (simplified)

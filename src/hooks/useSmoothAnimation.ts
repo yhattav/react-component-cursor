@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { NullablePosition } from '../types.js';
+import { isSSR } from '../utils/ssr';
 
 const SMOOTHING_THRESHOLD = 0.1;
 
@@ -67,6 +68,9 @@ export function useSmoothAnimation(
   }, [calculateNewPosition, setPosition, targetPosition]);
 
   useEffect(() => {
+    // Skip animation during SSR
+    if (isSSR()) return;
+    
     // If smoothFactor is 1, just set position directly
     if (smoothFactor === 1) {
       setPosition(targetPosition);
