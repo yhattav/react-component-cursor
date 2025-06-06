@@ -174,6 +174,23 @@ describe('Prop Validation', () => {
     });
   });
 
+  describe('showDevIndicator validation', () => {
+    it('should error for non-boolean showDevIndicator', () => {
+      render(<CustomCursor showDevIndicator={'invalid' as any}>Test cursor</CustomCursor>);
+      expect(errorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('showDevIndicator\' must be a boolean')
+      );
+    });
+
+    it('should not error for valid boolean showDevIndicator', () => {
+      render(<CustomCursor showDevIndicator={false}>Test cursor</CustomCursor>);
+      expect(errorSpy).not.toHaveBeenCalled();
+      
+      render(<CustomCursor showDevIndicator={true}>Test cursor</CustomCursor>);
+      expect(errorSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('callback validation', () => {
     it('should error for non-function onMove', () => {
       render(<CustomCursor onMove={'invalid' as any}>Test cursor</CustomCursor>);

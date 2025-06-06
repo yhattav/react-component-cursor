@@ -52,6 +52,7 @@ describe('Forward Compatibility', () => {
           offset={{ x: 10, y: 20 }}
           showNativeCursor={false}
           throttleMs={16}
+          showDevIndicator={false}
           onMove={onMove}
           onVisibilityChange={onVisibilityChange}
         >

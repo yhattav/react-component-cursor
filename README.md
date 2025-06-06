@@ -59,6 +59,7 @@ function App() {
 | `containerRef`        | `RefObject<HTMLElement>`         | -       | Reference to container element for bounded cursor        |
 | `showNativeCursor`    | `boolean`                        | `false` | Whether to show the native cursor alongside the custom one |
 | `throttleMs`          | `number`                         | `0`     | Throttle mouse events in milliseconds (0 = no throttling) |
+| `showDevIndicator`    | `boolean`                        | `true`  | **[Dev Only]** Show red debug ring in development (no effect in production) |
 | `onMove`              | `(position: { x: number, y: number }) => void` | -       | Callback fired on cursor movement                        |
 | `onVisibilityChange` | `(isVisible: boolean, reason: CursorVisibilityReason) => void`   | -       | Callback fired when cursor visibility changes. Reason indicates why ('container', 'disabled', etc.) |
 
@@ -248,12 +249,30 @@ import { CustomCursor } from '@yhattav/react-component-cursor/dist/index.mjs';
 When running in development mode, you'll see:
 
 1. **Red Ring Indicator**: A red border around custom cursors for visual debugging
+   - **Toggle off**: Use `showDevIndicator={false}` to hide the debug ring when needed
+   - **Production**: Automatically removed in production builds (zero overhead)
 2. **Console Validation**: Helpful error messages for invalid props:
    ```
    CustomCursor: smoothness must be a non-negative number, got: -1
    CustomCursor: id must be a non-empty string, got: ""
    ```
 3. **Development Warnings**: Guidance for common setup issues
+
+### Controlling Debug Features
+
+```tsx
+// Hide debug ring for clean screenshots or design work
+<CustomCursor showDevIndicator={false}>
+  <MyCustomCursor />
+</CustomCursor>
+
+// Show debug ring (default behavior in development)
+<CustomCursor showDevIndicator={true}>
+  <MyCustomCursor />
+</CustomCursor>
+
+// In production builds, showDevIndicator has no effect - debug features are completely removed
+```
 
 ### Build Configuration
 

@@ -11,6 +11,12 @@ const meta: Meta = {
         type: 'text',
       },
     },
+    showDevIndicator: {
+      control: {
+        type: 'boolean',
+      },
+      description: '[Dev Only] Show red debug ring in development (no effect in production)',
+    },
   },
   parameters: {
     controls: { expanded: true },

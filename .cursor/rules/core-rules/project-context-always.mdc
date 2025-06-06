@@ -60,3 +60,7 @@ This is a **React component library** that provides a flexible, customizable cur
 - **Documentation**: Comprehensive README with examples
 - **Performance**: Optimized for 60fps cursor tracking
 - **API Design**: Simple, intuitive props with sensible defaults
+
+## Development 
+- **Steps Should Always run**: Any work you do should always be ready for visual assesment by me. This means that I should be able to review it in the browser.
+- **Dev Server Always Running**: Always assume dev server is already running for both library and example projects. No need to ask to run the app. 
