@@ -1,9 +1,28 @@
 {
   "version": "0.1.0",
   "license": "MIT",
+  "exports": {
+    ".": {
+      "development": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.dev.mjs",
+        "require": "./dist/index.dev.js"
+      },
+      "production": {
+        "types": "./dist/index.d.ts", 
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.js"
+      },
+      "default": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.mjs", 
+        "require": "./dist/index.js"
+      }
+    }
+  },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
-  "typings": "dist/index.d.ts",
+  "types": "dist/index.d.ts",
   "files": [
     "dist",
     "src"
@@ -45,19 +64,30 @@
     "trailingComma": "es5"
   },
   "name": "@yhattav/react-component-cursor",
-  "types": "dist/index.d.ts",
   "publishConfig": {
     "access": "public"
   },
   "author": "yhattav",
   "size-limit": [
     {
+      "name": "Production Bundle (CJS)",
       "path": "dist/index.js",
       "limit": "10 KB"
     },
     {
+      "name": "Production Bundle (ESM)",
       "path": "dist/index.mjs",
       "limit": "10 KB"
+    },
+    {
+      "name": "Development Bundle (CJS)",
+      "path": "dist/index.dev.js",
+      "limit": "15 KB"
+    },
+    {
+      "name": "Development Bundle (ESM)",
+      "path": "dist/index.dev.mjs",
+      "limit": "15 KB"
     }
   ],
   "devDependencies": {

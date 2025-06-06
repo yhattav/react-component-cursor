@@ -22,14 +22,15 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
     const [isMouseInContainer1, setIsMouseInContainer1] = useState(false);
     const [isMouseInContainer2, setIsMouseInContainer2] = useState(false);
     const [globalCursorMode, setGlobalCursorMode] = useState('simple');
-    const [container1CursorMode, setContainer1CursorMode] = useState('simple');
-    const [cursor1Position, setCursor1Position] = useState({ x: 0, y: 0 });
-    const [lastGlobalPosition, setLastGlobalPosition] = useState({
-      x: 0,
-      y: 0,
-    });
-    const [hoveredSecond, setHoveredSecond] = useState(false);
-    const [isPerformanceMode, setIsPerformanceMode] = useState(false);
+      const [container1CursorMode, setContainer1CursorMode] = useState('simple');
+  const [cursor1Position, setCursor1Position] = useState({ x: 0, y: 0 });
+  const [lastGlobalPosition, setLastGlobalPosition] = useState({
+    x: 0,
+    y: 0,
+  });
+  const [hoveredSecond, setHoveredSecond] = useState(false);
+  const [isPerformanceMode, setIsPerformanceMode] = useState(false);
+  const [showDevIndicator, setShowDevIndicator] = useState(true);
 
     // Refs
     const mainContainerRef = useRef(null);
@@ -176,6 +177,13 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
           >
             {isPerformanceMode ? '60fps Mode' : 'Performance Mode'}
           </Button>
+
+          <Button
+            variant={showDevIndicator ? 'primary' : 'secondary'}
+            onClick={() => setShowDevIndicator((prev) => !prev)}
+          >
+            {showDevIndicator ? 'Hide Dev Ring' : 'Show Dev Ring'}
+          </Button>
         </div>
 
         {/* Global Cursor - Using simplified API */}
@@ -187,6 +195,7 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
             onVisibilityChange={handleCursorVisibilityChange}
             showNativeCursor={false}
             throttleMs={isPerformanceMode ? 16 : 0} // 60fps when enabled
+            showDevIndicator={showDevIndicator}
           >
             {renderCursor(globalCursorMode)}
           </CustomCursor>
@@ -213,6 +222,7 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
                 onVisibilityChange={handleCursorVisibilityChange}
                 showNativeCursor={false}
                 throttleMs={isPerformanceMode ? 16 : 0}
+                showDevIndicator={showDevIndicator}
               >
                 {renderCursor(container1CursorMode)}
               </CustomCursor>
@@ -254,6 +264,7 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
                 offset={{ x: 0, y: -10 }}
                 onMove={handleContainer2CursorMove}
                 onVisibilityChange={handleCursorVisibilityChange}
+                showDevIndicator={showDevIndicator}
               >
                 <div
                   className={`

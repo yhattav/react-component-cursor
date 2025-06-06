@@ -8,6 +8,7 @@ import {
   CursorVisibilityHandler,
   CursorVisibilityReason,
 } from './types.js';
+import { validateProps } from './utils/validation';
 
 // Clean props interface
 export interface CustomCursorProps {
@@ -30,6 +31,9 @@ export interface CustomCursorProps {
   showNativeCursor?: boolean;
   throttleMs?: number; // Performance throttling
   
+  // Development
+  showDevIndicator?: boolean; // Show red debug circle in development (default: true)
+  
   // Event Handlers
   onMove?: CursorMoveHandler;
   onVisibilityChange?: CursorVisibilityHandler;
@@ -37,12 +41,13 @@ export interface CustomCursorProps {
 
 const ANIMATION_DURATION = '0.3s';
 const ANIMATION_NAME = 'cursorFadeIn';
-const DEFAULT_Z_INDEX = 9999;
+  const DEFAULT_Z_INDEX = 9999;
 
 const DevIndicator: React.FC<{
   position: { x: number | null; y: number | null };
-}> = ({ position }) => {
-  if (process.env.NODE_ENV !== 'development') return null;
+  show: boolean;
+}> = ({ position, show }) => {
+  if (process.env.NODE_ENV !== 'development' || !show) return null;
 
   return (
     <div
@@ -79,7 +84,8 @@ const arePropsEqual = (
     prevProps.zIndex !== nextProps.zIndex ||
     prevProps.smoothness !== nextProps.smoothness ||
     prevProps.showNativeCursor !== nextProps.showNativeCursor ||
-    prevProps.throttleMs !== nextProps.throttleMs
+    prevProps.throttleMs !== nextProps.throttleMs ||
+    prevProps.showDevIndicator !== nextProps.showDevIndicator
   ) {
     return false;
   }
@@ -143,9 +149,28 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     containerRef,
     showNativeCursor = false,
     throttleMs = 0,
+    showDevIndicator = true,
     onMove,
     onVisibilityChange,
   }) => {
+    // Validate props in development mode
+    validateProps({
+      id,
+      enabled,
+      children,
+      className,
+      style,
+      zIndex,
+      offset,
+      smoothness,
+      containerRef,
+      showNativeCursor,
+      throttleMs,
+      showDevIndicator,
+      onMove,
+      onVisibilityChange,
+    });
+
     // Memoize offset values to avoid recreating object
     const offsetValues = React.useMemo(() => ({
       x: typeof offset === 'object' ? offset.x : 0,
@@ -239,9 +264,9 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
 
     // Memoize move callback to avoid recreation
     const handleMove = React.useCallback(() => {
-      if (position.x !== null && position.y !== null) {
+      if (position.x !== null && position.y !== null && typeof onMove === 'function') {
         const cursorPosition: CursorPosition = { x: position.x, y: position.y };
-        onMove?.(cursorPosition);
+        onMove(cursorPosition);
       }
     }, [position.x, position.y, onMove]);
 
@@ -252,9 +277,11 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
 
     // Memoize visibility callback to avoid recreation
     const handleVisibilityChange = React.useCallback(() => {
-      const actuallyVisible = enabled && isVisible;
-      const reason: CursorVisibilityReason = !enabled ? 'disabled' : 'container';
-      onVisibilityChange?.(actuallyVisible, reason);
+      if (typeof onVisibilityChange === 'function') {
+        const actuallyVisible = enabled && isVisible;
+        const reason: CursorVisibilityReason = !enabled ? 'disabled' : 'container';
+        onVisibilityChange(actuallyVisible, reason);
+      }
     }, [enabled, isVisible, onVisibilityChange]);
 
     // Handle visibility callback
@@ -316,7 +343,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
             >
               {children}
             </div>
-            <DevIndicator position={position} />
+            <DevIndicator position={position} show={showDevIndicator} />
           </React.Fragment>,
           portalContainer
         )}

@@ -59,6 +59,7 @@ function App() {
 | `containerRef`        | `RefObject<HTMLElement>`         | -       | Reference to container element for bounded cursor        |
 | `showNativeCursor`    | `boolean`                        | `false` | Whether to show the native cursor alongside the custom one |
 | `throttleMs`          | `number`                         | `0`     | Throttle mouse events in milliseconds (0 = no throttling) |
+| `showDevIndicator`    | `boolean`                        | `true`  | **[Dev Only]** Show red debug ring in development (no effect in production) |
 | `onMove`              | `(position: { x: number, y: number }) => void` | -       | Callback fired on cursor movement                        |
 | `onVisibilityChange` | `(isVisible: boolean, reason: CursorVisibilityReason) => void`   | -       | Callback fired when cursor visibility changes. Reason indicates why ('container', 'disabled', etc.) |
 
@@ -194,6 +195,111 @@ const MyComponent: React.FC = () => {
       {/* Your cursor content */}
     </CustomCursor>
   );
+};
+```
+
+## Development vs Production Builds
+
+This library uses **conditional exports** to provide optimized builds for different environments:
+
+### 🔧 Development Build
+- **Enhanced Developer Experience**: Includes helpful debugging features
+- **Visual Debug Indicator**: Red ring around custom cursors for easy identification
+- **Prop Validation**: Runtime validation with helpful error messages
+- **Development Warnings**: Console warnings for common issues
+- **Bundle Size**: ~3KB (includes debug features)
+
+### ⚡ Production Build  
+- **Optimized Performance**: All debug code eliminated via tree-shaking
+- **Minimal Bundle**: Debug features completely removed
+- **Best User Experience**: No visual indicators or validation overhead
+- **Bundle Size**: ~2.2KB (production optimized)
+
+### How It Works
+
+The library automatically selects the appropriate build based on your environment:
+
+```tsx
+// This single import automatically chooses the right build
+import { CustomCursor } from '@yhattav/react-component-cursor';
+
+// In development (NODE_ENV=development):
+// - Gets debug features, validation, red ring indicator
+// - Larger bundle with helpful developer tools
+
+// In production (NODE_ENV=production):  
+// - Gets optimized build with debug code eliminated
+// - Smaller bundle focused on performance
+```
+
+### Manual Build Selection
+
+You can also manually select builds if needed (advanced usage):
+
+```tsx
+// Force development build (includes debug features)
+import { CustomCursor } from '@yhattav/react-component-cursor/dist/index.dev.mjs';
+
+// Force production build (optimized, no debug features)
+import { CustomCursor } from '@yhattav/react-component-cursor/dist/index.mjs';
+```
+
+### Debug Features in Development
+
+When running in development mode, you'll see:
+
+1. **Red Ring Indicator**: A red border around custom cursors for visual debugging
+   - **Toggle off**: Use `showDevIndicator={false}` to hide the debug ring when needed
+   - **Production**: Automatically removed in production builds (zero overhead)
+2. **Console Validation**: Helpful error messages for invalid props:
+   ```
+   CustomCursor: smoothness must be a non-negative number, got: -1
+   CustomCursor: id must be a non-empty string, got: ""
+   ```
+3. **Development Warnings**: Guidance for common setup issues
+
+### Controlling Debug Features
+
+```tsx
+// Hide debug ring for clean screenshots or design work
+<CustomCursor showDevIndicator={false}>
+  <MyCustomCursor />
+</CustomCursor>
+
+// Show debug ring (default behavior in development)
+<CustomCursor showDevIndicator={true}>
+  <MyCustomCursor />
+</CustomCursor>
+
+// In production builds, showDevIndicator has no effect - debug features are completely removed
+```
+
+### Build Configuration
+
+Popular bundlers automatically handle conditional exports:
+
+**Vite** (automatically configured):
+```js
+// vite.config.js - no special configuration needed
+export default defineConfig({
+  // Vite automatically uses conditional exports
+});
+```
+
+**Webpack** (v5+):
+```js
+// webpack.config.js - automatic in most cases
+module.exports = {
+  // Webpack 5+ supports conditional exports out of the box
+  mode: process.env.NODE_ENV, // 'development' or 'production'
+};
+```
+
+**Next.js** (v12+):
+```js
+// next.config.js - automatic support
+module.exports = {
+  // Next.js automatically handles conditional exports
 };
 ```
 

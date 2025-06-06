@@ -24,7 +24,7 @@ This roadmap outlines all necessary tasks to transition react-component-cursor f
   - [x] Review prop defaults and ensure they make sense
   - [x] Consider deprecating any experimental props
   - [x] Ensure forward compatibility for future features
-  - [ ] Add prop validation and helpful error messages
+  - [x] Add prop validation and helpful error messages
 
 - [x] **Performance Optimization**
   - [x] Implement React.memo with proper comparison function
