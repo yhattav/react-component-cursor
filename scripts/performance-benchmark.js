@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+/* eslint-env node */
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -220,8 +223,6 @@ class PerformanceBenchmark {
     console.log('🧠 Running memory benchmarks...');
     
     try {
-      const initialMemory = process.memoryUsage();
-      
       // Simulate memory-intensive operations
       const results = [];
       for (let i = 0; i < BENCHMARK_CONFIG.repetitions; i++) {
