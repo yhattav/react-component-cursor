@@ -30,6 +30,9 @@ export interface CustomCursorProps {
   showNativeCursor?: boolean;
   throttleMs?: number; // Performance throttling
   
+  // Development
+  showDevIndicator?: boolean; // Show red debug circle in development (default: true)
+  
   // Event Handlers
   onMove?: CursorMoveHandler;
   onVisibilityChange?: CursorVisibilityHandler;
@@ -39,10 +42,133 @@ const ANIMATION_DURATION = '0.3s';
 const ANIMATION_NAME = 'cursorFadeIn';
 const DEFAULT_Z_INDEX = 9999;
 
+// Development-only validation that gets tree-shaken in production
+function validateProps(props: CustomCursorProps): void {
+  // The entire function body gets removed in production builds
+  if (process.env.NODE_ENV !== 'development') return;
+
+  const { 
+    id, 
+    smoothness, 
+    throttleMs, 
+    zIndex, 
+    offset, 
+    containerRef,
+    showDevIndicator,
+    onMove,
+    onVisibilityChange,
+  } = props;
+
+  // Validate id
+  if (id !== undefined && (typeof id !== 'string' || id.trim() === '')) {
+    console.error(
+      `CustomCursor: 'id' must be a non-empty string. Received: ${typeof id === 'string' ? `"${id}"` : id}`
+    );
+  }
+
+  // Validate smoothness
+  if (smoothness !== undefined) {
+    if (typeof smoothness !== 'number' || isNaN(smoothness)) {
+      console.error(
+        `CustomCursor: 'smoothness' must be a number. Received: ${smoothness} (${typeof smoothness})`
+      );
+    } else if (smoothness < 0) {
+      console.error(
+        `CustomCursor: 'smoothness' must be non-negative. Received: ${smoothness}. Use 1 for no smoothing, higher values for more smoothing.`
+      );
+    } else if (smoothness > 20) {
+      console.warn(
+        `CustomCursor: 'smoothness' value ${smoothness} is very high. Values above 20 may cause poor performance. Consider using a lower value.`
+      );
+    }
+  }
+
+  // Validate throttleMs
+  if (throttleMs !== undefined) {
+    if (typeof throttleMs !== 'number' || isNaN(throttleMs)) {
+      console.error(
+        `CustomCursor: 'throttleMs' must be a number. Received: ${throttleMs} (${typeof throttleMs})`
+      );
+    } else if (throttleMs < 0) {
+      console.error(
+        `CustomCursor: 'throttleMs' must be non-negative. Received: ${throttleMs}. Use 0 for no throttling.`
+      );
+    } else if (throttleMs > 100) {
+      console.warn(
+        `CustomCursor: 'throttleMs' value ${throttleMs} is quite high. This may make the cursor feel sluggish. Consider using a lower value (0-50ms).`
+      );
+    }
+  }
+
+  // Validate zIndex
+  if (zIndex !== undefined) {
+    if (typeof zIndex !== 'number' || isNaN(zIndex)) {
+      console.error(
+        `CustomCursor: 'zIndex' must be a number. Received: ${zIndex} (${typeof zIndex})`
+      );
+    } else if (!Number.isInteger(zIndex)) {
+      console.warn(
+        `CustomCursor: 'zIndex' should be an integer. Received: ${zIndex}`
+      );
+    }
+  }
+
+  // Validate offset
+  if (offset !== undefined) {
+    if (typeof offset !== 'object' || offset === null) {
+      console.error(
+        `CustomCursor: 'offset' must be an object with x and y properties. Received: ${offset}`
+      );
+    } else {
+      const { x, y } = offset as { x?: unknown; y?: unknown };
+      if (typeof x !== 'number' || isNaN(x)) {
+        console.error(
+          `CustomCursor: 'offset.x' must be a number. Received: ${x} (${typeof x})`
+        );
+      }
+      if (typeof y !== 'number' || isNaN(y)) {
+        console.error(
+          `CustomCursor: 'offset.y' must be a number. Received: ${y} (${typeof y})`
+        );
+      }
+    }
+  }
+
+  // Validate containerRef
+  if (containerRef !== undefined) {
+    if (typeof containerRef !== 'object' || containerRef === null || !('current' in containerRef)) {
+      console.error(
+        `CustomCursor: 'containerRef' must be a React ref object (created with useRef). Received: ${containerRef}`
+      );
+    }
+  }
+
+  // Validate callbacks
+  if (onMove !== undefined && typeof onMove !== 'function') {
+    console.error(
+      `CustomCursor: 'onMove' must be a function. Received: ${typeof onMove}`
+    );
+  }
+
+  if (onVisibilityChange !== undefined && typeof onVisibilityChange !== 'function') {
+    console.error(
+      `CustomCursor: 'onVisibilityChange' must be a function. Received: ${typeof onVisibilityChange}`
+    );
+  }
+
+  // Validate showDevIndicator
+  if (showDevIndicator !== undefined && typeof showDevIndicator !== 'boolean') {
+    console.error(
+      `CustomCursor: 'showDevIndicator' must be a boolean. Received: ${showDevIndicator} (${typeof showDevIndicator})`
+    );
+  }
+}
+
 const DevIndicator: React.FC<{
   position: { x: number | null; y: number | null };
-}> = ({ position }) => {
-  if (process.env.NODE_ENV !== 'development') return null;
+  show: boolean;
+}> = ({ position, show }) => {
+  if (process.env.NODE_ENV !== 'development' || !show) return null;
 
   return (
     <div
@@ -79,7 +205,8 @@ const arePropsEqual = (
     prevProps.zIndex !== nextProps.zIndex ||
     prevProps.smoothness !== nextProps.smoothness ||
     prevProps.showNativeCursor !== nextProps.showNativeCursor ||
-    prevProps.throttleMs !== nextProps.throttleMs
+    prevProps.throttleMs !== nextProps.throttleMs ||
+    prevProps.showDevIndicator !== nextProps.showDevIndicator
   ) {
     return false;
   }
@@ -143,9 +270,28 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     containerRef,
     showNativeCursor = false,
     throttleMs = 0,
+    showDevIndicator = true,
     onMove,
     onVisibilityChange,
   }) => {
+    // Validate props in development mode
+    validateProps({
+      id,
+      enabled,
+      children,
+      className,
+      style,
+      zIndex,
+      offset,
+      smoothness,
+      containerRef,
+      showNativeCursor,
+      throttleMs,
+      showDevIndicator,
+      onMove,
+      onVisibilityChange,
+    });
+
     // Memoize offset values to avoid recreating object
     const offsetValues = React.useMemo(() => ({
       x: typeof offset === 'object' ? offset.x : 0,
@@ -239,9 +385,9 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
 
     // Memoize move callback to avoid recreation
     const handleMove = React.useCallback(() => {
-      if (position.x !== null && position.y !== null) {
+      if (position.x !== null && position.y !== null && typeof onMove === 'function') {
         const cursorPosition: CursorPosition = { x: position.x, y: position.y };
-        onMove?.(cursorPosition);
+        onMove(cursorPosition);
       }
     }, [position.x, position.y, onMove]);
 
@@ -252,9 +398,11 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
 
     // Memoize visibility callback to avoid recreation
     const handleVisibilityChange = React.useCallback(() => {
-      const actuallyVisible = enabled && isVisible;
-      const reason: CursorVisibilityReason = !enabled ? 'disabled' : 'container';
-      onVisibilityChange?.(actuallyVisible, reason);
+      if (typeof onVisibilityChange === 'function') {
+        const actuallyVisible = enabled && isVisible;
+        const reason: CursorVisibilityReason = !enabled ? 'disabled' : 'container';
+        onVisibilityChange(actuallyVisible, reason);
+      }
     }, [enabled, isVisible, onVisibilityChange]);
 
     // Handle visibility callback
@@ -316,7 +464,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
             >
               {children}
             </div>
-            <DevIndicator position={position} />
+            <DevIndicator position={position} show={showDevIndicator} />
           </React.Fragment>,
           portalContainer
         )}

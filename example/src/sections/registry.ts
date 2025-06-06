@@ -24,6 +24,7 @@ export const SECTIONS: Record<string, SectionConfig> = {
     component: DemoSection,
     enabled: true,
   },
+
   gravity: {
     id: 'gravity',
     name: 'Gravity',
