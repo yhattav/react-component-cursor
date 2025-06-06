@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: write
+
 jobs:
   performance:
     runs-on: ubuntu-latest
@@ -111,13 +114,15 @@ jobs:
       if: always()
 
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
+      uses: JamesIves/github-pages-deploy-action@v4
       if: github.ref == 'refs/heads/main'
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs
-        destination_dir: performance
-        keep_files: true
+        folder: docs
+        branch: gh-pages
+        target-folder: performance
+        clean-exclude: |
+          index.html
+          .nojekyll
         
     - name: Create performance issue on regression
       if: steps.monitoring.outcome == 'failure' && github.event_name != 'schedule'
