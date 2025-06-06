@@ -115,41 +115,31 @@ export function useMousePosition(
   useEffect(() => {
     const element = containerElement || document;
     
-    try {
-      // Always listen to mousemove (simplified)
-      element.addEventListener(
-        'mousemove',
-        throttledUpdateTargetPosition as EventListener
-      );
+    // Always listen to mousemove (simplified)
+    element.addEventListener(
+      'mousemove',
+      throttledUpdateTargetPosition as EventListener
+    );
 
-      if (containerElement) {
-        containerElement.addEventListener('mouseleave', handleMouseLeave);
-        containerElement.addEventListener('mouseenter', handleMouseEnter as EventListener);
-      }
-    } catch (error) {
-      // Handle addEventListener errors gracefully
-      console.warn('Failed to add event listeners:', error);
+    if (containerElement) {
+      containerElement.addEventListener('mouseleave', handleMouseLeave);
+      containerElement.addEventListener('mouseenter', handleMouseEnter as EventListener);
     }
 
     return () => {
-      try {
-        element.removeEventListener(
-          'mousemove',
-          throttledUpdateTargetPosition as EventListener
+      element.removeEventListener(
+        'mousemove',
+        throttledUpdateTargetPosition as EventListener
+      );
+      if (containerElement) {
+        containerElement.removeEventListener(
+          'mouseleave',
+          handleMouseLeave
         );
-        if (containerElement) {
-          containerElement.removeEventListener(
-            'mouseleave',
-            handleMouseLeave
-          );
-          containerElement.removeEventListener(
-            'mouseenter',
-            handleMouseEnter as EventListener
-          );
-        }
-      } catch (error) {
-        // Handle removeEventListener errors gracefully
-        console.warn('Failed to remove event listeners:', error);
+        containerElement.removeEventListener(
+          'mouseenter',
+          handleMouseEnter as EventListener
+        );
       }
     };
   }, [containerElement, throttledUpdateTargetPosition, handleMouseLeave, handleMouseEnter]);
