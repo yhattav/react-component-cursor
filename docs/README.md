@@ -13,7 +13,7 @@ The dashboard is automatically deployed to GitHub Pages and updated on every pus
 The dashboard provides visual insights into:
 
 ### Key Metrics
-- **Bundle Size**: Library size trends over time (target: <15KB)
+- **Bundle Size**: Primary bundle size trends over time (target: <8KB minified, <3KB gzipped)
 - **Memory Usage**: Memory consumption during testing (target: <1MB)
 - **Test Performance**: Percentage of tests passing (target: >95%)
 - **Test Coverage**: Number of tests successfully executed

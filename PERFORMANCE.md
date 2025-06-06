@@ -111,9 +111,8 @@ open docs/index.html
 🔧 Node.js: v20.18.0
 
 📦 Bundle Size:
-   ESM: 5.70KB
-   CJS: 6.26KB
-   Total: 11.96KB (20.25% under threshold)
+   Primary (ESM): 5.70KB minified, 2.32KB gzipped
+   Targets: <8.00KB minified, <3.00KB gzipped
 
 🧠 Memory Performance:
    Max heap delta: 0.05MB

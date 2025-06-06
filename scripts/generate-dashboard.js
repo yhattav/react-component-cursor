@@ -55,8 +55,8 @@ class PerformanceDashboard {
       const timestamp = new Date(result.timestamp).toLocaleDateString();
       chartData.timestamps.push(timestamp);
       
-      // Bundle size data
-      const bundleSize = result.metrics?.bundleSize?.total || 0;
+      // Bundle size data (use primary bundle size for more accurate reporting)
+      const bundleSize = result.metrics?.bundleSize?.primary?.minified || result.metrics?.bundleSize?.total || 0;
       chartData.bundleSizes.push((bundleSize / 1024).toFixed(2)); // Convert to KB
       
       // Memory usage data  
@@ -225,7 +225,7 @@ class PerformanceDashboard {
     const currentPerformance = chartData.renderPerformance[latest];
     const currentTests = chartData.testCounts[latest];
     
-    const bundleStatus = currentBundleSize < 15 ? 'status-good' : currentBundleSize < 20 ? 'status-warning' : 'status-error';
+    const bundleStatus = currentBundleSize < 8 ? 'status-good' : currentBundleSize < 12 ? 'status-warning' : 'status-error';
     const memoryStatus = currentMemory < 1 ? 'status-good' : currentMemory < 5 ? 'status-warning' : 'status-error';
     const perfStatus = currentPerformance >= 95 ? 'status-good' : currentPerformance >= 80 ? 'status-warning' : 'status-error';
     
