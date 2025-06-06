@@ -234,11 +234,11 @@ afterEach(() => {
     });
   }
   
-  // Reset appendChild behavior
-  if (document.body.appendChild !== originalBodyAppendChild) {
+  // Reset appendChild behavior only if we have the original functions
+  if (originalBodyAppendChild && document.body && document.body.appendChild !== originalBodyAppendChild) {
     document.body.appendChild = originalBodyAppendChild;
   }
-  if (document.head.appendChild !== originalHeadAppendChild) {
+  if (originalHeadAppendChild && document.head && document.head.appendChild !== originalHeadAppendChild) {
     document.head.appendChild = originalHeadAppendChild;
   }
   

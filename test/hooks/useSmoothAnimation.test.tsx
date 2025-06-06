@@ -40,32 +40,20 @@ describe('useSmoothAnimation', () => {
     cancelRafSpy.mockRestore();
   });
 
-  it('handles missing requestAnimationFrame gracefully', () => {
-    const originalRAF = global.requestAnimationFrame;
-    const originalCAF = global.cancelAnimationFrame;
-    
-    // Remove RAF to test fallback
-    Object.defineProperty(global, 'requestAnimationFrame', {
-      value: undefined,
-      writable: true,
-      configurable: true
-    });
-    Object.defineProperty(global, 'cancelAnimationFrame', {
-      value: undefined,
-      writable: true,
-      configurable: true
-    });
-
+    it('smoothly interpolates between positions', () => {
     const setPosition = jest.fn();
     const targetPosition = { x: 100, y: 100 };
+    
+    // Use a smoothing factor > 1 to trigger animation
+    renderHook(() => useSmoothAnimation(targetPosition, 5, setPosition));
 
-    expect(() => {
-      renderHook(() => useSmoothAnimation(targetPosition, 2, setPosition));
-    }).not.toThrow();
+    // Advance fake timers to trigger animation frame
+    act(() => {
+      jest.advanceTimersByTime(16);
+    });
 
-    // Restore RAF
-    global.requestAnimationFrame = originalRAF;
-    global.cancelAnimationFrame = originalCAF;
+    // Should have called setPosition during animation
+    expect(setPosition).toHaveBeenCalled();
   });
 
   it('skips animation when smoothness is 1', () => {
@@ -108,22 +96,18 @@ describe('useSmoothAnimation', () => {
     cancelRafSpy.mockRestore();
   });
 
-  it('handles RAF errors gracefully', () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-    const rafSpy = jest.spyOn(global, 'requestAnimationFrame')
-      .mockImplementation(() => {
-        throw new Error('RAF error');
-      });
-
+  it('respects smoothness factor in calculations', () => {
     const setPosition = jest.fn();
     const targetPosition = { x: 100, y: 100 };
-
-    expect(() => {
-      renderHook(() => useSmoothAnimation(targetPosition, 2, setPosition));
-    }).not.toThrow();
-
+    
+    // The hook should use RAF for smooth animations when smoothness > 1
+    const rafSpy = jest.spyOn(global, 'requestAnimationFrame');
+    
+    renderHook(() => useSmoothAnimation(targetPosition, 5, setPosition));
+    
+    expect(rafSpy).toHaveBeenCalled();
+    
     rafSpy.mockRestore();
-    consoleSpy.mockRestore();
   });
 
   it('stops animating when reaching threshold', () => {

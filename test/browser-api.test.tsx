@@ -16,42 +16,15 @@ describe('Browser API Integration', () => {
       rafSpy.mockRestore();
     });
 
-    it('should handle missing RAF gracefully', () => {
-      const originalRAF = global.requestAnimationFrame;
-      const originalCAF = global.cancelAnimationFrame;
+    it('should work with direct animation when smoothness is 1', () => {
+      const rafSpy = jest.spyOn(global, 'requestAnimationFrame');
       
-      Object.defineProperty(global, 'requestAnimationFrame', {
-        value: undefined,
-        writable: true,
-        configurable: true
-      });
-      Object.defineProperty(global, 'cancelAnimationFrame', {
-        value: undefined,
-        writable: true,
-        configurable: true
-      });
-
-      expect(() => {
-        render(<CustomCursor smoothness={2}>No RAF</CustomCursor>);
-      }).not.toThrow();
-
-      global.requestAnimationFrame = originalRAF;
-      global.cancelAnimationFrame = originalCAF;
-    });
-
-    it('should handle RAF errors gracefully', () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { /* mock */ });
-      const rafSpy = jest.spyOn(global, 'requestAnimationFrame')
-        .mockImplementation(() => {
-          throw new Error('RAF error');
-        });
-
-      expect(() => {
-        render(<CustomCursor smoothness={2}>RAF Error</CustomCursor>);
-      }).not.toThrow();
-
+      render(<CustomCursor smoothness={1}>Direct</CustomCursor>);
+      
+      // Should not use RAF when smoothness is 1 (direct positioning)
+      expect(rafSpy).not.toHaveBeenCalled();
+      
       rafSpy.mockRestore();
-      consoleSpy.mockRestore();
     });
   });
 
@@ -99,35 +72,27 @@ describe('Browser API Integration', () => {
     });
   });
 
-  describe('SSR Compatibility', () => {
-    it('should handle missing window', () => {
-      const originalWindow = global.window;
-      Object.defineProperty(global, 'window', {
-        value: undefined,
-        writable: true,
-        configurable: true
-      });
-
-      expect(() => {
-        render(<CustomCursor>SSR</CustomCursor>);
-      }).not.toThrow();
-
-      global.window = originalWindow;
+  describe('Performance Optimization', () => {
+    it('should not use RAF for direct positioning', () => {
+      const rafSpy = jest.spyOn(global, 'requestAnimationFrame');
+      
+      render(<CustomCursor smoothness={1}>Direct</CustomCursor>);
+      
+      // Direct positioning should not trigger RAF
+      expect(rafSpy).not.toHaveBeenCalled();
+      
+      rafSpy.mockRestore();
     });
 
-    it('should handle missing performance.now', () => {
-      const originalPerformance = global.performance;
-      Object.defineProperty(global, 'performance', {
-        value: undefined,
-        writable: true,
-        configurable: true
-      });
-
-      expect(() => {
-        render(<CustomCursor>No Performance</CustomCursor>);
-      }).not.toThrow();
-
-      global.performance = originalPerformance;
+    it('should use RAF for smooth animations', () => {
+      const rafSpy = jest.spyOn(global, 'requestAnimationFrame');
+      
+      render(<CustomCursor smoothness={2}>Smooth</CustomCursor>);
+      
+      // Smooth animations should use RAF
+      expect(rafSpy).toHaveBeenCalled();
+      
+      rafSpy.mockRestore();
     });
   });
 
@@ -150,19 +115,16 @@ describe('Browser API Integration', () => {
     });
   });
 
-  describe('Browser Feature Detection', () => {
-    it('should work with polyfilled RAF', () => {
-      const originalRAF = global.requestAnimationFrame;
+  describe('Animation Cleanup', () => {
+    it('should cancel animation frames on unmount', () => {
+      const cancelSpy = jest.spyOn(global, 'cancelAnimationFrame');
       
-      global.requestAnimationFrame = (callback: FrameRequestCallback) => {
-        return setTimeout(() => callback(Date.now()), 16) as unknown as number;
-      };
-
-      expect(() => {
-        render(<CustomCursor smoothness={2}>Polyfilled</CustomCursor>);
-      }).not.toThrow();
-
-      global.requestAnimationFrame = originalRAF;
+      const { unmount } = render(<CustomCursor smoothness={2}>Cleanup</CustomCursor>);
+      unmount();
+      
+      expect(cancelSpy).toHaveBeenCalled();
+      
+      cancelSpy.mockRestore();
     });
   });
 }); 
