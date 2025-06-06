@@ -1,14 +1,258 @@
 import '@testing-library/jest-dom';
 
-// Enable fake timers
+// ===== BROWSER API MOCKS =====
+
+// Mock requestAnimationFrame and cancelAnimationFrame
+let rafId = 0;
+const rafCallbacks = new Map<number, FrameRequestCallback>();
+
+global.requestAnimationFrame = jest.fn((callback: FrameRequestCallback) => {
+  const id = ++rafId;
+  rafCallbacks.set(id, callback);
+  
+  // Execute callback immediately in tests (synchronous)
+  // Can be overridden in specific tests for async behavior
+  if (process.env.NODE_ENV === 'test') {
+    setTimeout(() => callback(performance.now()), 0);
+  }
+  
+  return id;
+});
+
+global.cancelAnimationFrame = jest.fn((id: number) => {
+  rafCallbacks.delete(id);
+});
+
+// Helper to manually trigger RAF callbacks in tests
+global.triggerRAF = (timestamp: number = performance.now()) => {
+  const callbacks = Array.from(rafCallbacks.values());
+  rafCallbacks.clear();
+  callbacks.forEach(callback => callback(timestamp));
+};
+
+// Mock performance.now()
+global.performance = {
+  ...global.performance,
+  now: jest.fn(() => Date.now()),
+};
+
+// ===== DOM API MOCKS =====
+
+// Mock getBoundingClientRect
+const mockGetBoundingClientRect = jest.fn(() => ({
+  x: 0,
+  y: 0,
+  width: 800,
+  height: 600,
+  top: 0,
+  left: 0,
+  bottom: 600,
+  right: 800,
+  toJSON: () => ({}),
+}));
+
+// Apply to HTMLElement prototype
+Object.defineProperty(HTMLElement.prototype, 'getBoundingClientRect', {
+  value: mockGetBoundingClientRect,
+  writable: true,
+});
+
+// Mock document methods used by CustomCursor
+const originalGetElementById = document.getElementById;
+const originalCreateElement = document.createElement;
+const originalBodyAppendChild = document.body.appendChild;
+const originalHeadAppendChild = document.head.appendChild;
+
+// Track created elements for cleanup
+const createdElements = new Set<Element>();
+
+document.getElementById = jest.fn((id: string) => {
+  return originalGetElementById.call(document, id);
+});
+
+document.createElement = jest.fn((tagName: string) => {
+  const element = originalCreateElement.call(document, tagName);
+  createdElements.add(element);
+  return element;
+});
+
+// Track appendChild calls with proper typing
+(document.body.appendChild as jest.Mock) = jest.fn(<T extends Node>(node: T): T => {
+  return originalBodyAppendChild.call(document.body, node) as T;
+});
+
+(document.head.appendChild as jest.Mock) = jest.fn(<T extends Node>(node: T): T => {
+  return originalHeadAppendChild.call(document.head, node) as T;
+});
+
+// Mock window object properties
+Object.defineProperty(window, 'innerWidth', {
+  writable: true,
+  configurable: true,
+  value: 1024,
+});
+
+Object.defineProperty(window, 'innerHeight', {
+  writable: true,
+  configurable: true,
+  value: 768,
+});
+
+// ===== EVENT LISTENER MOCKS =====
+
+// Track event listeners for testing
+const eventListeners = new Map<string, Set<EventListenerOrEventListenerObject>>();
+
+const originalAddEventListener = Element.prototype.addEventListener;
+const originalRemoveEventListener = Element.prototype.removeEventListener;
+const originalDocumentAddEventListener = document.addEventListener;
+const originalDocumentRemoveEventListener = document.removeEventListener;
+
+// Mock Element.addEventListener
+Element.prototype.addEventListener = jest.fn(function(
+  this: Element,
+  type: string,
+  listener: EventListenerOrEventListenerObject,
+  options?: boolean | AddEventListenerOptions
+) {
+  const key = `${this.tagName || 'ELEMENT'}-${type}`;
+  if (!eventListeners.has(key)) {
+    eventListeners.set(key, new Set());
+  }
+  eventListeners.get(key)!.add(listener);
+  
+  return originalAddEventListener.call(this, type, listener, options);
+});
+
+// Mock Element.removeEventListener
+Element.prototype.removeEventListener = jest.fn(function(
+  this: Element,
+  type: string,
+  listener: EventListenerOrEventListenerObject,
+  options?: boolean | EventListenerOptions
+) {
+  const key = `${this.tagName || 'ELEMENT'}-${type}`;
+  eventListeners.get(key)?.delete(listener);
+  
+  return originalRemoveEventListener.call(this, type, listener, options);
+});
+
+// Mock document.addEventListener
+document.addEventListener = jest.fn((
+  type: string,
+  listener: EventListenerOrEventListenerObject,
+  options?: boolean | AddEventListenerOptions
+) => {
+  const key = `DOCUMENT-${type}`;
+  if (!eventListeners.has(key)) {
+    eventListeners.set(key, new Set());
+  }
+  eventListeners.get(key)!.add(listener);
+  
+  return originalDocumentAddEventListener.call(document, type, listener, options);
+});
+
+// Mock document.removeEventListener
+document.removeEventListener = jest.fn((
+  type: string,
+  listener: EventListenerOrEventListenerObject,
+  options?: boolean | EventListenerOptions
+) => {
+  const key = `DOCUMENT-${type}`;
+  eventListeners.get(key)?.delete(listener);
+  
+  return originalDocumentRemoveEventListener.call(document, type, listener, options);
+});
+
+// Helper to trigger events for testing
+global.triggerEvent = (
+  target: Element | Document, 
+  eventType: string, 
+  eventProps: Partial<Event> = {}
+) => {
+  const event = new Event(eventType, { bubbles: true, cancelable: true, ...eventProps });
+  Object.assign(event, eventProps);
+  target.dispatchEvent(event);
+};
+
+// Helper to trigger mouse events
+global.triggerMouseEvent = (
+  target: Element | Document,
+  eventType: string,
+  { clientX = 0, clientY = 0, ...eventProps }: Partial<MouseEvent> = {}
+) => {
+  const event = new MouseEvent(eventType, {
+    bubbles: true,
+    cancelable: true,
+    clientX,
+    clientY,
+    ...eventProps,
+  });
+  target.dispatchEvent(event);
+};
+
+// ===== SSR COMPATIBILITY MOCKS =====
+
+// Mock missing APIs for SSR testing
+if (typeof window === 'undefined') {
+  global.window = {} as any;
+  global.document = {} as any;
+  global.HTMLElement = class MockHTMLElement {} as any;
+}
+
+// ===== TIMER SETUP =====
+
+// Enable fake timers by default
 beforeEach(() => {
   jest.useFakeTimers();
+  // Clear RAF callbacks between tests
+  rafCallbacks.clear();
+  rafId = 0;
+  // Clear event listener tracking
+  eventListeners.clear();
 });
 
 afterEach(() => {
   jest.runOnlyPendingTimers();
   jest.useRealTimers();
+  
+  // Restore RAF mocks if they've been overridden
+  if (typeof global.requestAnimationFrame !== 'function') {
+    global.requestAnimationFrame = jest.fn((callback: FrameRequestCallback) => {
+      const id = ++rafId;
+      rafCallbacks.set(id, callback);
+      if (process.env.NODE_ENV === 'test') {
+        setTimeout(() => callback(performance.now()), 0);
+      }
+      return id;
+    });
+  }
+  
+  if (typeof global.cancelAnimationFrame !== 'function') {
+    global.cancelAnimationFrame = jest.fn((id: number) => {
+      rafCallbacks.delete(id);
+    });
+  }
+  
+  // Clean up created elements
+  createdElements.forEach(element => {
+    try {
+      element.remove?.();
+    } catch (e) {
+      // Ignore cleanup errors
+    }
+  });
+  createdElements.clear();
 });
 
 // Configure concurrent features
 process.env.IS_REACT_ACT_ENVIRONMENT = 'true';
+
+// ===== GLOBAL TEST HELPERS =====
+
+// Export helpers for use in tests
+declare global {
+  function triggerRAF(timestamp?: number): void;
+  function triggerEvent(target: Element | Document, eventType: string, eventProps?: Partial<Event>): void;
+  function triggerMouseEvent(target: Element | Document, eventType: string, eventProps?: Partial<MouseEvent>): void;
+}

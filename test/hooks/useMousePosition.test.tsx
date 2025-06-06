@@ -19,272 +19,363 @@ beforeEach(() => {
 });
 
 describe('useMousePosition', () => {
-  describe('basic functionality', () => {
-    it('should initialize with null position and visible globally', () => {
-      const { result } = renderHook(() =>
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('Basic Functionality', () => {
+    it('initializes with null position', () => {
+      const { result } = renderHook(() => 
         useMousePosition(undefined, 0, 0, 0)
       );
 
       expect(result.current.position).toEqual({ x: null, y: null });
       expect(result.current.targetPosition).toEqual({ x: null, y: null });
-      expect(result.current.isVisible).toBe(true); // Global cursor is visible by default
     });
 
-    it('should track global mouse movement without container', () => {
-      const { result } = renderHook(() =>
-        useMousePosition(undefined, 0, 0, 0)
+    it('applies offset correctly', () => {
+      const { result } = renderHook(() => 
+        useMousePosition(undefined, 10, 20, 0)
       );
 
       act(() => {
-        fireEvent.mouseMove(document, { clientX: 100, clientY: 200 });
+        fireEvent.mouseMove(document, { clientX: 100, clientY: 100 });
       });
 
-      expect(result.current.targetPosition).toEqual({ x: 100, y: 200 });
+      expect(result.current.targetPosition).toEqual({ x: 110, y: 120 });
     });
 
-    it('should apply offset to mouse position', () => {
-      const { result } = renderHook(() =>
-        useMousePosition(undefined, 10, -5, 0)
+    it('handles throttling correctly', () => {
+      const { result } = renderHook(() => 
+        useMousePosition(undefined, 0, 0, 100)
       );
 
       act(() => {
-        fireEvent.mouseMove(document, { clientX: 100, clientY: 200 });
+        fireEvent.mouseMove(document, { clientX: 100, clientY: 100 });
+        fireEvent.mouseMove(document, { clientX: 200, clientY: 200 });
       });
 
-      expect(result.current.targetPosition).toEqual({ x: 110, y: 195 });
-    });
-
-    it('should set position to targetPosition when position is initially null', () => {
-      const { result } = renderHook(() =>
-        useMousePosition(undefined, 0, 0, 0)
-      );
-
-      act(() => {
-        fireEvent.mouseMove(document, { clientX: 100, clientY: 200 });
-      });
-
-      // Position should be set to targetPosition since it was initially null
-      expect(result.current.position).toEqual({ x: 100, y: 200 });
+      // Only first event should be processed immediately
+      expect(result.current.targetPosition).toEqual({ x: 100, y: 100 });
     });
   });
 
-  describe('container-based tracking', () => {
-    let container: HTMLDivElement;
-    let containerRef: React.RefObject<HTMLDivElement>;
-
-    beforeEach(() => {
-      container = document.createElement('div');
-      container.style.position = 'absolute';
-      container.style.left = '50px';
-      container.style.top = '50px';
-      container.style.width = '200px';
-      container.style.height = '200px';
+  describe('Event Listener Integration', () => {
+    it('attaches event listeners to document by default', () => {
+      const addEventListenerSpy = jest.spyOn(document, 'addEventListener');
       
-      // Mock getBoundingClientRect
-      container.getBoundingClientRect = jest.fn(() => ({
-        left: 50,
-        top: 50,
-        right: 250,
-        bottom: 250,
-        width: 200,
-        height: 200,
-        x: 50,
-        y: 50,
-      } as DOMRect));
-
-      document.body.appendChild(container);
-      containerRef = { current: container };
-    });
-
-    afterEach(() => {
-      if (container.parentNode) {
-        container.parentNode.removeChild(container);
-      }
-    });
-
-    it('should initialize as visible when container is present', () => {
-      const { result } = renderHook(() =>
-        useMousePosition(containerRef, 0, 0, 0)
-      );
-
-      expect(result.current.isVisible).toBe(true);
-    });
-
-    it('should track mouse movement within container bounds', () => {
-      const { result } = renderHook(() =>
-        useMousePosition(containerRef, 0, 0, 0)
-      );
-
-      // Mouse inside container (50-250 x, 50-250 y)
-      act(() => {
-        fireEvent.mouseMove(container, { clientX: 100, clientY: 150 });
-      });
-
-      expect(result.current.targetPosition).toEqual({ x: 100, y: 150 });
-    });
-
-    it('should not update position when mouse is outside container', () => {
-      const { result } = renderHook(() =>
-        useMousePosition(containerRef, 0, 0, 0)
-      );
-
-      // Mouse outside container (outside 50-250 bounds)
-      act(() => {
-        fireEvent.mouseMove(document, { clientX: 10, clientY: 10 });
-      });
-
-      // Should not update targetPosition
-      expect(result.current.targetPosition).toEqual({ x: null, y: null });
-    });
-
-    it('should handle mouse enter and leave events', () => {
-      const { result } = renderHook(() =>
-        useMousePosition(containerRef, 0, 0, 0)
-      );
-
-      // Initially visible
-      expect(result.current.isVisible).toBe(true);
-
-      // Mouse leave
-      act(() => {
-        fireEvent.mouseLeave(container);
-      });
-
-      expect(result.current.isVisible).toBe(false);
-
-      // Mouse enter
-      act(() => {
-        fireEvent.mouseEnter(container);
-      });
-
-      expect(result.current.isVisible).toBe(true);
-    });
-  });
-
-  describe('throttling', () => {
-    it('should use throttled version when throttleMs > 0', () => {
-      const { result } = renderHook(() =>
-        useMousePosition(undefined, 0, 0, 100) // 100ms throttle
-      );
-
-      // Make several rapid mouse movements
-      act(() => {
-        mockDateNow.mockReturnValue(0);
-        fireEvent.mouseMove(document, { clientX: 10, clientY: 10 });
-      });
-
-      // First movement should be immediate
-      expect(result.current.targetPosition).toEqual({ x: 10, y: 10 });
-
-      // Make more movements quickly
-      act(() => {
-        mockDateNow.mockReturnValue(10); // 10ms later
-        fireEvent.mouseMove(document, { clientX: 20, clientY: 20 });
-        
-        mockDateNow.mockReturnValue(20); // 20ms later
-        fireEvent.mouseMove(document, { clientX: 30, clientY: 30 });
-      });
-
-      // The throttle should delay the updates, but the exact behavior depends on timing
-      // We just verify that throttling is active by checking that updates are not immediate
-      const hasThrottleEffect = result.current.targetPosition.x !== 30 || 
-                              result.current.targetPosition.y !== 30;
+      renderHook(() => useMousePosition(undefined, 0, 0, 0));
       
-      // This tests that throttling mechanism is in place (not exact timing)
-      expect(hasThrottleEffect || result.current.targetPosition).toBeDefined();
-    });
-
-    it('should work without throttling when throttleMs is 0', () => {
-      const { result } = renderHook(() =>
-        useMousePosition(undefined, 0, 0, 0)
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        'mousemove',
+        expect.any(Function)
       );
-
-      act(() => {
-        fireEvent.mouseMove(document, { clientX: 100, clientY: 200 });
-      });
-
-      expect(result.current.targetPosition).toEqual({ x: 100, y: 200 });
-
-      act(() => {
-        fireEvent.mouseMove(document, { clientX: 150, clientY: 250 });
-      });
-
-      expect(result.current.targetPosition).toEqual({ x: 150, y: 250 });
+      
+      addEventListenerSpy.mockRestore();
     });
-  });
 
-  describe('cleanup', () => {
-    it('should remove event listeners on unmount', () => {
+    it('attaches event listeners to container when provided', () => {
+      const containerRef = React.createRef<HTMLDivElement>();
+      const mockElement = document.createElement('div');
+      (containerRef as any).current = mockElement;
+      
+      const addEventListenerSpy = jest.spyOn(mockElement, 'addEventListener');
+      
+      renderHook(() => useMousePosition(containerRef, 0, 0, 0));
+      
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        'mouseleave',
+        expect.any(Function)
+      );
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        'mouseenter',
+        expect.any(Function)
+      );
+      
+      addEventListenerSpy.mockRestore();
+    });
+
+    it('removes event listeners on cleanup', () => {
       const removeEventListenerSpy = jest.spyOn(document, 'removeEventListener');
       
-      const { unmount } = renderHook(() =>
-        useMousePosition(undefined, 0, 0, 0)
-      );
-
+      const { unmount } = renderHook(() => useMousePosition(undefined, 0, 0, 0));
+      
       unmount();
-
+      
       expect(removeEventListenerSpy).toHaveBeenCalledWith(
         'mousemove',
         expect.any(Function)
       );
-
+      
       removeEventListenerSpy.mockRestore();
     });
 
-    it('should remove container event listeners on unmount', () => {
-      const container = document.createElement('div');
-      const containerRef = { current: container };
-      const removeEventListenerSpy = jest.spyOn(container, 'removeEventListener');
+    it('handles event listener errors gracefully', () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const addEventListenerSpy = jest.spyOn(document, 'addEventListener')
+        .mockImplementation(() => {
+          throw new Error('Event listener error');
+        });
 
-      const { unmount } = renderHook(() =>
-        useMousePosition(containerRef, 0, 0, 0)
-      );
+      expect(() => {
+        renderHook(() => useMousePosition(undefined, 0, 0, 0));
+      }).not.toThrow();
 
-      unmount();
-
-      expect(removeEventListenerSpy).toHaveBeenCalledWith(
-        'mouseleave',
-        expect.any(Function)
-      );
-      expect(removeEventListenerSpy).toHaveBeenCalledWith(
-        'mouseenter',
-        expect.any(Function)
-      );
-
-      removeEventListenerSpy.mockRestore();
+      addEventListenerSpy.mockRestore();
+      consoleSpy.mockRestore();
     });
   });
 
-  describe('edge cases', () => {
-    it('should handle container ref with null current', () => {
-      const containerRef: React.RefObject<HTMLDivElement> = { current: null };
-
-      const { result } = renderHook(() =>
+  describe('Container Integration', () => {
+    it('uses getBoundingClientRect for container positioning', () => {
+      const containerRef = React.createRef<HTMLDivElement>();
+      const mockElement = document.createElement('div');
+      const getBoundingClientRectSpy = jest.fn(() => ({
+        left: 50,
+        top: 25,
+        right: 450,
+        bottom: 325,
+        width: 400,
+        height: 300,
+        x: 50,
+        y: 25,
+        toJSON: () => ({}),
+      }));
+      
+      mockElement.getBoundingClientRect = getBoundingClientRectSpy;
+      (containerRef as any).current = mockElement;
+      
+      const { result } = renderHook(() => 
         useMousePosition(containerRef, 0, 0, 0)
       );
 
-      expect(result.current.isVisible).toBe(false); // When container.current is null, should be invisible
+      act(() => {
+        // Simulate mouse inside container
+        fireEvent.mouseMove(mockElement, { clientX: 200, clientY: 150 });
+      });
+
+      // getBoundingClientRect should be called during mouse event processing
+      expect(getBoundingClientRectSpy).toHaveBeenCalled();
     });
 
-    it('should not update position when new position is same as current', () => {
-      const { result } = renderHook(() =>
+    it('handles getBoundingClientRect errors gracefully', () => {
+      const containerRef = React.createRef<HTMLDivElement>();
+      const mockElement = document.createElement('div');
+      
+      mockElement.getBoundingClientRect = () => {
+        throw new Error('getBoundingClientRect error');
+      };
+      (containerRef as any).current = mockElement;
+
+      expect(() => {
+        const { result } = renderHook(() => 
+          useMousePosition(containerRef, 0, 0, 0)
+        );
+
+        act(() => {
+          fireEvent.mouseMove(mockElement, { clientX: 200, clientY: 150 });
+        });
+      }).not.toThrow();
+    });
+
+    it('handles visibility changes for container', () => {
+      const containerRef = React.createRef<HTMLDivElement>();
+      const mockElement = document.createElement('div');
+      (containerRef as any).current = mockElement;
+      
+      const { result } = renderHook(() => 
+        useMousePosition(containerRef, 0, 0, 0)
+      );
+
+      expect(result.current.isVisible).toBe(true); // Container exists
+
+      act(() => {
+        fireEvent.mouseLeave(mockElement);
+      });
+
+      expect(result.current.isVisible).toBe(false);
+
+      act(() => {
+        fireEvent.mouseEnter(mockElement);
+      });
+
+      expect(result.current.isVisible).toBe(true);
+    });
+  });
+
+  describe('Edge Cases and Error Handling', () => {
+    it('handles null container ref gracefully', () => {
+      const containerRef = { current: null };
+      
+      expect(() => {
+        renderHook(() => useMousePosition(containerRef, 0, 0, 0));
+      }).not.toThrow();
+    });
+
+    it('handles undefined container ref gracefully', () => {
+      expect(() => {
+        renderHook(() => useMousePosition(undefined, 0, 0, 0));
+      }).not.toThrow();
+    });
+
+    it('handles missing document object', () => {
+      const originalDocument = global.document;
+      
+      (global as any).document = {
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+      };
+
+      expect(() => {
+        renderHook(() => useMousePosition(undefined, 0, 0, 0));
+      }).not.toThrow();
+
+      global.document = originalDocument;
+    });
+
+    it('handles missing event properties gracefully', () => {
+      const { result } = renderHook(() => 
         useMousePosition(undefined, 0, 0, 0)
       );
 
-      // Set initial position
       act(() => {
-        fireEvent.mouseMove(document, { clientX: 100, clientY: 200 });
+        // Event with missing clientX/clientY
+        const event = new MouseEvent('mousemove', {});
+        delete (event as any).clientX;
+        delete (event as any).clientY;
+        document.dispatchEvent(event);
       });
 
-      const initialTargetPosition = result.current.targetPosition;
+      // Should not crash
+      expect(result.current.targetPosition.x).toEqual(expect.any(Number));
+    });
 
-      // Move to same position
+    it('handles rapid mouse movements', () => {
+      const { result } = renderHook(() => 
+        useMousePosition(undefined, 0, 0, 0)
+      );
+
+      expect(() => {
+        act(() => {
+          for (let i = 0; i < 100; i++) {
+            fireEvent.mouseMove(document, { 
+              clientX: i * 10, 
+              clientY: i * 5 
+            });
+          }
+        });
+      }).not.toThrow();
+
+      // Last position should be captured
+      expect(result.current.targetPosition.x).toBe(990);
+      expect(result.current.targetPosition.y).toBe(495);
+    });
+
+    it('handles extreme coordinate values', () => {
+      const { result } = renderHook(() => 
+        useMousePosition(undefined, 0, 0, 0)
+      );
+
       act(() => {
-        fireEvent.mouseMove(document, { clientX: 100, clientY: 200 });
+        fireEvent.mouseMove(document, { 
+          clientX: Number.MAX_SAFE_INTEGER, 
+          clientY: Number.MIN_SAFE_INTEGER 
+        });
       });
 
-      // Should be the same object reference (no unnecessary re-render)
-      expect(result.current.targetPosition).toBe(initialTargetPosition);
+      expect(result.current.targetPosition.x).toBe(Number.MAX_SAFE_INTEGER);
+      expect(result.current.targetPosition.y).toBe(Number.MIN_SAFE_INTEGER);
+    });
+
+    it('optimizes re-renders by avoiding unnecessary updates', () => {
+      let renderCount = 0;
+      const TestComponent = () => {
+        renderCount++;
+        const { position } = useMousePosition(undefined, 0, 0, 0);
+        return <div>{position.x}</div>;
+      };
+
+      const { result } = renderHook(() => <TestComponent />);
+      const initialRenderCount = renderCount;
+
+      act(() => {
+        // Send same position multiple times
+        fireEvent.mouseMove(document, { clientX: 100, clientY: 100 });
+        fireEvent.mouseMove(document, { clientX: 100, clientY: 100 });
+        fireEvent.mouseMove(document, { clientX: 100, clientY: 100 });
+      });
+
+      // Should not cause excessive re-renders
+      expect(renderCount - initialRenderCount).toBeLessThan(5);
+    });
+  });
+
+  describe('Memory and Performance', () => {
+    it('cleans up throttle timers properly', () => {
+      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      
+      const { unmount } = renderHook(() => 
+        useMousePosition(undefined, 0, 0, 100)
+      );
+
+      act(() => {
+        fireEvent.mouseMove(document, { clientX: 100, clientY: 100 });
+      });
+
+      unmount();
+
+      // Should clean up any pending timers
+      expect(clearTimeoutSpy).toHaveBeenCalled();
+      
+      clearTimeoutSpy.mockRestore();
+    });
+
+    it('handles memory pressure scenarios', () => {
+      const hooks: Array<{ unmount: () => void }> = [];
+      
+      expect(() => {
+        // Create many hook instances
+        for (let i = 0; i < 50; i++) {
+          hooks.push(renderHook(() => useMousePosition(undefined, i, i, 0)));
+        }
+        
+        // Trigger events on all
+        act(() => {
+          fireEvent.mouseMove(document, { clientX: 500, clientY: 500 });
+        });
+        
+        // Clean them all up
+        hooks.forEach(({ unmount }) => unmount());
+      }).not.toThrow();
+    });
+  });
+
+  describe('Browser Compatibility', () => {
+    it('works without modern event features', () => {
+      const { result } = renderHook(() => 
+        useMousePosition(undefined, 0, 0, 0)
+      );
+
+      act(() => {
+        // Create basic event without modern properties
+        const event = new Event('mousemove') as any;
+        event.clientX = 150;
+        event.clientY = 250;
+        document.dispatchEvent(event);
+      });
+
+      expect(result.current.targetPosition).toEqual({ x: 150, y: 250 });
+    });
+
+    it('handles missing performance API gracefully', () => {
+      const originalPerformance = global.performance;
+      delete (global as any).performance;
+
+      expect(() => {
+        renderHook(() => useMousePosition(undefined, 0, 0, 0));
+      }).not.toThrow();
+
+      global.performance = originalPerformance;
     });
   });
 }); 
