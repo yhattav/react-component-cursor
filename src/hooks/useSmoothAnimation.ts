@@ -74,5 +74,5 @@ export function useSmoothAnimation(
     }
 
     return animate();
-  }, [smoothFactor, targetPosition, animate, setPosition]);
+  }, [smoothFactor, targetPosition.x, targetPosition.y, animate, setPosition]);
 }
