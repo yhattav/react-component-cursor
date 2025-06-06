@@ -67,19 +67,21 @@ jobs:
         path: performance-results/
         
     - name: Restore performance history
-      uses: actions/cache/restore@v4
+      uses: actions/cache@v4
       with:
         path: performance-results/history.json
-        key: performance-history-${{ github.repository }}
+        key: performance-history-${{ github.repository }}-${{ github.run_id }}
         restore-keys: |
+          performance-history-${{ github.repository }}-
           performance-history-
           
     - name: Restore performance baseline
-      uses: actions/cache/restore@v4
+      uses: actions/cache@v4
       with:
         path: performance-results/baseline.json
-        key: performance-baseline-${{ github.repository }}
+        key: performance-baseline-${{ github.repository }}-${{ github.run_id }}
         restore-keys: |
+          performance-baseline-${{ github.repository }}-
           performance-baseline-
           
     - name: Run performance monitoring
@@ -88,7 +90,7 @@ jobs:
       id: monitoring
       
     - name: Save performance history
-      uses: actions/cache/save@v4
+      uses: actions/cache@v4
       with:
         path: performance-results/history.json
         key: performance-history-${{ github.repository }}-${{ github.run_id }}
@@ -101,7 +103,7 @@ jobs:
         
     - name: Save performance baseline
       if: steps.monitoring.outcome == 'failure'
-      uses: actions/cache/save@v4
+      uses: actions/cache@v4
       with:
         path: performance-results/baseline.json
         key: performance-baseline-${{ github.repository }}-${{ github.run_id }}
@@ -180,11 +182,12 @@ jobs:
         path: performance-results/
         
     - name: Restore performance history
-      uses: actions/cache/restore@v4
+      uses: actions/cache@v4
       with:
         path: performance-results/history.json
-        key: performance-history-${{ github.repository }}
+        key: performance-history-${{ github.repository }}-${{ github.run_id }}
         restore-keys: |
+          performance-history-${{ github.repository }}-
           performance-history-
           
     - name: Generate weekly performance report
