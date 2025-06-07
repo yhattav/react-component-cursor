@@ -11,7 +11,7 @@ export default defineConfig([
     sourcemap: true,
     clean: true,
     minify: true,
-    external: EXTERNAL_DEPENDENCIES,
+    external: ['react', 'react-dom'],
     define: {
       'process.env.NODE_ENV': '"production"'
     },
