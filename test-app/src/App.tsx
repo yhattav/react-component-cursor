@@ -5,7 +5,6 @@ import { CustomCursor } from '@yhattav/react-component-cursor';
 const TestApp: React.FC = () => {
   const [cursorMode, setCursorMode] = useState<'simple' | 'custom'>('simple');
   const [showContainer, setShowContainer] = useState(false);
-  const containerRef = React.useRef<HTMLDivElement>(null);
 
   return (
     <div style={{ 
@@ -79,7 +78,6 @@ const TestApp: React.FC = () => {
       {/* Container Cursor Test */}
       {showContainer && (
         <div 
-          ref={containerRef}
           data-testid="cursor-container"
           style={{
             width: '400px',
@@ -94,7 +92,7 @@ const TestApp: React.FC = () => {
           <CustomCursor
             data-testid="custom-cursor-container"
             id="container-cursor"
-            containerRef={containerRef}
+            containerRef={{ current: null } as React.RefObject<HTMLElement>}
             smoothness={2}
             showDevIndicator={false}
           >

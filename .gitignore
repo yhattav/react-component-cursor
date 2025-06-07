@@ -15,7 +15,3 @@ browser-test-report.md
 reports/
 test-app/node_modules/
 test-app/dist/
-
-# Playwright test artifacts
-test-results/
-playwright-report/
