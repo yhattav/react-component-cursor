@@ -5,6 +5,7 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(tsx?)$',
+  testPathIgnorePatterns: ['/node_modules/', '/e2e/'],
   coverageDirectory: 'coverage',
   collectCoverageFrom: ['src/**/*.{ts,tsx,js,jsx}', '!src/**/*.d.ts'],
   setupFilesAfterEnv: ['<rootDir>/test/setupTests.ts'],
