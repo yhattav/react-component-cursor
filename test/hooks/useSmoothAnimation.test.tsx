@@ -2,13 +2,26 @@ import { renderHook, act } from '@testing-library/react';
 import { useSmoothAnimation } from '../../src/hooks';
 
 describe('useSmoothAnimation', () => {
+  let originalMatchMedia: typeof window.matchMedia | undefined;
+
   beforeEach(() => {
     jest.useFakeTimers();
     jest.clearAllMocks();
+    
+    // Safely capture original matchMedia for restoration
+    originalMatchMedia = typeof window !== 'undefined' ? window.matchMedia : undefined;
   });
 
   afterEach(() => {
     jest.useRealTimers();
+    
+    // Restore original matchMedia to prevent side effects (only if window exists)
+    if (typeof window !== 'undefined' && originalMatchMedia) {
+      Object.defineProperty(window, 'matchMedia', {
+        writable: true,
+        value: originalMatchMedia,
+      });
+    }
   });
 
   it('smoothly animates position changes', () => {
@@ -135,6 +148,27 @@ describe('useSmoothAnimation', () => {
 
     rafSpy.mockRestore();
   });
+
+  it('handles missing matchMedia gracefully', () => {
+    // Mock missing matchMedia (older browsers)
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: undefined,
+    });
+
+    const setPosition = jest.fn();
+    const targetPosition = { x: 100, y: 100 };
+    const rafSpy = jest.spyOn(global, 'requestAnimationFrame');
+
+    renderHook(() => useSmoothAnimation(targetPosition, 5, setPosition));
+
+    // Should use animation when matchMedia is not available (fallback behavior)
+    expect(rafSpy).toHaveBeenCalled();
+
+    rafSpy.mockRestore();
+  });
+
+
 
   it('stops animating when reaching threshold', () => {
     const setPosition = jest.fn();
