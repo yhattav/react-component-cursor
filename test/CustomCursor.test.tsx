@@ -88,7 +88,7 @@ describe('CustomCursor', () => {
     expect(cursor).toHaveStyle('background-color: red');
     expect(cursor).toHaveStyle('font-size: 20px');
     expect(cursor).toHaveStyle('position: fixed');
-    expect(cursor).toHaveStyle('transform: translate(100px, 100px)');
+    expect(cursor).toHaveStyle('transform: translate(100px, 100px) translate(-50%, -50%)');
   });
 
   it('applies custom className', () => {
@@ -144,7 +144,7 @@ describe('CustomCursor', () => {
     render(<CustomCursor offset={{ x: 10, y: 20 }}>Offset cursor</CustomCursor>);
     
     const cursor = screen.getByText('Offset cursor');
-    expect(cursor).toHaveStyle('transform: translate(110px, 120px)');
+    expect(cursor).toHaveStyle('transform: translate(110px, 120px) translate(-50%, -50%)');
   });
 
   it('applies CSS custom properties correctly', () => {
@@ -153,6 +153,18 @@ describe('CustomCursor', () => {
     const cursor = screen.getByText('CSS variables cursor');
     expect(cursor).toHaveStyle('--cursor-x: 100px');
     expect(cursor).toHaveStyle('--cursor-y: 100px');
+  });
+
+  it('applies centered prop correctly', () => {
+    const { rerender } = render(<CustomCursor centered={true}>Centered cursor</CustomCursor>);
+    
+    let cursor = screen.getByText('Centered cursor');
+    expect(cursor).toHaveStyle('transform: translate(100px, 100px) translate(-50%, -50%)');
+    
+    rerender(<CustomCursor centered={false}>Centered cursor</CustomCursor>);
+    
+    cursor = screen.getByText('Centered cursor');
+    expect(cursor).toHaveStyle('transform: translate(100px, 100px)');
   });
 
   it('passes correct props to useMousePosition hook', () => {
@@ -237,7 +249,7 @@ describe('CustomCursor', () => {
     expect(cursor).toHaveStyle('border: 2px solid red');
     expect(cursor).toHaveStyle('padding: 10px');
     expect(cursor).toHaveStyle('position: fixed');
-    expect(cursor).toHaveStyle('transform: translate(100px, 100px)');
+    expect(cursor).toHaveStyle('transform: translate(100px, 100px) translate(-50%, -50%)');
     expect(cursor).toHaveStyle('pointer-events: none');
   });
 

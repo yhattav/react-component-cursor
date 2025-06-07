@@ -96,7 +96,6 @@ export const GallerySection: React.FC<GallerySectionProps> = React.memo(
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              transform: 'translate(-50%, -50%)',
               color: 'white',
               fontSize: '16px',
             }}
@@ -116,7 +115,6 @@ export const GallerySection: React.FC<GallerySectionProps> = React.memo(
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            transform: 'translate(-50%, -50%)',
             color: 'white',
             fontSize: '20px',
           }}

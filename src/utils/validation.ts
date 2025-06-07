@@ -15,6 +15,7 @@ export function validateProps(props: CustomCursorProps): void {
     zIndex, 
     offset, 
     containerRef,
+    centered,
     showDevIndicator,
     onMove,
     onVisibilityChange,
@@ -102,6 +103,13 @@ export function validateProps(props: CustomCursorProps): void {
         `CustomCursor: 'containerRef' must be a React ref object (created with useRef). Received: ${containerRef}`
       );
     }
+  }
+
+  // Validate centered
+  if (centered !== undefined && typeof centered !== 'boolean') {
+    console.error(
+      `CustomCursor: 'centered' must be a boolean. Received: ${centered} (${typeof centered})`
+    );
   }
 
   // Validate showDevIndicator

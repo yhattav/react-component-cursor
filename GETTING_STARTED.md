@@ -35,7 +35,6 @@ function App() {
             height: '20px',
             backgroundColor: '#3b82f6',
             borderRadius: '50%',
-            transform: 'translate(-50%, -50%)', // Center the cursor
           }}
         />
       </CustomCursor>
@@ -78,7 +77,6 @@ function SmoothCursor() {
             height: isHovered ? '40px' : '20px',
             backgroundColor: isHovered ? '#ef4444' : '#3b82f6',
             borderRadius: '50%',
-            transform: 'translate(-50%, -50%)',
             transition: 'all 0.2s ease',
           }}
         />
@@ -131,7 +129,6 @@ function ContainerCursor() {
               height: '30px',
               border: '2px solid #f59e0b',
               borderRadius: '50%',
-              transform: 'translate(-50%, -50%)',
             }}
           />
         </CustomCursor>
@@ -175,7 +172,6 @@ function TrackingCursor() {
             height: '24px',
             backgroundColor: '#10b981',
             borderRadius: '50%',
-            transform: 'translate(-50%, -50%)',
             opacity: isVisible ? 1 : 0.5,
           }}
         />
@@ -225,7 +221,6 @@ export default function RootLayout({
   height: 20px;
   background: linear-gradient(45deg, #3b82f6, #8b5cf6);
   border-radius: 50%;
-  transform: translate(-50%, -50%);
 }
 ```
 
@@ -264,7 +259,6 @@ export const wrapRootElement = ({ element }) => (
           height: '20px',
           backgroundColor: '#663399', // Gatsby purple
           borderRadius: '50%',
-          transform: 'translate(-50%, -50%)',
         }}
       />
     </CustomCursor>

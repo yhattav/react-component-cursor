@@ -27,6 +27,7 @@ export interface CustomCursorProps {
   offset?: CursorOffset | { x: number; y: number };
   smoothness?: number; // 0 = instant, higher = smoother
   containerRef?: React.RefObject<HTMLElement>;
+  centered?: boolean; // Auto-center cursor on mouse position (default: true)
   
   // Behavior
   showNativeCursor?: boolean;
@@ -89,6 +90,7 @@ const arePropsEqual = (
     prevProps.className !== nextProps.className ||
     prevProps.zIndex !== nextProps.zIndex ||
     prevProps.smoothness !== nextProps.smoothness ||
+    prevProps.centered !== nextProps.centered ||
     prevProps.showNativeCursor !== nextProps.showNativeCursor ||
     prevProps.throttleMs !== nextProps.throttleMs ||
     prevProps.showDevIndicator !== nextProps.showDevIndicator
@@ -153,6 +155,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     offset = { x: 0, y: 0 },
     smoothness = 1,
     containerRef,
+    centered = true,
     showNativeCursor = false,
     throttleMs = 0,
     showDevIndicator = true,
@@ -173,6 +176,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       offset,
       smoothness,
       containerRef,
+      centered,
       showNativeCursor,
       throttleMs,
       showDevIndicator,
@@ -241,31 +245,34 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     }, [getPortalContainerMemo]);
 
     // Memoize style sheet content with reduced motion support
-    const styleSheetContent = React.useMemo(() => `
-      @keyframes ${ANIMATION_NAME} {
-        from {
-          opacity: 0;
-          transform: translate(var(--cursor-x), var(--cursor-y)) scale(0.8);
-        }
-        to {
-          opacity: 1;
-          transform: translate(var(--cursor-x), var(--cursor-y)) scale(1);
-        }
-      }
-      
-      @media (prefers-reduced-motion: reduce) {
+    const styleSheetContent = React.useMemo(() => {
+      const centerTransform = centered ? ' translate(-50%, -50%)' : '';
+      return `
         @keyframes ${ANIMATION_NAME} {
           from {
             opacity: 0;
-            transform: translate(var(--cursor-x), var(--cursor-y)) scale(1);
+            transform: translate(var(--cursor-x), var(--cursor-y))${centerTransform} scale(0.8);
           }
           to {
             opacity: 1;
-            transform: translate(var(--cursor-x), var(--cursor-y)) scale(1);
+            transform: translate(var(--cursor-x), var(--cursor-y))${centerTransform} scale(1);
           }
         }
-      }
-    `, []);
+        
+        @media (prefers-reduced-motion: reduce) {
+          @keyframes ${ANIMATION_NAME} {
+            from {
+              opacity: 0;
+              transform: translate(var(--cursor-x), var(--cursor-y))${centerTransform} scale(1);
+            }
+            to {
+              opacity: 1;
+              transform: translate(var(--cursor-x), var(--cursor-y))${centerTransform} scale(1);
+            }
+          }
+        }
+      `;
+    }, [centered]);
 
     React.useEffect(() => {
       const doc = safeDocument();
@@ -337,12 +344,15 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     }
 
     const cursorStyle = React.useMemo(
-      () =>
-        ({
+      () => {
+        const baseTransform = `translate(${position.x ?? 0}px, ${position.y ?? 0}px)`;
+        const centerTransform = centered ? ' translate(-50%, -50%)' : '';
+        
+        return {
           position: 'fixed',
           top: 0,
           left: 0,
-          transform: `translate(${position.x ?? 0}px, ${position.y ?? 0}px)`,
+          transform: baseTransform + centerTransform,
           pointerEvents: 'none',
           zIndex,
           opacity: 1,
@@ -351,8 +361,9 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
           '--cursor-x': `${position.x ?? 0}px`,
           '--cursor-y': `${position.y ?? 0}px`,
           ...style,
-        } as React.CSSProperties),
-      [position.x, position.y, zIndex, style]
+        } as React.CSSProperties;
+      },
+      [position.x, position.y, zIndex, centered, style]
     );
 
     // Memoize global style content

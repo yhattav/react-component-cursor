@@ -16,7 +16,7 @@ export const CustomCursorButton: React.FC<CustomCursorButtonProps> = ({
         borderRadius: '1rem',
         fontSize: '14px',
         boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-        transform: 'translate(-50%, -50%)',
+
         whiteSpace: 'nowrap',
       }}
     >

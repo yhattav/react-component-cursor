@@ -56,7 +56,7 @@ export const EntryAnimationSection: React.FC<EntryAnimationSectionProps> =
                 height: '20px',
                 backgroundColor: '#3b82f6',
                 borderRadius: '50%',
-                transform: 'translate(-50%, -50%)',
+        
                 opacity: isVisible ? 1 : 0,
                 transition: 'opacity 0.3s ease',
                 boxShadow:
