@@ -146,22 +146,43 @@ class BrowserIntegrationTester {
       // Give React time to hydrate
       await page.waitForTimeout(2000);
       
+      // Trigger mouse movement to initialize cursor
+      await page.mouse.move(100, 100);
+      await page.waitForTimeout(500); // Wait for cursor to appear
+      
       const appState = await page.evaluate(() => {
         const root = document.querySelector('#root');
         const hasReactContent = root && root.children.length > 0;
         const hasAppTitle = document.querySelector('[data-testid="app-title"]');
         const hasTestStatus = document.querySelector('[data-testid="test-status"]');
-        const hasCustomCursor = document.querySelector('[data-testid="custom-cursor-global"]') || 
-                                document.querySelector('#custom-cursor-test-cursor') ||
-                                document.querySelector('#cursor-container');
+        
+        // Check for cursors with detailed debugging
+        const cursorGlobal = document.querySelector('[data-testid="custom-cursor-global"]');
+        const cursorContainer = document.querySelector('[data-testid="custom-cursor-container"]');
+        const cursorById1 = document.querySelector('#custom-cursor-test-cursor');
+        const cursorById2 = document.querySelector('#custom-cursor-container-cursor');
+        const allCursorElements = document.querySelectorAll('[id^="custom-cursor-"]');
+        
+        const hasCustomCursor = cursorGlobal || cursorContainer || cursorById1 || cursorById2;
         
         return {
           rootExists: !!root,
           hasContent: hasReactContent,
           hasAppTitle: !!hasAppTitle,
           hasTestStatus: !!hasTestStatus,
-          contentHTML: root ? root.innerHTML.substring(0, 200) : '',
+          contentHTML: root ? root.innerHTML.substring(0, 500) : '', // More content for debugging
           hasCursor: !!hasCustomCursor,
+          cursorDetails: {
+            foundGlobalTestId: !!cursorGlobal,
+            foundContainerTestId: !!cursorContainer,
+            foundGlobalId: !!cursorById1,
+            foundContainerId: !!cursorById2,
+            allCursorCount: allCursorElements.length,
+            allCursorIds: Array.from(allCursorElements).map(el => el.id)
+          },
+          // Additional debugging for CustomCursor
+          portalContainer: !!document.getElementById('cursor-container'),
+          allElementsWithDataTestId: Array.from(document.querySelectorAll('[data-testid]')).map(el => el.getAttribute('data-testid')),
           windowReact: !!window.React,
           documentTitle: document.title
         };
