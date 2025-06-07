@@ -14,6 +14,7 @@ jest.mock('../src/utils/ssr', () => ({
   safeDocument: jest.fn(),
   safeWindow: jest.fn(),
   browserOnly: jest.fn(),
+  isMobileDevice: jest.fn(),
 }));
 
 const mockSSRUtils = ssrUtils as jest.Mocked<typeof ssrUtils>;
@@ -21,6 +22,8 @@ const mockSSRUtils = ssrUtils as jest.Mocked<typeof ssrUtils>;
 describe('SSR Compatibility', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Mock mobile detection to return false in SSR (no window/navigator)
+    mockSSRUtils.isMobileDevice.mockReturnValue(false);
   });
 
   describe('SSR Environment Detection', () => {
@@ -34,11 +37,11 @@ describe('SSR Compatibility', () => {
     });
 
     it('should provide safe document access when mocked for SSR', () => {
-      mockSSRUtils.safeDocument.mockReturnValue(undefined);
-      mockSSRUtils.safeWindow.mockReturnValue(undefined);
+      mockSSRUtils.safeDocument.mockReturnValue(null);
+      mockSSRUtils.safeWindow.mockReturnValue(null);
       
-      expect(mockSSRUtils.safeDocument()).toBeUndefined();
-      expect(mockSSRUtils.safeWindow()).toBeUndefined();
+      expect(mockSSRUtils.safeDocument()).toBeNull();
+      expect(mockSSRUtils.safeWindow()).toBeNull();
     });
 
     it('should execute browserOnly functions safely when mocked for SSR', () => {
@@ -173,7 +176,7 @@ describe('SSR Compatibility', () => {
   describe('Performance in SSR', () => {
     it('should not execute expensive operations during SSR', () => {
       mockSSRUtils.isSSR.mockReturnValue(true);
-      mockSSRUtils.safeDocument.mockReturnValue(undefined);
+      mockSSRUtils.safeDocument.mockReturnValue(null);
       
       const onMove = jest.fn();
       const onVisibilityChange = jest.fn();
@@ -194,8 +197,8 @@ describe('SSR Compatibility', () => {
 
     it('should handle missing browser APIs gracefully', () => {
       mockSSRUtils.isSSR.mockReturnValue(true);
-      mockSSRUtils.safeDocument.mockReturnValue(undefined);
-      mockSSRUtils.safeWindow.mockReturnValue(undefined);
+      mockSSRUtils.safeDocument.mockReturnValue(null);
+      mockSSRUtils.safeWindow.mockReturnValue(null);
       
       expect(() => {
         renderToString(
@@ -237,6 +240,7 @@ describe('Browser Environment Tests', () => {
     mockSSRUtils.isBrowser.mockReturnValue(true);
     mockSSRUtils.safeDocument.mockReturnValue(document);
     mockSSRUtils.safeWindow.mockReturnValue(window as any);
+    mockSSRUtils.isMobileDevice.mockReturnValue(false); // Desktop browser
   });
 
   it('should detect browser environment correctly', () => {
