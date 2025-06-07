@@ -5,4 +5,15 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   base: '/react-component-cursor/',
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      input: {
+        main: './index.html',
+        server: './src/main-server.tsx'
+      }
+    }
+  },
+  ssr: {
+    noExternal: ['@yhattav/react-component-cursor']
+  }
 });
