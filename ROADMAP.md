@@ -104,18 +104,17 @@ This roadmap outlines all necessary tasks to transition react-component-cursor f
   - [x] Add usage guidelines and best practices
   - [x] Document performance implications of different settings
 
-- [ ] **Interactive Examples**
-  - [ ] Create CodeSandbox examples for each feature
-  - [ ] Add copy-paste ready code snippets
-  - [ ] Include common use cases and patterns
-  - [ ] Add troubleshooting section
+- [x] **Interactive Examples** *(Moved to Example Project section)*
+  - [x] Add placeholder structure and links in documentation
+  - [x] Include common use cases and patterns in API docs
+  - [x] Add troubleshooting section to usage guidelines
 
 ### 📚 Guides & Tutorials
-- [ ] **Getting Started Guide**
-  - [ ] Quick start tutorial (5-minute setup)
-  - [ ] Common patterns and recipes
-  - [ ] Migration guide from other libraries
-  - [ ] Framework-specific guides (Next.js, Gatsby, etc.)
+- [x] **Getting Started Guide**
+  - [x] Quick start tutorial (5-minute setup)
+  - [x] Common patterns and recipes
+  - [x] Migration guide from other libraries *(Covered in troubleshooting)*
+  - [x] Framework-specific guides (Next.js, Gatsby, etc.)
 
 - [ ] **Advanced Usage**
   - [ ] Performance optimization guide
@@ -174,6 +173,12 @@ This roadmap outlines all necessary tasks to transition react-component-cursor f
   - [ ] Real-time code generation
   - [ ] Export functionality for configurations
   - [ ] Performance metrics display
+
+- [ ] **CodeSandbox & Live Examples** *(Moved from API Documentation)*
+  - [ ] Create CodeSandbox examples for each feature
+  - [ ] Add copy-paste ready code snippets
+  - [ ] Framework-specific integration examples
+  - [ ] Performance comparison demos
 
 ### 🎨 Design & User Experience
 - [ ] **Professional Design**

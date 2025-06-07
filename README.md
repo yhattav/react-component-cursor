@@ -20,6 +20,8 @@ or
 yarn add @yhattav/react-component-cursor
 ```
 
+📖 **New to the library?** Check out our comprehensive [Getting Started Guide](GETTING_STARTED.md) for step-by-step tutorials and examples.
+
 ## Basic Usage
 
 ```tsx
