@@ -55,7 +55,7 @@ class BrowserIntegrationTester {
     return new Promise((resolve, reject) => {
       this.server = http.createServer((request, response) => {
         return handler(request, response, {
-          public: path.join(__dirname, '..', 'example', 'dist')
+          public: path.join(__dirname, '..', 'test-app', 'dist')
         });
       });
 
@@ -84,23 +84,34 @@ class BrowserIntegrationTester {
     }
   }
 
-  async buildExampleApp() {
-    this.log('Building example app for browser testing...', 'start');
+  async buildTestApp() {
+    this.log('Building test app for browser testing...', 'start');
     
     const { spawn } = require('child_process');
     
     return new Promise((resolve, reject) => {
-      const child = spawn('npm', ['run', 'build'], {
-        cwd: path.join(__dirname, '..', 'example'),
+      const child = spawn('npm', ['install'], {
+        cwd: path.join(__dirname, '..', 'test-app'),
         stdio: 'inherit'
       });
 
       child.on('close', (code) => {
         if (code === 0) {
-          this.log('Example app built successfully', 'success');
-          resolve();
+          const buildChild = spawn('npm', ['run', 'build'], {
+            cwd: path.join(__dirname, '..', 'test-app'),
+            stdio: 'inherit'
+          });
+
+          buildChild.on('close', (buildCode) => {
+            if (buildCode === 0) {
+              this.log('Test app built successfully', 'success');
+              resolve();
+            } else {
+              reject(new Error(`Build failed with code ${buildCode}`));
+            }
+          });
         } else {
-          reject(new Error(`Build failed with code ${code}`));
+          reject(new Error(`Install failed with code ${code}`));
         }
       });
     });
@@ -129,17 +140,58 @@ class BrowserIntegrationTester {
       // Wait for React to load
       await page.waitForSelector('body', { timeout: 10000 });
 
-      // Test 1: Check if CustomCursor component is present
-      const cursorElement = await page.$('[data-testid="custom-cursor"], .custom-cursor');
-      if (!cursorElement) {
-        // Look for cursor in DOM differently - check for library presence
-        const libraryLoaded = await page.evaluate(() => {
-          return window.React && document.querySelector('#root');
-        });
+      // Test 1: Check if React app is loaded
+      await page.waitForSelector('#root', { timeout: 10000 });
+      
+      // Give React time to hydrate
+      await page.waitForTimeout(2000);
+      
+      // Trigger mouse movement to initialize cursor
+      await page.mouse.move(100, 100);
+      await page.waitForTimeout(500); // Wait for cursor to appear
+      
+      const appState = await page.evaluate(() => {
+        const root = document.querySelector('#root');
+        const hasReactContent = root && root.children.length > 0;
+        const hasAppTitle = document.querySelector('[data-testid="app-title"]');
+        const hasTestStatus = document.querySelector('[data-testid="test-status"]');
         
-        if (!libraryLoaded) {
-          throw new Error('React app not loaded properly');
-        }
+        // Check for cursors with detailed debugging
+        const cursorGlobal = document.querySelector('[data-testid="custom-cursor-global"]');
+        const cursorContainer = document.querySelector('[data-testid="custom-cursor-container"]');
+        const cursorById1 = document.querySelector('#custom-cursor-test-cursor');
+        const cursorById2 = document.querySelector('#custom-cursor-container-cursor');
+        const allCursorElements = document.querySelectorAll('[id^="custom-cursor-"]');
+        
+        const hasCustomCursor = cursorGlobal || cursorContainer || cursorById1 || cursorById2;
+        
+        return {
+          rootExists: !!root,
+          hasContent: hasReactContent,
+          hasAppTitle: !!hasAppTitle,
+          hasTestStatus: !!hasTestStatus,
+          contentHTML: root ? root.innerHTML.substring(0, 500) : '', // More content for debugging
+          hasCursor: !!hasCustomCursor,
+          cursorDetails: {
+            foundGlobalTestId: !!cursorGlobal,
+            foundContainerTestId: !!cursorContainer,
+            foundGlobalId: !!cursorById1,
+            foundContainerId: !!cursorById2,
+            allCursorCount: allCursorElements.length,
+            allCursorIds: Array.from(allCursorElements).map(el => el.id)
+          },
+          // Additional debugging for CustomCursor
+          portalContainer: !!document.getElementById('cursor-container'),
+          allElementsWithDataTestId: Array.from(document.querySelectorAll('[data-testid]')).map(el => el.getAttribute('data-testid')),
+          windowReact: !!window.React,
+          documentTitle: document.title
+        };
+      });
+      
+      this.log(`App state: ${JSON.stringify(appState)}`);
+      
+      if (!appState.rootExists || !appState.hasContent || !appState.hasAppTitle) {
+        throw new Error(`Test app not loaded properly. Root: ${appState.rootExists}, Content: ${appState.hasContent}, Title: ${appState.hasAppTitle}`);
       }
 
       // Test 2: Check mouse tracking functionality
@@ -239,7 +291,8 @@ class BrowserIntegrationTester {
         
         const browser = await config.browserType.launch();
         const context = await browser.newContext({
-          ...config.device
+          ...config.device,
+          hasTouch: true // Enable touch for all mobile devices
         });
         const page = await context.newPage();
 
@@ -446,7 +499,7 @@ class BrowserIntegrationTester {
         this.log('Playwright installed successfully', 'success');
       }
 
-      await this.buildExampleApp();
+      await this.buildTestApp();
       await this.startTestServer();
 
       // Give server time to start
