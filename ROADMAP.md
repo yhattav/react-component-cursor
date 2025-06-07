@@ -116,10 +116,10 @@ This roadmap outlines all necessary tasks to transition react-component-cursor f
   - [x] Migration guide from other libraries *(Covered in troubleshooting)*
   - [x] Framework-specific guides (Next.js, Gatsby, etc.)
 
-- [ ] **Advanced Usage**
-  - [ ] Performance optimization guide
-  - [ ] Custom animations and effects
-  - [ ] Integration with popular UI libraries
+- [ ] **Advanced Usage** *(Deferred - Will be covered by live examples in showcase site)*
+  - [ ] Performance optimization guide *(→ Live performance demos)*
+  - [ ] Custom animations and effects *(→ Interactive examples)*
+  - [ ] Integration with popular UI libraries *(→ Framework integration demos)*
   - [x] Server-side rendering considerations
 
 ### 🔧 Developer Resources
