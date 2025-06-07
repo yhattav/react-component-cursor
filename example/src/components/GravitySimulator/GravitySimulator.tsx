@@ -14,7 +14,7 @@ import { getContainerOffset } from '../../utils/dom/domUtils';
 import { INITIAL_GRAVITY_POINTS } from '../../constants/physics';
 import { SimulatorSettings } from '../SimulatorSettings/SimulatorSettings';
 import { useSettings } from '../../hooks/useSettings';
-import { throttle } from 'lodash';
+import throttle from 'lodash/throttle';
 
 interface ParticleMechanics {
   position: Point2D;
