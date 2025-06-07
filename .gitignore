@@ -6,3 +6,10 @@ dist
 example/.parcel-cache
 coverage/
 performance-results/
+
+# Integration test reports
+integration-test-report.json
+integration-test-report.md
+browser-test-report.json
+browser-test-report.md
+reports/
