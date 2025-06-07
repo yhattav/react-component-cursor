@@ -40,7 +40,11 @@ This roadmap outlines all necessary tasks to transition react-component-cursor f
   - [ ] Cursor state management (hover, click, drag states) *(Post-1.0)*
   - [ ] Built-in cursor animations and transitions *(Post-1.0)*
   - [ ] Accessibility improvements (reduced motion support) *(Post-1.0)*
-  - [ ] Touch device fallback strategies *(Post-1.0)*
+  - [ ] Advanced touch gesture support *(Post-1.0)*
+    - [ ] Touch feedback system with visual indicators *(Post-1.0)*
+    - [ ] Stylus/pen support with pressure sensitivity *(Post-1.0)*
+    - [ ] Touch gesture integration (tap, long press, swipe) *(Post-1.0)*
+    - [ ] Smart mobile optimization (battery, performance) *(Post-1.0)*
   - [ ] Custom cursor themes/presets *(Post-1.0)*
 
 ### 🧪 Testing & Quality Assurance
@@ -77,10 +81,10 @@ This roadmap outlines all necessary tasks to transition react-component-cursor f
   - [x] Implement feature detection for unsupported features
   - [x] Add polyfills where necessary
 
-- [ ] **Mobile & Touch Support**
-  - [ ] Proper handling on touch devices
-  - [ ] Graceful degradation on mobile
-  - [ ] Touch gesture support where applicable
+- [x] **Mobile & Touch Support**
+  - [x] Proper handling on touch devices
+  - [x] Graceful degradation on mobile
+  - [x] Basic touch event detection and testing
 
 - [ ] **Accessibility**
   - [ ] WCAG 2.1 AA compliance
