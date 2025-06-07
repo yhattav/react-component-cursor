@@ -311,15 +311,15 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       handleVisibilityChange();
     }, [handleVisibilityChange]);
 
+    // Handle mobile-specific visibility callback
+    React.useEffect(() => {
+      if (isMobile && typeof onVisibilityChange === 'function') {
+        onVisibilityChange(false, 'touch');
+      }
+    }, [isMobile, onVisibilityChange]);
+
     // Early return for mobile devices - no cursor rendering
     if (isMobile) {
-      // Call visibility callback with 'touch' reason for mobile
-      React.useEffect(() => {
-        if (typeof onVisibilityChange === 'function') {
-          onVisibilityChange(false, 'touch');
-        }
-      }, [onVisibilityChange]);
-      
       return null;
     }
 
