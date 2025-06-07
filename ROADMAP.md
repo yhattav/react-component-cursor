@@ -53,8 +53,8 @@ This roadmap outlines all necessary tasks to transition react-component-cursor f
   - [x] Test with different React versions (16.8+, 17, 18)
   - [x] Test SSR compatibility (Next.js, Gatsby)
   - [x] Test with different build systems (Vite, Webpack, Rollup)
-  - [ ] Test in different browsers (Chrome, Firefox, Safari, Edge)
-  - [ ] Mobile browser testing
+  - [x] Test in different browsers (Chrome, Firefox, Safari, Edge)
+  - [x] Mobile browser testing
 
 - [ ] **End-to-End Testing**
   - [ ] Set up Playwright or Cypress

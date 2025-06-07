@@ -38,6 +38,11 @@ export interface CustomCursorProps {
   // Event Handlers
   onMove?: CursorMoveHandler;
   onVisibilityChange?: CursorVisibilityHandler;
+  
+  // Testing & Accessibility
+  'data-testid'?: string;
+  role?: string;
+  'aria-label'?: string;
 }
 
 const ANIMATION_DURATION = '0.3s';
@@ -153,6 +158,9 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     showDevIndicator = true,
     onMove,
     onVisibilityChange,
+    'data-testid': dataTestId,
+    role,
+    'aria-label': ariaLabel,
   }) => {
     // Validate props in development mode (always called first)
     validateProps({
@@ -353,6 +361,9 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
               style={cursorStyle}
               className={className}
               aria-hidden="true"
+              data-testid={dataTestId}
+              role={role}
+              aria-label={ariaLabel}
             >
               {children}
             </div>
