@@ -11,6 +11,7 @@ export default defineConfig([
     sourcemap: true,
     clean: true,
     minify: true,
+    external: ['react', 'react-dom'],
     define: {
       'process.env.NODE_ENV': '"production"'
     },
@@ -31,6 +32,7 @@ export default defineConfig([
     sourcemap: true,
     clean: false, // Don't clean, we're building alongside production
     minify: false, // Keep readable for development
+    external: ['react', 'react-dom'],
     define: {
       'process.env.NODE_ENV': '"development"'
     },

@@ -49,10 +49,10 @@ This roadmap outlines all necessary tasks to transition react-component-cursor f
   - [x] Test performance under various conditions
   - [x] Mock and test browser APIs
 
-- [ ] **Integration Testing**
-  - [ ] Test with different React versions (16.8+, 17, 18)
+- [x] **Integration Testing**
+  - [x] Test with different React versions (16.8+, 17, 18)
   - [x] Test SSR compatibility (Next.js, Gatsby)
-  - [ ] Test with different build systems (Vite, Webpack, Rollup)
+  - [x] Test with different build systems (Vite, Webpack, Rollup)
   - [ ] Test in different browsers (Chrome, Firefox, Safari, Edge)
   - [ ] Mobile browser testing
 

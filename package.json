@@ -9,13 +9,13 @@
         "require": "./dist/index.dev.js"
       },
       "production": {
-        "types": "./dist/index.d.ts", 
+        "types": "./dist/index.d.ts",
         "import": "./dist/index.mjs",
         "require": "./dist/index.js"
       },
       "default": {
         "types": "./dist/index.d.ts",
-        "import": "./dist/index.mjs", 
+        "import": "./dist/index.mjs",
         "require": "./dist/index.js"
       }
     }
@@ -51,7 +51,10 @@
     "perf:monitor": "node scripts/performance-monitor.js",
     "perf:baseline": "node scripts/performance-monitor.js --set-baseline",
     "perf:ci": "npm run perf:benchmark && npm run perf:monitor",
-    "perf:dashboard": "node scripts/generate-dashboard.js"
+    "perf:dashboard": "node scripts/generate-dashboard.js",
+    "integration:test": "node scripts/integration-test.js",
+    "integration:browser": "node scripts/browser-integration-test.js",
+    "integration:all": "npm run integration:test && npm run integration:browser"
   },
   "peerDependencies": {
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
