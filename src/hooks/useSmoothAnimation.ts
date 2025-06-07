@@ -71,8 +71,13 @@ export function useSmoothAnimation(
     // Skip animation during SSR
     if (isSSR()) return;
     
-    // If smoothFactor is 1, just set position directly
-    if (smoothFactor === 1) {
+    // Check for reduced motion preference (only in browser)
+    const mediaQuery = typeof window !== 'undefined' && window.matchMedia ? 
+                      window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+    const prefersReducedMotion = mediaQuery?.matches ?? false;
+    
+    // If smoothFactor is 1 or user prefers reduced motion, set position directly
+    if (smoothFactor === 1 || prefersReducedMotion) {
       setPosition(targetPosition);
       return;
     }
