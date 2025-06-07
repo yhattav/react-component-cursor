@@ -44,24 +44,318 @@ function App() {
 }
 ```
 
-## Props
+## 📋 Complete API Reference
 
-| Prop                  | Type                             | Default | Description                                              |
-| --------------------- | -------------------------------- | ------- | -------------------------------------------------------- |
-| `id`                  | `string`                         | `'unnamed-cursor'` | Unique identifier for the cursor instance        |
-| `enabled`             | `boolean`                        | `true`  | Whether the cursor is enabled and visible               |
-| `children`            | `ReactNode`                      | -       | The component to use as cursor                           |
-| `className`           | `string`                         | `''`    | Additional CSS classes                                   |
-| `style`               | `CSSProperties`                  | `{}`    | Additional inline styles                                 |
-| `offset`              | `{ x: number; y: number }`       | `{ x: 0, y: 0 }` | Offset from cursor position               |
-| `zIndex`              | `number`                         | `9999`  | Z-index of the cursor element                            |
-| `smoothness`          | `number`                         | `1`     | Movement smoothing (1 = no smoothing, higher = smoother) |
-| `containerRef`        | `RefObject<HTMLElement>`         | -       | Reference to container element for bounded cursor        |
-| `showNativeCursor`    | `boolean`                        | `false` | Whether to show the native cursor alongside the custom one |
-| `throttleMs`          | `number`                         | `0`     | Throttle mouse events in milliseconds (0 = no throttling) |
-| `showDevIndicator`    | `boolean`                        | `true`  | **[Dev Only]** Show red debug ring in development (no effect in production) |
-| `onMove`              | `(position: { x: number, y: number }) => void` | -       | Callback fired on cursor movement                        |
-| `onVisibilityChange` | `(isVisible: boolean, reason: CursorVisibilityReason) => void`   | -       | Callback fired when cursor visibility changes. Reason indicates why ('container', 'disabled', etc.) |
+### `<CustomCursor>` Component
+
+The main component for creating custom cursors.
+
+#### Props
+
+| Prop                  | Type                             | Default | Description                                              | Performance Impact |
+| --------------------- | -------------------------------- | ------- | -------------------------------------------------------- | -------------------|
+| `id`                  | `string`                         | `'unnamed-cursor'` | Unique identifier for the cursor instance. Used for DOM element IDs and cleanup. | None |
+| `enabled`             | `boolean`                        | `true`  | Whether the cursor is enabled and visible. When `false`, cursor is hidden but still tracks mouse. | None |
+| `children`            | `ReactNode`                      | -       | The React component/element to use as cursor content. Can be any valid React node. | Varies by content complexity |
+| `className`           | `string`                         | `''`    | Additional CSS classes applied to the cursor container element. | None |
+| `style`               | `CSSProperties`                  | `{}`    | Additional inline styles applied to the cursor container. Use for custom positioning, size, etc. | None |
+| `offset`              | `CursorOffset`                   | `{ x: 0, y: 0 }` | Pixel offset from the actual mouse position. Useful for centering custom cursors. | None |
+| `zIndex`              | `number`                         | `9999`  | CSS z-index of the cursor element. Ensures cursor appears above other content. | None |
+| `smoothness`          | `number`                         | `1`     | Movement smoothing factor. `1` = instant movement, higher values = smoother but with lag. | **High** when > 1 |
+| `containerRef`        | `RefObject<HTMLElement>`         | -       | Reference to container element. When provided, cursor only appears within this element. | None |
+| `showNativeCursor`    | `boolean`                        | `false` | Whether to show the native cursor alongside the custom one. `false` hides native cursor globally. | None |
+| `throttleMs`          | `number`                         | `0`     | Throttle mouse events in milliseconds. `0` = native refresh rate. Values >16ms may affect responsiveness. | **Minimal** impact in practice |
+| `showDevIndicator`    | `boolean`                        | `true`  | **[Dev Only]** Show red debug ring around cursor in development. Automatically removed in production builds. | None in production |
+| `onMove`              | `CursorMoveHandler`              | -       | Callback fired on cursor movement. Receives `{ x, y }` position object. | **Low** per callback |
+| `onVisibilityChange`  | `CursorVisibilityHandler`        | -       | Callback fired when cursor visibility changes. Receives `(isVisible, reason)` parameters. | **Low** per callback |
+| `data-testid`         | `string`                         | -       | Test ID for automated testing. Applied to cursor element. | None |
+| `role`                | `string`                         | -       | ARIA role for accessibility. Applied to cursor element. | None |
+| `aria-label`          | `string`                         | -       | ARIA label for accessibility. Applied to cursor element. | None |
+
+### 📦 TypeScript Types
+
+#### Core Types
+
+```tsx
+import type {
+  CustomCursorProps,
+  CursorPosition,
+  CursorOffset,
+  CursorMoveHandler,
+  CursorVisibilityHandler,
+  CursorVisibilityReason,
+} from '@yhattav/react-component-cursor';
+```
+
+##### `CursorPosition`
+```tsx
+type CursorPosition = {
+  x: number;
+  y: number;
+};
+```
+Represents a cursor position with x and y coordinates in pixels.
+
+##### `CursorOffset`
+```tsx
+type CursorOffset = {
+  x: number;
+  y: number;
+};
+```
+Offset values applied to cursor position. Positive values move right/down, negative values move left/up.
+
+##### `CursorMoveHandler`
+```tsx
+type CursorMoveHandler = (position: CursorPosition) => void;
+```
+Function type for the `onMove` callback.
+
+##### `CursorVisibilityHandler`
+```tsx
+type CursorVisibilityHandler = (
+  isVisible: boolean, 
+  reason: CursorVisibilityReason
+) => void;
+```
+Function type for the `onVisibilityChange` callback.
+
+##### `CursorVisibilityReason`
+```tsx
+type CursorVisibilityReason = 
+  | 'container'      // Cursor hidden/shown due to container bounds
+  | 'disabled'       // Cursor hidden due to enabled=false
+  | 'touch'          // Cursor hidden on touch devices
+  | 'reducedMotion'  // Cursor hidden due to accessibility preferences
+  | 'accessibility'  // Cursor hidden due to accessibility features
+  | string;          // Future reasons (forward compatible)
+```
+Indicates why cursor visibility changed.
+
+#### Future-Ready Types (Reserved for v2+)
+
+```tsx
+import type {
+  CursorState,
+  CursorMode,
+} from '@yhattav/react-component-cursor';
+```
+
+##### `CursorState`
+```tsx
+type CursorState = 
+  | 'idle' 
+  | 'hover' 
+  | 'click' 
+  | 'drag' 
+  | string;
+```
+**Reserved for future versions.** Will enable cursor state management.
+
+##### `CursorMode`
+```tsx
+type CursorMode = 
+  | 'default' 
+  | 'pointer' 
+  | 'text' 
+  | 'grab' 
+  | 'grabbing' 
+  | string;
+```
+**Reserved for future versions.** Will enable predefined cursor shapes/modes.
+
+### 🔧 SSR Utilities (Advanced)
+
+For advanced server-side rendering scenarios:
+
+```tsx
+import {
+  isSSR,
+  isBrowser,
+  browserOnly,
+  safeDocument,
+  safeWindow,
+} from '@yhattav/react-component-cursor';
+```
+
+#### `isSSR(): boolean`
+Returns `true` if running in a server-side environment.
+
+#### `isBrowser(): boolean`
+Returns `true` if running in a browser environment.
+
+#### `browserOnly<T>(fn: () => T): T | null`
+Executes function only in browser environment, returns `null` during SSR.
+
+#### `safeDocument(): Document | null`
+Safely accesses `document` object, returns `null` during SSR.
+
+#### `safeWindow(): Window | null`
+Safely accesses `window` object, returns `null` during SSR.
+
+### ⚡ Performance Guidelines
+
+#### Optimal Settings for Different Use Cases
+
+**🎮 Gaming/Interactive Apps**
+```tsx
+<CustomCursor
+  smoothness={1}        // Instant response
+  throttleMs={0}        // No throttling
+  showDevIndicator={false}
+>
+  <GameCursor />
+</CustomCursor>
+```
+
+**🎨 Creative/Portfolio Sites**
+```tsx
+<CustomCursor
+  smoothness={3}        // Smooth, elegant movement
+  throttleMs={8}        // Light throttling for style
+  onMove={trackAnalytics}
+>
+  <ArtisticCursor />
+</CustomCursor>
+```
+
+**📱 Mobile-Friendly Apps**
+```tsx
+<CustomCursor
+  smoothness={1}        // Direct positioning
+  throttleMs={16}       // Optional: cap at 60fps (minimal impact)
+  // Component automatically hides on touch devices
+>
+  <DesktopOnlyCursor />
+</CustomCursor>
+```
+
+#### Performance Impact Matrix
+
+| Setting | CPU Impact | Memory Impact | Battery Impact | Visual Quality | Notes |
+|---------|------------|---------------|----------------|----------------|-------|
+| `smoothness={1}` | ✅ None | ✅ None | ✅ None | ⚡ Instant | Direct positioning, no animation loop |
+| `smoothness={2-5}` | 🟡 Low | ✅ None | 🟡 Low | 🎨 Smooth | Light RAF usage for interpolation |
+| `smoothness={5+}` | 🟠 Medium | ✅ None | 🟠 Medium | 🎭 Very Smooth | Continuous RAF, slower convergence |
+| `throttleMs={0}` | 🟡 Low | ✅ None | 🟡 Low | ⚡ Native Refresh | Runs at display rate (60-144Hz) |
+| `throttleMs={8-16}` | 🟡 Low | ✅ None | 🟡 Low | 🎯 Smooth 60fps | Minimal difference from native |
+| `throttleMs={16+}` | ✅ Lower | ✅ None | ✅ Lower | 🐌 <60fps | Noticeable responsiveness reduction |
+
+**Reality Check:** The difference between `throttleMs={0}` and `throttleMs={16}` is minimal in practice. Modern displays run at 60-144Hz (6-16ms), so the CPU impact difference is negligible. Mouse events are typically OS-limited to ~125-1000Hz anyway.
+
+### 🎯 Best Practices
+
+#### 1. **Choose Appropriate Smoothness**
+```tsx
+// ✅ Good: Light smoothing for elegance
+<CustomCursor smoothness={2}>
+
+// ❌ Avoid: Excessive smoothing causes lag
+<CustomCursor smoothness={20}>
+```
+
+#### 2. **Use Throttling for Performance**
+```tsx
+// ✅ Good: 60fps throttling for complex cursors
+<CustomCursor throttleMs={16}>
+  <ComplexAnimatedCursor />
+</CustomCursor>
+
+// ❌ Avoid: No throttling with heavy cursors
+<CustomCursor throttleMs={0}>
+  <HeavyVideoCursor />
+</CustomCursor>
+```
+
+#### 3. **Optimize Callback Functions**
+```tsx
+// ✅ Good: Memoized callback
+const handleMove = useCallback((pos) => {
+  // Handle movement
+}, []);
+
+<CustomCursor onMove={handleMove} />
+
+// ❌ Avoid: Inline functions (cause re-renders)
+<CustomCursor onMove={(pos) => console.log(pos)} />
+```
+
+#### 4. **Container Scoping for Performance**
+```tsx
+// ✅ Good: Scope cursor to specific areas
+<InteractiveSection ref={containerRef}>
+  <CustomCursor containerRef={containerRef}>
+    <SectionCursor />
+  </CustomCursor>
+</InteractiveSection>
+
+// ❌ Avoid: Global cursor for small interactive areas
+```
+
+#### 5. **Accessibility Considerations**
+```tsx
+// ✅ Good: Accessibility support
+<CustomCursor
+  role="presentation"
+  aria-label="Custom cursor indicator"
+  // Automatically respects prefers-reduced-motion
+>
+  <AccessibleCursor />
+</CustomCursor>
+```
+
+### 🎮 Interactive Examples
+
+For working examples and live demos, see:
+
+- **Live Demo**: [react-component-cursor.vercel.app](https://react-component-cursor.vercel.app)
+- **CodeSandbox Examples**: 
+  - [Basic Usage](https://codesandbox.io/s/react-component-cursor-basic)
+  - [Container Scoping](https://codesandbox.io/s/react-component-cursor-container)
+  - [Interactive States](https://codesandbox.io/s/react-component-cursor-interactive)
+- **Storybook**: [Component Documentation](https://yhattav.github.io/react-component-cursor/storybook)
+
+### 📚 Usage Guidelines
+
+#### Framework Compatibility
+- ✅ **Next.js** - Full SSR support with zero configuration
+- ✅ **Gatsby** - Static generation compatible
+- ✅ **Remix** - Server-side rendering works out of the box
+- ✅ **Vite/CRA** - Client-side rendering with optimal performance
+- ✅ **Astro** - Partial hydration compatible
+
+#### Troubleshooting Common Issues
+
+**Cursor not appearing:**
+```tsx
+// ✅ Ensure cursor: 'none' is set on container
+<div style={{ cursor: 'none' }}>
+  <CustomCursor>...</CustomCursor>
+</div>
+
+// ✅ Check if on mobile device (automatically hidden)
+// ✅ Verify enabled={true} prop
+// ✅ Check browser console for validation errors
+```
+
+**Performance issues:**
+```tsx
+// ✅ Reduce smoothness for better performance
+<CustomCursor smoothness={1}>  // Direct positioning
+
+// ✅ Add throttling for complex cursors
+<CustomCursor throttleMs={16}>  // 60fps limit
+
+// ✅ Use container scoping for targeted areas
+<CustomCursor containerRef={sectionRef}>
+```
+
+**Hydration mismatches:**
+```tsx
+// ✅ SSR is handled automatically - no action needed
+// ✅ Avoid conditional rendering - let component handle SSR
+// ✅ Don't wrap in dynamic imports unless specific needs
+```
 
 ## Advanced Usage
 
