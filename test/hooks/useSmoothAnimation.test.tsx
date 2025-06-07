@@ -110,6 +110,32 @@ describe('useSmoothAnimation', () => {
     rafSpy.mockRestore();
   });
 
+  it('respects reduced motion preferences', () => {
+    // Mock matchMedia to return prefers-reduced-motion
+    const mockMatchMedia = jest.fn(() => ({
+      matches: true,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    }));
+    
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: mockMatchMedia,
+    });
+
+    const setPosition = jest.fn();
+    const targetPosition = { x: 100, y: 100 };
+    const rafSpy = jest.spyOn(global, 'requestAnimationFrame');
+
+    renderHook(() => useSmoothAnimation(targetPosition, 5, setPosition));
+
+    // Should set position directly without animation when reduced motion is preferred
+    expect(setPosition).toHaveBeenCalledWith(targetPosition);
+    expect(rafSpy).not.toHaveBeenCalled();
+
+    rafSpy.mockRestore();
+  });
+
   it('stops animating when reaching threshold', () => {
     const setPosition = jest.fn();
     

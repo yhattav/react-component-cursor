@@ -533,6 +533,32 @@ describe('CustomCursor', () => {
       const cursor = screen.getByText('Non-interactive cursor');
       expect(cursor).toHaveStyle('pointer-events: none');
     });
+
+    it('includes reduced motion CSS for accessibility', () => {
+      render(<CustomCursor id="reduced-motion-test">Reduced motion test</CustomCursor>);
+      
+      const styleElement = document.getElementById('cursor-style-reduced-motion-test');
+      expect(styleElement).toBeInTheDocument();
+      expect(styleElement?.textContent).toContain('@media (prefers-reduced-motion: reduce)');
+      expect(styleElement?.textContent).toContain('scale(1)'); // No scaling animation in reduced motion
+    });
+
+    it('supports custom ARIA attributes', () => {
+      render(
+        <CustomCursor 
+          role="presentation" 
+          aria-label="Custom cursor indicator"
+        >
+          ARIA cursor
+        </CustomCursor>
+      );
+      
+      const cursor = screen.getByText('ARIA cursor');
+      expect(cursor).toHaveAttribute('role', 'presentation');
+      expect(cursor).toHaveAttribute('aria-label', 'Custom cursor indicator');
+      // aria-hidden should still be true for cursor elements
+      expect(cursor).toHaveAttribute('aria-hidden', 'true');
+    });
   });
 
   describe('Multiple cursors', () => {

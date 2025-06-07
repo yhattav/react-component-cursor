@@ -240,7 +240,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       };
     }, [getPortalContainerMemo]);
 
-    // Memoize style sheet content
+    // Memoize style sheet content with reduced motion support
     const styleSheetContent = React.useMemo(() => `
       @keyframes ${ANIMATION_NAME} {
         from {
@@ -250,6 +250,19 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
         to {
           opacity: 1;
           transform: translate(var(--cursor-x), var(--cursor-y)) scale(1);
+        }
+      }
+      
+      @media (prefers-reduced-motion: reduce) {
+        @keyframes ${ANIMATION_NAME} {
+          from {
+            opacity: 0;
+            transform: translate(var(--cursor-x), var(--cursor-y)) scale(1);
+          }
+          to {
+            opacity: 1;
+            transform: translate(var(--cursor-x), var(--cursor-y)) scale(1);
+          }
         }
       }
     `, []);
