@@ -18,6 +18,8 @@ This roadmap outlines all necessary tasks to transition react-component-cursor f
 
 ## 📚 Core Library Development
 
+> **Priority Strategy**: Focus on foundational elements (testing, documentation, release engineering) before advanced features. Advanced features are deferred to post-1.0 releases.
+
 ### 🔧 Component Architecture & API
 - [x] **API Stability Review**
   - [x] Audit all prop names and types for consistency
@@ -33,13 +35,13 @@ This roadmap outlines all necessary tasks to transition react-component-cursor f
   - [x] Minimize re-renders and DOM updates
   - [x] Add performance benchmarks and monitoring
 
-- [ ] **Advanced Features**
-  - [ ] Multiple cursor shapes/modes support
-  - [ ] Cursor state management (hover, click, drag states)
-  - [ ] Built-in cursor animations and transitions
-  - [ ] Accessibility improvements (reduced motion support)
-  - [ ] Touch device fallback strategies
-  - [ ] Custom cursor themes/presets
+- [ ] **Advanced Features** *(Deferred - Focus on Foundations First)*
+  - [ ] Multiple cursor shapes/modes support *(Post-1.0)*
+  - [ ] Cursor state management (hover, click, drag states) *(Post-1.0)*
+  - [ ] Built-in cursor animations and transitions *(Post-1.0)*
+  - [ ] Accessibility improvements (reduced motion support) *(Post-1.0)*
+  - [ ] Touch device fallback strategies *(Post-1.0)*
+  - [ ] Custom cursor themes/presets *(Post-1.0)*
 
 ### 🧪 Testing & Quality Assurance
 - [x] **Unit Testing (Target: 100% coverage)**
@@ -56,11 +58,11 @@ This roadmap outlines all necessary tasks to transition react-component-cursor f
   - [x] Test in different browsers (Chrome, Firefox, Safari, Edge)
   - [x] Mobile browser testing
 
-- [ ] **End-to-End Testing**
-  - [ ] Set up Playwright or Cypress
-  - [ ] Test cursor behavior in real browser environment
-  - [ ] Test performance on different devices
-  - [ ] Test accessibility with screen readers
+- [x] **End-to-End Testing**
+  - [x] Set up Playwright or Cypress
+  - [x] Test cursor behavior in real browser environment
+  - [x] Test performance on different devices
+  - [x] Test accessibility with screen readers
 
 - [ ] **Performance Testing**
   - [ ] Bundle size regression tests
