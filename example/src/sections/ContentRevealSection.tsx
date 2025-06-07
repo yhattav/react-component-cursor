@@ -45,7 +45,7 @@ export const ContentRevealSection: React.FC = () => {
           position: 'absolute',
           top: '50%',
           left: '50%',
-          transform: 'translate(-50%, -50%)',
+          
           fontSize: '24px',
           color: '#1890ff',
         }}
@@ -64,7 +64,7 @@ export const ContentRevealSection: React.FC = () => {
             height: '100px',
             background:
               'radial-gradient(circle closest-side, rgba(255,255,255,0.3) 0%, transparent 100%)',
-            transform: 'translate(-50%, -50%)',
+
             pointerEvents: 'none',
           }}
         />

@@ -50,8 +50,7 @@ const TestApp: React.FC = () => {
                 width: '12px',
                 height: '12px',
                 backgroundColor: '#ff0000',
-                borderRadius: '50%',
-                transform: 'translate(-50%, -50%)'
+                borderRadius: '50%'
               }}
             />
           ) : (
@@ -62,7 +61,6 @@ const TestApp: React.FC = () => {
                 height: '20px',
                 backgroundColor: '#0066ff',
                 borderRadius: '4px',
-                transform: 'translate(-50%, -50%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -104,8 +102,7 @@ const TestApp: React.FC = () => {
                 width: '16px',
                 height: '16px',
                 backgroundColor: '#00ff00',
-                borderRadius: '50%',
-                transform: 'translate(-50%, -50%)'
+                borderRadius: '50%'
               }}
             />
           </CustomCursor>

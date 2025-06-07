@@ -91,11 +91,11 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
           return <CustomCursorButton text="Click me!" />;
         case 'hover':
           return (
-            <div className="w-15 h-15 border-2 border-primary-500 rounded-full -translate-x-1/2 -translate-y-1/2 transition-all duration-200" />
+            <div className="w-15 h-15 border-2 border-primary-500 rounded-full transition-all duration-200" />
           );
         default:
           return (
-            <div className="w-5 h-5 bg-primary-500 rounded-full -translate-x-1/2 -translate-y-1/2" />
+            <div className="w-5 h-5 bg-primary-500 rounded-full" />
           );
       }
     }, []);
@@ -270,7 +270,7 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
                   className={`
                     ${hoveredSecond ? 'w-15 h-15' : 'w-5 h-5'}
                     ${hoveredSecond ? 'bg-transparent border-2 border-red-500' : 'bg-red-500'}
-                    rounded-full -translate-x-1/2 -translate-y-1/2 transition-all duration-200
+                    rounded-full transition-all duration-200
                   `}
                 />
               </CustomCursor>

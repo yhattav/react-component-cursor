@@ -36,11 +36,10 @@ function App() {
             height: '20px',
             backgroundColor: '#3b82f6',
             borderRadius: '50%',
-            transform: 'translate(-50%, -50%)',
           }}
         />
       </CustomCursor>
-      {/ Your app content /}
+      {/* Your app content */}
     </div>
   );
 }
@@ -61,10 +60,11 @@ The main component for creating custom cursors.
 | `children`            | `ReactNode`                      | -       | The React component/element to use as cursor content. Can be any valid React node. | Varies by content complexity |
 | `className`           | `string`                         | `''`    | Additional CSS classes applied to the cursor container element. | None |
 | `style`               | `CSSProperties`                  | `{}`    | Additional inline styles applied to the cursor container. Use for custom positioning, size, etc. | None |
-| `offset`              | `CursorOffset`                   | `{ x: 0, y: 0 }` | Pixel offset from the actual mouse position. Useful for centering custom cursors. | None |
+| `offset`              | `CursorOffset`                   | `{ x: 0, y: 0 }` | Pixel offset from the actual mouse position. Applied before centering. | None |
 | `zIndex`              | `number`                         | `9999`  | CSS z-index of the cursor element. Ensures cursor appears above other content. | None |
 | `smoothness`          | `number`                         | `1`     | Movement smoothing factor. `1` = instant movement, higher values = smoother but with lag. | **High** when > 1 |
 | `containerRef`        | `RefObject<HTMLElement>`         | -       | Reference to container element. When provided, cursor only appears within this element. | None |
+| `centered`            | `boolean`                        | `true`  | Automatically center cursor content on mouse position. Set to `false` for top-left positioning. | None |
 | `showNativeCursor`    | `boolean`                        | `false` | Whether to show the native cursor alongside the custom one. `false` hides native cursor globally. | None |
 | `throttleMs`          | `number`                         | `0`     | Throttle mouse events in milliseconds. `0` = native refresh rate. Values >16ms may affect responsiveness. | **Minimal** impact in practice |
 | `showDevIndicator`    | `boolean`                        | `true`  | **[Dev Only]** Show red debug ring around cursor in development. Automatically removed in production builds. | None in production |
@@ -381,11 +381,10 @@ function ContainerExample() {
             height: '40px',
             border: '2px solid #ef4444',
             borderRadius: '50%',
-            transform: 'translate(-50%, -50%)',
           }}
         />
       </CustomCursor>
-      {/ Container content /}
+      {/* Container content */}
     </div>
   );
 }
@@ -405,7 +404,6 @@ function InteractiveCursor() {
             height: isHovered ? '60px' : '20px',
             backgroundColor: '#3b82f6',
             borderRadius: '50%',
-            transform: 'translate(-50%, -50%)',
             transition: 'all 0.2s ease',
           }}
         />
@@ -438,7 +436,6 @@ function VisibilityAwareCursor() {
           height: '20px',
           backgroundColor: '#3b82f6',
           borderRadius: '50%',
-          transform: 'translate(-50%, -50%)',
         }}
       />
     </CustomCursor>
