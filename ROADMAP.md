@@ -64,11 +64,11 @@ This roadmap outlines all necessary tasks to transition react-component-cursor f
   - [x] Test performance on different devices
   - [x] Test accessibility with screen readers
 
-- [ ] **Performance Testing**
-  - [ ] Bundle size regression tests
-  - [ ] Memory leak testing
-  - [ ] Animation frame rate testing
-  - [ ] CPU usage profiling
+- [x] **Performance Testing**
+  - [x] Bundle size regression tests
+  - [x] Memory leak testing
+  - [x] Animation frame rate testing
+  - [x] CPU usage profiling
 
 ### 🔒 Browser Compatibility & Standards
 - [ ] **Cross-Browser Support**
