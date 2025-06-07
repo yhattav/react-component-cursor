@@ -9,7 +9,7 @@ import {
   CursorVisibilityReason,
 } from './types.js';
 import { validateProps } from './utils/validation';
-import { isSSR, safeDocument } from './utils/ssr';
+import { isSSR, safeDocument, isMobileDevice } from './utils/ssr';
 
 // Clean props interface
 export interface CustomCursorProps {
@@ -186,6 +186,9 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       y: typeof offset === 'object' ? offset.y : 0,
     }), [offset]);
 
+    // Check for mobile device early (after hooks are called)
+    const isMobile = React.useMemo(() => isMobileDevice(), []);
+
     // Always call hooks, even if we'll return null (Rules of Hooks)
     const mousePositionHook = useMousePosition(containerRef, offsetValues.x, offsetValues.y, throttleMs);
     const { position, setPosition, targetPosition, isVisible } = mousePositionHook;
@@ -307,6 +310,18 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     React.useEffect(() => {
       handleVisibilityChange();
     }, [handleVisibilityChange]);
+
+    // Early return for mobile devices - no cursor rendering
+    if (isMobile) {
+      // Call visibility callback with 'touch' reason for mobile
+      React.useEffect(() => {
+        if (typeof onVisibilityChange === 'function') {
+          onVisibilityChange(false, 'touch');
+        }
+      }, [onVisibilityChange]);
+      
+      return null;
+    }
 
     const cursorStyle = React.useMemo(
       () =>

@@ -20,6 +20,32 @@ export const isBrowser = (): boolean => {
 };
 
 /**
+ * Detects if the code is running on a mobile/touch device
+ * Uses multiple detection methods for better accuracy
+ * @returns true if running on mobile/touch device, false otherwise
+ */
+export const isMobileDevice = (): boolean => {
+  if (isSSR()) {
+    return false;
+  }
+
+  // Check for touch capability
+  const hasTouchCapability = 'ontouchstart' in window || 
+                            navigator.maxTouchPoints > 0 || 
+                            (navigator as any).msMaxTouchPoints > 0;
+
+  // Check user agent for mobile patterns
+  const mobileUserAgentPattern = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+  const isMobileUserAgent = mobileUserAgentPattern.test(navigator.userAgent);
+
+  // Check for small screen size (mobile viewport)
+  const isSmallScreen = window.innerWidth <= 768 || window.innerHeight <= 768;
+
+  // Device is considered mobile if it has touch AND (mobile user agent OR small screen)
+  return hasTouchCapability && (isMobileUserAgent || isSmallScreen);
+};
+
+/**
  * Safely executes a function only in browser environment
  * @param fn Function to execute in browser
  * @param fallback Optional fallback value to return in SSR
@@ -33,17 +59,17 @@ export const browserOnly = <T>(fn: () => T, fallback?: T): T | undefined => {
 };
 
 /**
- * Safely accesses document object
- * @returns document object if in browser, undefined if in SSR
+ * Safely gets the document object, handling SSR
+ * @returns document if in browser, null if in SSR
  */
-export const safeDocument = (): Document | undefined => {
-  return browserOnly(() => document);
+export const safeDocument = (): Document | null => {
+  return isBrowser() ? document : null;
 };
 
 /**
- * Safely accesses window object
- * @returns window object if in browser, undefined if in SSR
+ * Safely gets the window object, handling SSR
+ * @returns window if in browser, null if in SSR
  */
-export const safeWindow = (): Window | undefined => {
-  return browserOnly(() => window);
+export const safeWindow = (): Window | null => {
+  return isBrowser() ? window : null;
 }; 

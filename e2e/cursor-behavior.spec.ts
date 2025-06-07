@@ -4,15 +4,10 @@ test.describe('Custom Cursor Behavior', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await expect(page.getByTestId('app-title')).toBeVisible();
+    // Wait for any hydration to complete
+    await page.waitForTimeout(200);
     
-    // Wait for React to fully hydrate and the cursor to be ready
-    await expect(page.getByTestId('test-status')).toContainText('Test App Ready');
-    await page.waitForTimeout(500); // Additional wait for cursor initialization
-  });
-
-  test('should display the test app with default cursor', async ({ page }) => {
-    // Verify app loads correctly
-    await expect(page.getByTestId('app-title')).toHaveText('React Cursor Library Test');
+    // Verify app is ready
     await expect(page.getByTestId('test-status')).toContainText('Test App Ready');
     
     // Verify default state
@@ -20,7 +15,23 @@ test.describe('Custom Cursor Behavior', () => {
     await expect(page.getByTestId('toggle-container')).toContainText('Container Mode: OFF');
   });
 
-  test('should render custom cursor element', async ({ page }) => {
+  test('should render custom cursor element on desktop', async ({ page, isMobile }) => {
+    if (isMobile) {
+      // On mobile, cursor should not be rendered (graceful degradation)
+      await page.mouse.move(200, 200);
+      await page.waitForTimeout(100);
+      
+      // Verify no custom cursor elements are visible
+      await expect(page.getByTestId('custom-cursor-global')).not.toBeVisible();
+      await expect(page.getByTestId('cursor-simple')).not.toBeVisible();
+      
+      // But the page should still function normally
+      await expect(page.getByTestId('app-title')).toBeVisible();
+      await expect(page.getByTestId('test-status')).toContainText('Test App Ready');
+      return;
+    }
+
+    // Desktop behavior
     // Move mouse to activate the cursor
     await page.mouse.move(200, 200);
     await page.waitForTimeout(100);
@@ -35,7 +46,26 @@ test.describe('Custom Cursor Behavior', () => {
     await expect(simpleCursor).toHaveCSS('border-radius', '50%');
   });
 
-  test('should switch between cursor modes', async ({ page }) => {
+  test('should switch between cursor modes on desktop', async ({ page, isMobile }) => {
+    if (isMobile) {
+      // On mobile, mode switching should work but cursors shouldn't be visible
+      await expect(page.getByTestId('cursor-simple')).not.toBeVisible();
+      await expect(page.getByTestId('cursor-custom')).not.toBeVisible();
+      
+      // Switch modes - should work without errors
+      await page.getByTestId('toggle-cursor-mode').click();
+      await expect(page.getByTestId('toggle-cursor-mode')).toContainText('Current: custom');
+      
+      await page.getByTestId('toggle-cursor-mode').click();
+      await expect(page.getByTestId('toggle-cursor-mode')).toContainText('Current: simple');
+      
+      // Still no cursors should be visible
+      await expect(page.getByTestId('cursor-simple')).not.toBeVisible();
+      await expect(page.getByTestId('cursor-custom')).not.toBeVisible();
+      return;
+    }
+
+    // Desktop behavior
     // Move mouse to activate the cursor
     await page.mouse.move(150, 150);
     await page.waitForTimeout(100);
@@ -60,7 +90,22 @@ test.describe('Custom Cursor Behavior', () => {
     await expect(page.getByTestId('cursor-custom')).not.toBeVisible();
   });
 
-  test('should track mouse movement', async ({ page }) => {
+  test('should track mouse movement on desktop', async ({ page, isMobile }) => {
+    if (isMobile) {
+      // On mobile, verify no cursor tracking happens but page remains functional
+      await page.touchscreen.tap(100, 100);
+      await page.waitForTimeout(100);
+      
+      // No cursor should be visible
+      const cursor = page.getByTestId('cursor-simple');
+      await expect(cursor).not.toBeVisible();
+      
+      // But touch interactions should work
+      await expect(page.getByTestId('app-title')).toBeVisible();
+      return;
+    }
+
+    // Desktop behavior
     // Activate cursor first
     await page.mouse.move(100, 100);
     await page.waitForTimeout(100);
@@ -94,7 +139,25 @@ test.describe('Custom Cursor Behavior', () => {
     }
   });
 
-  test('should handle hover interactions', async ({ page }) => {
+  test('should handle hover interactions on desktop', async ({ page, isMobile }) => {
+    if (isMobile) {
+      // On mobile, hover areas should still be functional with touch
+      const hoverArea1 = page.getByTestId('hover-area-1');
+      const hoverArea2 = page.getByTestId('hover-area-2');
+      
+      // Touch interactions should work
+      await hoverArea1.tap();
+      await page.waitForTimeout(50);
+      
+      await hoverArea2.tap();
+      await page.waitForTimeout(50);
+      
+      // No cursor should be visible
+      await expect(page.getByTestId('cursor-simple')).not.toBeVisible();
+      return;
+    }
+
+    // Desktop behavior
     const hoverArea1 = page.getByTestId('hover-area-1');
     const hoverArea2 = page.getByTestId('hover-area-2');
     const cursor = page.getByTestId('cursor-simple');
@@ -126,7 +189,22 @@ test.describe('Custom Cursor Behavior', () => {
     expect(cursor2Box!.x + cursor2Box!.width / 2).toBeLessThan(area2Box!.x + area2Box!.width + 10);
   });
 
-  test('should switch to container mode', async ({ page }) => {
+  test('should switch to container mode', async ({ page, isMobile }) => {
+    if (isMobile) {
+      // On mobile, container mode switching should work but no cursors visible
+      await page.getByTestId('toggle-container').click();
+      await expect(page.getByTestId('toggle-container')).toContainText('Container Mode: ON');
+      
+      // No cursors should be visible
+      await expect(page.getByTestId('custom-cursor-global')).not.toBeVisible();
+      await expect(page.getByTestId('custom-cursor-container')).not.toBeVisible();
+      
+      // But container should still be present and functional
+      await expect(page.getByTestId('cursor-container')).toBeVisible();
+      return;
+    }
+
+    // Desktop behavior
     // Switch to container mode
     await page.getByTestId('toggle-container').click();
     await expect(page.getByTestId('toggle-container')).toContainText('Container Mode: ON');
@@ -149,7 +227,25 @@ test.describe('Custom Cursor Behavior', () => {
     await expect(containerCursor).toHaveCSS('border-radius', '50%');
   });
 
-  test('should track mouse movement within container', async ({ page }) => {
+  test('should track mouse movement within container on desktop', async ({ page, isMobile }) => {
+    if (isMobile) {
+      // On mobile, just verify container mode works but no cursor tracking
+      await page.getByTestId('toggle-container').click();
+      await page.waitForTimeout(200);
+      
+      const container = page.getByTestId('cursor-container');
+      await expect(container).toBeVisible();
+      
+      // Touch the container
+      await container.tap();
+      await page.waitForTimeout(50);
+      
+      // No cursor should be visible
+      await expect(page.getByTestId('cursor-container-element')).not.toBeVisible();
+      return;
+    }
+
+    // Desktop behavior
     // Switch to container mode
     await page.getByTestId('toggle-container').click();
     await page.waitForTimeout(200);
@@ -176,7 +272,37 @@ test.describe('Custom Cursor Behavior', () => {
     expect(Math.abs(cursorBox!.y + cursorBox!.height / 2 - containerCenterY)).toBeLessThan(10);
   });
 
-  test('should maintain performance during rapid mouse movement', async ({ page }) => {
+  test('should maintain performance during rapid mouse movement on desktop', async ({ page, isMobile }) => {
+    if (isMobile) {
+      // On mobile, test that rapid touch interactions don't break the page
+      const touchPositions = [
+        { x: 100, y: 100 },
+        { x: 200, y: 150 },
+        { x: 300, y: 200 },
+        { x: 400, y: 150 },
+        { x: 500, y: 100 }
+      ];
+      
+      const startTime = Date.now();
+      
+      for (const position of touchPositions) {
+        await page.touchscreen.tap(position.x, position.y);
+        await page.waitForTimeout(5);
+      }
+      
+      const endTime = Date.now();
+      const totalTime = endTime - startTime;
+      
+      // Should handle rapid touch in reasonable time
+      expect(totalTime).toBeLessThan(1000);
+      
+      // Page should remain functional
+      await expect(page.getByTestId('app-title')).toBeVisible();
+      await expect(page.getByTestId('cursor-simple')).not.toBeVisible();
+      return;
+    }
+
+    // Desktop behavior
     const cursor = page.getByTestId('cursor-simple');
     
     // Perform rapid mouse movements
