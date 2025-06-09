@@ -1,11 +1,12 @@
 'use client';
 
-import { CustomCursor } from '@yhattav/react-component-cursor';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { CustomCursor } from '@yhattav/react-component-cursor';
 
 // Components
 import { HeroSection } from '../components/sections/hero-section';
+import { InteractiveExamplesSection } from '../components/sections/interactive-examples-section';
 import { GlowCursor, EmojiCursor, ParticleCursor } from '../components/cursors';
 
 // Constants and types
@@ -78,7 +79,12 @@ export default function HomePage() {
             <div className="bg-gray-800/30 rounded-xl p-8 border border-green-500/50">
               <h3 className="text-xl font-semibold text-green-400 mb-4">✅ After: Dynamic & Engaging</h3>
               <div className="bg-gray-900 rounded-lg p-6 mb-4 relative overflow-hidden">
-                <CustomCursor smoothness={1}>
+                <CustomCursor 
+                  id="proof-cursor"
+                  smoothness={1}
+                  showNativeCursor={false}
+                  showDevIndicator={false}
+                >
                   <div className="w-4 h-4 bg-gradient-to-r from-green-400 to-blue-500 rounded-full animate-pulse" />
                 </CustomCursor>
                 <div className="text-green-400 text-center py-8">
@@ -220,7 +226,10 @@ export default function HomePage() {
             {/* Demo Areas with Custom Cursors */}
             {demoCursorMode !== 'default' && (
               <CustomCursor
+                id="demo-cursor"
                 smoothness={demoCursorMode === 'particle' ? 1 : 2}
+                showNativeCursor={false}
+                showDevIndicator={false}
                 className="z-40"
               >
                 {demoCursorMode === 'glow' && <GlowCursor />}
@@ -280,6 +289,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* 4. INTERACTIVE EXAMPLES - See It In Action (30-60 seconds) */}
+      <InteractiveExamplesSection />
 
       {/* Quick Start Section */}
       <section className="py-20 bg-gradient-to-b from-gray-900/50 to-black">
