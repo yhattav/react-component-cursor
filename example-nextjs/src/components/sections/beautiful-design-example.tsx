@@ -10,76 +10,124 @@ import { CodeSnippet } from '../ui/code-snippet';
  * Demonstrates advanced visual effects with organic cloud backdrop
  */
 function BeautifulDesignCursor() {
+  // Pre-generate stable random values to prevent jumpy animations
+  const particles = React.useMemo(() => 
+    [...Array(12)].map((_, i) => ({
+      id: i,
+      size: 20 + (Math.sin(i * 2.3) * 0.5 + 0.5) * 40,
+      baseX: Math.sin(i * 1.7) * 60,
+      baseY: Math.cos(i * 1.3) * 60,
+      moveRangeX: 15 + (Math.sin(i * 3.1) * 0.5 + 0.5) * 20,
+      moveRangeY: 15 + (Math.cos(i * 2.7) * 0.5 + 0.5) * 20,
+      hue: 147 + (Math.sin(i * 1.9) * 0.5 + 0.5) * 89,
+      saturation: 51 + (Math.cos(i * 2.1) * 0.5 + 0.5) * 134,
+      lightness: 234 + (Math.sin(i * 1.1) * 0.5 + 0.5) * 21,
+      opacity: 0.1 + (Math.cos(i * 1.5) * 0.5 + 0.5) * 0.15,
+      blur: 8 + (Math.sin(i * 2.9) * 0.5 + 0.5) * 16,
+      duration: 8 + (Math.cos(i * 1.8) * 0.5 + 0.5) * 6,
+      delay: (Math.sin(i * 0.7) * 0.5 + 0.5) * 4,
+    })), []
+  );
+
+  const smallParticles = React.useMemo(() => 
+    [...Array(8)].map((_, i) => ({
+      id: i,
+      size: 8 + (Math.sin(i * 3.2) * 0.5 + 0.5) * 15,
+      baseX: Math.sin(i * 2.4) * 40,
+      baseY: Math.cos(i * 1.8) * 40,
+      moveRangeX: 8 + (Math.sin(i * 2.6) * 0.5 + 0.5) * 12,
+      moveRangeY: 8 + (Math.cos(i * 3.4) * 0.5 + 0.5) * 12,
+      hue: 236 + (Math.sin(i * 2.2) * 0.5 + 0.5) * 19,
+      saturation: 72 + (Math.cos(i * 1.6) * 0.5 + 0.5) * 103,
+      lightness: 153 + (Math.sin(i * 2.8) * 0.5 + 0.5) * 102,
+      opacity: 0.15 + (Math.cos(i * 2.0) * 0.5 + 0.5) * 0.1,
+      blur: 4 + (Math.sin(i * 1.4) * 0.5 + 0.5) * 8,
+      duration: 6 + (Math.cos(i * 2.5) * 0.5 + 0.5) * 4,
+      delay: (Math.sin(i * 1.2) * 0.5 + 0.5) * 3,
+    })), []
+  );
+
   return (
     <div className="relative">
-      {/* Organic cloud backdrop with negative color effect */}
-      <motion.div 
-        className="absolute -inset-12 opacity-80"
-        animate={{
-          scale: [1, 1.1, 0.95, 1],
-          rotate: [0, 5, -3, 0],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-        style={{
-          background: 'radial-gradient(ellipse 70% 100% at 30% 40%, rgba(168, 85, 247, 0.35) 0%, rgba(236, 72, 153, 0.1) 50%, transparent 80%)',
-          filter: 'blur(18px) brightness(0.5) contrast(1.6) backdrop-blur(8px)',
-          borderRadius: '60% 40% 70% 30%',
-        }}
-      />
+      {/* Particle-based organic cloud effect */}
+      {particles.map((particle) => (
+        <motion.div
+          key={particle.id}
+          className="absolute rounded-full"
+          style={{
+            width: `${particle.size}px`,
+            height: `${particle.size}px`,
+            left: `${particle.baseX}px`,
+            top: `${particle.baseY}px`,
+            background: `rgba(${Math.round(particle.hue)}, ${Math.round(particle.saturation)}, ${Math.round(particle.lightness)}, ${particle.opacity})`,
+            filter: `blur(${particle.blur}px)`,
+          }}
+          animate={{
+            x: [
+              -particle.moveRangeX, 
+              particle.moveRangeX * 0.7, 
+              -particle.moveRangeX * 0.3, 
+              particle.moveRangeX, 
+              -particle.moveRangeX
+            ],
+            y: [
+              -particle.moveRangeY, 
+              particle.moveRangeY * 0.5, 
+              particle.moveRangeY, 
+              -particle.moveRangeY * 0.8, 
+              -particle.moveRangeY
+            ],
+            scale: [1, 1.2, 0.8, 1.1, 1],
+            opacity: [particle.opacity, particle.opacity * 1.8, particle.opacity * 0.6, particle.opacity * 1.5, particle.opacity],
+          }}
+          transition={{
+            duration: particle.duration,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: particle.delay,
+          }}
+        />
+      ))}
       
-      {/* Secondary organic shape */}
-      <motion.div 
-        className="absolute -inset-10 opacity-70"
-        animate={{
-          scale: [0.8, 1.2, 0.9, 0.8],
-          rotate: [0, -8, 12, 0],
-          x: [0, 3, -2, 0],
-          y: [0, -2, 4, 0],
-        }}
-        transition={{
-          duration: 12,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 2
-        }}
-        style={{
-          background: 'radial-gradient(ellipse 80% 120% at 60% 30%, rgba(236, 72, 153, 0.4) 0%, rgba(147, 51, 234, 0.15) 40%, transparent 70%)',
-          filter: 'blur(15px) invert(0.15) hue-rotate(15deg) saturate(1.3)',
-          borderRadius: '40% 60% 30% 70%',
-        }}
-      />
-      
-      {/* Third flowing shape */}
-      <motion.div 
-        className="absolute -inset-8 opacity-60"
-        animate={{
-          scale: [1.1, 0.7, 1.3, 1.1],
-          rotate: [0, 15, -10, 0],
-          x: [0, -4, 3, 0],
-          y: [0, 2, -3, 0],
-        }}
-        transition={{
-          duration: 10,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 4
-        }}
-        style={{
-          background: 'radial-gradient(ellipse 90% 80% at 70% 60%, rgba(147, 51, 234, 0.45) 0%, rgba(168, 85, 247, 0.2) 30%, transparent 60%)',
-          filter: 'blur(20px) brightness(0.6) saturate(1.8) contrast(1.4)',
-          borderRadius: '50% 30% 80% 20%',
-        }}
-      />
-      
-      {/* Enhanced outer glow */}
-      <div 
-        className="absolute -inset-4 rounded-full bg-gradient-to-r from-purple-500/30 via-pink-500/25 to-red-500/30" 
-        style={{ filter: 'blur(8px)' }} 
-      />
+      {/* Additional smaller particles for depth */}
+      {smallParticles.map((particle) => (
+        <motion.div
+          key={`small-${particle.id}`}
+          className="absolute rounded-full"
+          style={{
+            width: `${particle.size}px`,
+            height: `${particle.size}px`,
+            left: `${particle.baseX}px`,
+            top: `${particle.baseY}px`,
+            background: `rgba(${Math.round(particle.hue)}, ${Math.round(particle.saturation)}, ${Math.round(particle.lightness)}, ${particle.opacity})`,
+            filter: `blur(${particle.blur}px)`,
+          }}
+          animate={{
+            x: [
+              -particle.moveRangeX, 
+              particle.moveRangeX * 0.6, 
+              particle.moveRangeX, 
+              -particle.moveRangeX * 0.4, 
+              -particle.moveRangeX
+            ],
+            y: [
+              particle.moveRangeY, 
+              -particle.moveRangeY * 0.7, 
+              -particle.moveRangeY, 
+              particle.moveRangeY * 0.3, 
+              particle.moveRangeY
+            ],
+            scale: [0.8, 1.3, 1.0, 0.9, 0.8],
+            opacity: [particle.opacity, particle.opacity * 1.6, particle.opacity * 0.8, particle.opacity * 1.2, particle.opacity],
+          }}
+          transition={{
+            duration: particle.duration,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: particle.delay,
+          }}
+        />
+      ))}
       
       {/* Main cursor */}
       <div className="relative w-8 h-8 bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 rounded-full shadow-2xl border border-white/20">
