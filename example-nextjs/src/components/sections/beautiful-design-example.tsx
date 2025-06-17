@@ -130,36 +130,7 @@ function BeautifulDesignCursor() {
       ))}
       
       {/* Main cursor */}
-      <div >
-        {/* Inner highlight
-        <div className="absolute top-1 left-1 w-2 h-2 bg-white/50 rounded-full backdrop-blur-sm" />
-         */}
-        {/* Center dot */}
-        {/* <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1 h-1 bg-white rounded-full animate-pulse" /> */}
-        
-        {/* Trailing particles */}
-        <div className="absolute inset-0 w-full h-full">
-          {[...Array(4)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-gradient-to-r from-pink-300 to-purple-300 rounded-full shadow-sm"
-              style={{
-                left: `${24 + i * 6}px`,
-                top: `${14 + Math.sin(i) * 4}px`,
-                opacity: 0.8 - i * 0.2,
-                animationDelay: `${i * 150}ms`,
-                animation: 'pulse 2s infinite',
-              }}
-            />
-          ))}
-        </div>
-        
-        {/* Rotating ring effect */}
-        <div 
-          className="absolute -inset-1 rounded-full border border-gradient-to-r from-purple-300/30 via-pink-300/30 to-red-300/30 animate-spin"
-          style={{ animationDuration: '4s' }} 
-        />
-      </div>
+      {/* Removed empty cursor div and its contents */}
       
       {/* Subtle outer particles */}
       <div className="absolute -inset-6">
