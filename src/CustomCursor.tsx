@@ -368,31 +368,38 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
 
     // Memoize global style content
     const globalStyleContent = React.useMemo(() => `
-      body, 
-      body * {
-        cursor: none !important;
-      }
-      
       #cursor-container {
         pointer-events: none !important;
       }
     `, []);
 
+    // Apply cursor style to container element or body
+    React.useEffect(() => {
+      const targetElement = containerRef?.current || document.body;
+      targetElement.style.cursor = showNativeCursor ? 'auto' : 'none';
+      
+      return () => {
+        if (containerRef?.current) {
+          containerRef.current.style.removeProperty('cursor');
+        } else {
+          document.body.style.removeProperty('cursor');
+        }
+      };
+    }, [containerRef, showNativeCursor]);
+
     // Determine if we should render anything (SSR safety + enabled check)
     const shouldRender = !isSSR() && 
-                         enabled && 
-                         isVisible && 
-                         position.x !== null && 
-                         position.y !== null && 
-                         portalContainer;
+                          enabled && 
+                          isVisible && 
+                          position.x !== null && 
+                          position.y !== null && 
+                          portalContainer;
 
     if (!shouldRender) return null;
 
     return (
       <>
-        {!showNativeCursor && (
-          <style id={`cursor-style-global-${id}`}>{globalStyleContent}</style>
-        )}
+        <style id={`cursor-style-global-${id}`}>{globalStyleContent}</style>
         {createPortal(
           <React.Fragment key={`cursor-${id}`}>
             <div

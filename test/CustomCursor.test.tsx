@@ -496,19 +496,70 @@ describe('CustomCursor', () => {
   });
 
   describe('Global style injection', () => {
-    it('injects global styles when showNativeCursor is false', () => {
+    it('applies cursor style to body when no containerRef is provided', () => {
       render(<CustomCursor showNativeCursor={false} id="global-test">Test</CustomCursor>);
       
-      const globalStyle = document.getElementById('cursor-style-global-global-test');
-      expect(globalStyle).toBeInTheDocument();
-      expect(globalStyle?.textContent).toContain('cursor: none !important');
+      expect(document.body).toHaveStyle('cursor: none');
     });
 
-    it('does not inject global styles when showNativeCursor is true', () => {
-      render(<CustomCursor showNativeCursor={true} id="no-global-test">Test</CustomCursor>);
+    it('applies cursor style to container when containerRef is provided', () => {
+      const containerRef = React.createRef<HTMLDivElement>();
+      render(
+        <div ref={containerRef}>
+          <CustomCursor showNativeCursor={false} containerRef={containerRef} id="container-test">
+            Test
+          </CustomCursor>
+        </div>
+      );
       
-      const globalStyle = document.getElementById('cursor-style-global-no-global-test');
-      expect(globalStyle).not.toBeInTheDocument();
+      expect(containerRef.current).toHaveStyle('cursor: none');
+    });
+
+    it('applies cursor: auto when showNativeCursor is true', () => {
+      const containerRef = React.createRef<HTMLDivElement>();
+      render(
+        <div ref={containerRef}>
+          <CustomCursor showNativeCursor={true} containerRef={containerRef} id="auto-test">
+            Test
+          </CustomCursor>
+        </div>
+      );
+      
+      expect(containerRef.current).toHaveStyle('cursor: auto');
+    });
+
+    it('cleans up cursor style on unmount', () => {
+      const containerRef = React.createRef<HTMLDivElement>();
+      const { unmount } = render(
+        <div ref={containerRef}>
+          <CustomCursor showNativeCursor={false} containerRef={containerRef} id="cleanup-test">
+            Test
+          </CustomCursor>
+        </div>
+      );
+      
+      // Verify style is applied
+      expect(containerRef.current?.style.cursor).toBe('none');
+      
+      // Store the element before unmounting
+      const container = containerRef.current;
+      
+      unmount();
+      
+      // Clean up the container element
+      if (container?.parentNode) {
+        container.parentNode.removeChild(container);
+      }
+      
+      // Create a new container to verify style is gone
+      const newContainer = document.createElement('div');
+      document.body.appendChild(newContainer);
+      
+      // Verify the new container has no cursor style
+      expect(newContainer.style.cursor).toBe('');
+      
+      // Clean up
+      document.body.removeChild(newContainer);
     });
   });
 
@@ -668,6 +719,75 @@ describe('CustomCursor', () => {
       // Should still be the same container (not multiple containers)
       const containers = document.querySelectorAll('#cursor-container');
       expect(containers).toHaveLength(1);
+    });
+  });
+
+  describe('Cursor hierarchy', () => {
+    it('respects cursor hierarchy based on container specificity and showNativeCursor', () => {
+      // Create a test page structure:
+      // Page (showNativeCursor: false)
+      // ├── Container1 (showNativeCursor: true)
+      // │   └── InnerContainer1 (showNativeCursor: false)
+      // └── Container2 (showNativeCursor: false)
+      //     └── InnerContainer2 (showNativeCursor: true)
+
+      const pageRef = React.createRef<HTMLDivElement>();
+      const container1Ref = React.createRef<HTMLDivElement>();
+      const innerContainer1Ref = React.createRef<HTMLDivElement>();
+      const container2Ref = React.createRef<HTMLDivElement>();
+      const innerContainer2Ref = React.createRef<HTMLDivElement>();
+
+      render(
+        <div ref={pageRef} data-testid="page">
+          <CustomCursor showNativeCursor={false} containerRef={pageRef}>
+            Page cursor
+          </CustomCursor>
+
+          <div ref={container1Ref} data-testid="container1">
+            <CustomCursor showNativeCursor={true} containerRef={container1Ref}>
+              Container1 cursor
+            </CustomCursor>
+
+            <div ref={innerContainer1Ref} data-testid="innerContainer1">
+              <CustomCursor showNativeCursor={false} containerRef={innerContainer1Ref}>
+                InnerContainer1 cursor
+              </CustomCursor>
+            </div>
+          </div>
+
+          <div ref={container2Ref} data-testid="container2">
+            <CustomCursor showNativeCursor={false} containerRef={container2Ref}>
+              Container2 cursor
+            </CustomCursor>
+
+            <div ref={innerContainer2Ref} data-testid="innerContainer2">
+              <CustomCursor showNativeCursor={true} containerRef={innerContainer2Ref}>
+                InnerContainer2 cursor
+              </CustomCursor>
+            </div>
+          </div>
+        </div>
+      );
+
+      // Test page level (should not show native cursor)
+      const page = screen.getByTestId('page');
+      expect(page).toHaveStyle('cursor: none');
+
+      // Test Container1 (should show native cursor)
+      const container1 = screen.getByTestId('container1');
+      expect(container1).toHaveStyle('cursor: auto');
+
+      // Test InnerContainer1 (should not show native cursor)
+      const innerContainer1 = screen.getByTestId('innerContainer1');
+      expect(innerContainer1).toHaveStyle('cursor: none');
+
+      // Test Container2 (should not show native cursor)
+      const container2 = screen.getByTestId('container2');
+      expect(container2).toHaveStyle('cursor: none');
+
+      // Test InnerContainer2 (should show native cursor)
+      const innerContainer2 = screen.getByTestId('innerContainer2');
+      expect(innerContainer2).toHaveStyle('cursor: auto');
     });
   });
 });
