@@ -5,6 +5,7 @@ import { ContentRevealSection } from './ContentRevealSection';
 import { EntryAnimationSection } from './EntryAnimationSection';
 import { PaintSection } from './PaintSection';
 import { GallerySection } from './GallerySection';
+import CursorHierarchy from './CursorHierarchy';
 
 export interface SectionConfig {
   id: string;
@@ -22,6 +23,15 @@ export const SECTIONS: Record<string, SectionConfig> = {
     title: 'Demo',
     description: 'Basic CustomCursor component demonstrations',
     component: DemoSection,
+    enabled: true,
+  },
+
+  'cursor-hierarchy': {
+    id: 'cursor-hierarchy',
+    name: 'Cursor Hierarchy',
+    title: 'Cursor Hierarchy',
+    description: 'Demonstrates cursor hierarchy with nested containers',
+    component: CursorHierarchy,
     enabled: true,
   },
 
