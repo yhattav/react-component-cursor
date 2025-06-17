@@ -22,7 +22,7 @@ function BeautifulDesignCursor() {
       hue: 147 + (Math.sin(i * 1.9) * 0.5 + 0.5) * 89,
       saturation: 51 + (Math.cos(i * 2.1) * 0.5 + 0.5) * 134,
       lightness: 234 + (Math.sin(i * 1.1) * 0.5 + 0.5) * 21,
-      opacity: 0.1 + (Math.cos(i * 1.5) * 0.5 + 0.5) * 0.15,
+      opacity: 0.4 + (Math.cos(i * 1.5) * 0.5 + 0.5) * 0.15,
       blur: 8 + (Math.sin(i * 2.9) * 0.5 + 0.5) * 16,
       duration: 8 + (Math.cos(i * 1.8) * 0.5 + 0.5) * 6,
       delay: (Math.sin(i * 0.7) * 0.5 + 0.5) * 4,
@@ -40,7 +40,7 @@ function BeautifulDesignCursor() {
       hue: 236 + (Math.sin(i * 2.2) * 0.5 + 0.5) * 19,
       saturation: 72 + (Math.cos(i * 1.6) * 0.5 + 0.5) * 103,
       lightness: 153 + (Math.sin(i * 2.8) * 0.5 + 0.5) * 102,
-      opacity: 0.15 + (Math.cos(i * 2.0) * 0.5 + 0.5) * 0.1,
+      opacity: 0.4 + (Math.cos(i * 2.0) * 0.5 + 0.5) * 0.1,
       blur: 4 + (Math.sin(i * 1.4) * 0.5 + 0.5) * 8,
       duration: 6 + (Math.cos(i * 2.5) * 0.5 + 0.5) * 4,
       delay: (Math.sin(i * 1.2) * 0.5 + 0.5) * 3,
@@ -130,12 +130,12 @@ function BeautifulDesignCursor() {
       ))}
       
       {/* Main cursor */}
-      <div className="relative w-8 h-8 bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 rounded-full shadow-2xl border border-white/20">
-        {/* Inner highlight */}
+      <div >
+        {/* Inner highlight
         <div className="absolute top-1 left-1 w-2 h-2 bg-white/50 rounded-full backdrop-blur-sm" />
-        
+         */}
         {/* Center dot */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1 h-1 bg-white rounded-full animate-pulse" />
+        {/* <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1 h-1 bg-white rounded-full animate-pulse" /> */}
         
         {/* Trailing particles */}
         <div className="absolute inset-0 w-full h-full">
@@ -146,7 +146,7 @@ function BeautifulDesignCursor() {
               style={{
                 left: `${24 + i * 6}px`,
                 top: `${14 + Math.sin(i) * 4}px`,
-                opacity: 0.6 - i * 0.1,
+                opacity: 0.8 - i * 0.2,
                 animationDelay: `${i * 150}ms`,
                 animation: 'pulse 2s infinite',
               }}
@@ -236,7 +236,7 @@ function BeautifulDesignExample() {
       <CustomCursor
         id="beautiful-design-cursor"
         containerRef={containerRef}
-        smoothness={1}
+        smoothness={10}
         showNativeCursor={false}
         showDevIndicator={false}
       >
