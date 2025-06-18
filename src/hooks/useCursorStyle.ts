@@ -22,17 +22,10 @@ export function useCursorStyle({ containerRef, showNativeCursor }: UseCursorStyl
     targetElement.style.cursor = showNativeCursor ? 'auto' : 'none';
     
     return () => {
-      if (containerRef?.current) {
-        // Restore original cursor style
-        const originalCursor = containerRef.current.getAttribute('data-original-cursor') || '';
-        containerRef.current.style.cursor = originalCursor;
-        containerRef.current.removeAttribute('data-original-cursor');
-      } else {
-        // Restore original cursor style for body
-        const originalCursor = document.body.getAttribute('data-original-cursor') || '';
-        document.body.style.cursor = originalCursor;
-        document.body.removeAttribute('data-original-cursor');
-      }
+      // Use the stored targetElement, not containerRef.current which might be null
+      const originalCursor = targetElement.getAttribute('data-original-cursor') || '';
+      targetElement.style.cursor = originalCursor;
+      targetElement.removeAttribute('data-original-cursor');
     };
   }, [containerRef, showNativeCursor]);
 } 
