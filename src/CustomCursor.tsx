@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { createPortal } from 'react-dom';
-import { useMousePosition, useSmoothAnimation } from './hooks';
+import { useMousePosition, useSmoothAnimation, useCursorStyle } from './hooks';
 import {
   CursorPosition,
   CursorOffset,
@@ -198,6 +198,9 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     const { position, setPosition, targetPosition, isVisible } = mousePositionHook;
     useSmoothAnimation(targetPosition, smoothness, setPosition);
 
+    // Apply cursor styles to the target element
+    useCursorStyle({ containerRef, showNativeCursor });
+
     const [portalContainer, setPortalContainer] =
       React.useState<HTMLElement | null>(null);
 
@@ -368,11 +371,6 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
 
     // Memoize global style content
     const globalStyleContent = React.useMemo(() => `
-      body, 
-      body * {
-        cursor: none !important;
-      }
-      
       #cursor-container {
         pointer-events: none !important;
       }
@@ -380,19 +378,17 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
 
     // Determine if we should render anything (SSR safety + enabled check)
     const shouldRender = !isSSR() && 
-                         enabled && 
-                         isVisible && 
-                         position.x !== null && 
-                         position.y !== null && 
-                         portalContainer;
+                        enabled && 
+                        isVisible && 
+                        position.x !== null && 
+                        position.y !== null && 
+                        portalContainer;
 
     if (!shouldRender) return null;
 
     return (
       <>
-        {!showNativeCursor && (
-          <style id={`cursor-style-global-${id}`}>{globalStyleContent}</style>
-        )}
+        <style id={`cursor-style-global-${id}`}>{globalStyleContent}</style>
         {createPortal(
           <React.Fragment key={`cursor-${id}`}>
             <div
