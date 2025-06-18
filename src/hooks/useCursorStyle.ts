@@ -9,7 +9,7 @@ interface UseCursorStyleOptions {
  * Custom hook to manage cursor styles on target elements
  * Handles storing/restoring original cursor styles and applying new ones
  */
-export function useCursorStyle({ containerRef, showNativeCursor }: UseCursorStyleOptions) {
+export function useCursorStyle({ containerRef, showNativeCursor }: UseCursorStyleOptions): void {
   React.useEffect(() => {
     const targetElement = containerRef?.current || document.body;
     
