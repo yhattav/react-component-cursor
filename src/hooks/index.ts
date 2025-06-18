@@ -1,2 +1,3 @@
-export * from './useMousePosition';
-export * from './useSmoothAnimation';
+export { useMousePosition } from './useMousePosition';
+export { useSmoothAnimation } from './useSmoothAnimation';
+export { useCursorStyle } from './useCursorStyle';

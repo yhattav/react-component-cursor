@@ -12,15 +12,28 @@ jest.mock('react-dom', () => ({
 }));
 
 // Mock the hooks to control the test environment
-jest.mock('../src/hooks', () => ({
-  useMousePosition: jest.fn(() => ({
-    position: { x: 100, y: 100 },
-    setPosition: jest.fn(),
-    targetPosition: { x: 100, y: 100 },
-    isVisible: true,
-  })),
-  useSmoothAnimation: jest.fn(),
-}));
+jest.mock('../src/hooks', () => {
+  const actualHooks = jest.requireActual('../src/hooks');
+  const mockUseCursorStyle = jest.fn().mockImplementation((...args) => {
+    // Check if we should use the real implementation
+    if (process.env.USE_REAL_CURSOR_STYLE === 'true') {
+      return actualHooks.useCursorStyle(...args);
+    }
+    // Otherwise, just return a mock
+    return undefined;
+  });
+
+  return {
+    useMousePosition: jest.fn(() => ({
+      position: { x: 100, y: 100 },
+      setPosition: jest.fn(),
+      targetPosition: { x: 100, y: 100 },
+      isVisible: true,
+    })),
+    useSmoothAnimation: jest.fn(),
+    useCursorStyle: mockUseCursorStyle,
+  };
+});
 
 // Mock validation to avoid testing it here
 jest.mock('../src/utils/validation', () => ({
@@ -496,6 +509,16 @@ describe('CustomCursor', () => {
   });
 
   describe('Global style injection', () => {
+    beforeEach(() => {
+      // Use real cursor style implementation for these tests
+      process.env.USE_REAL_CURSOR_STYLE = 'true';
+    });
+
+    afterEach(() => {
+      // Reset back to mock
+      delete process.env.USE_REAL_CURSOR_STYLE;
+    });
+
     it('applies cursor style to body when no containerRef is provided', () => {
       render(<CustomCursor showNativeCursor={false} id="global-test">Test</CustomCursor>);
       
@@ -723,6 +746,16 @@ describe('CustomCursor', () => {
   });
 
   describe('Cursor hierarchy', () => {
+    beforeEach(() => {
+      // Use real cursor style implementation for these tests
+      process.env.USE_REAL_CURSOR_STYLE = 'true';
+    });
+
+    afterEach(() => {
+      // Reset back to mock
+      delete process.env.USE_REAL_CURSOR_STYLE;
+    });
+
     it('respects cursor hierarchy based on container specificity and showNativeCursor', () => {
       // Create a test page structure:
       // Page (showNativeCursor: false)

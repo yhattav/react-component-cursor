@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { createPortal } from 'react-dom';
-import { useMousePosition, useSmoothAnimation } from './hooks';
+import { useMousePosition, useSmoothAnimation, useCursorStyle } from './hooks';
 import {
   CursorPosition,
   CursorOffset,
@@ -198,6 +198,9 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     const { position, setPosition, targetPosition, isVisible } = mousePositionHook;
     useSmoothAnimation(targetPosition, smoothness, setPosition);
 
+    // Apply cursor styles to the target element
+    useCursorStyle({ containerRef, showNativeCursor });
+
     const [portalContainer, setPortalContainer] =
       React.useState<HTMLElement | null>(null);
 
@@ -369,44 +372,17 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     // Memoize global style content
     const globalStyleContent = React.useMemo(() => `
       #cursor-container {
-        pointer-events: none;
+        pointer-events: none !important;
       }
     `, []);
 
-    // Apply cursor style to container element or body with hierarchy support
-    React.useEffect(() => {
-      const targetElement = containerRef?.current || document.body;
-      
-      // Store the original cursor style if not already stored
-      if (!targetElement.hasAttribute('data-original-cursor')) {
-        targetElement.setAttribute('data-original-cursor', targetElement.style.cursor || '');
-      }
-      
-      // Apply the cursor style
-      targetElement.style.cursor = showNativeCursor ? 'auto' : 'none';
-      
-      return () => {
-        if (containerRef?.current) {
-          // Restore original cursor style
-          const originalCursor = containerRef.current.getAttribute('data-original-cursor') || '';
-          containerRef.current.style.cursor = originalCursor;
-          containerRef.current.removeAttribute('data-original-cursor');
-        } else {
-          // Restore original cursor style for body
-          const originalCursor = document.body.getAttribute('data-original-cursor') || '';
-          document.body.style.cursor = originalCursor;
-          document.body.removeAttribute('data-original-cursor');
-        }
-      };
-    }, [containerRef, showNativeCursor]);
-
     // Determine if we should render anything (SSR safety + enabled check)
     const shouldRender = !isSSR() && 
-                          enabled && 
-                          isVisible && 
-                          position.x !== null && 
-                          position.y !== null && 
-                          portalContainer;
+                        enabled && 
+                        isVisible && 
+                        position.x !== null && 
+                        position.y !== null && 
+                        portalContainer;
 
     if (!shouldRender) return null;
 
