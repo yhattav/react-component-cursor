@@ -369,20 +369,33 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     // Memoize global style content
     const globalStyleContent = React.useMemo(() => `
       #cursor-container {
-        pointer-events: none !important;
+        pointer-events: none;
       }
     `, []);
 
-    // Apply cursor style to container element or body
+    // Apply cursor style to container element or body with hierarchy support
     React.useEffect(() => {
       const targetElement = containerRef?.current || document.body;
+      
+      // Store the original cursor style if not already stored
+      if (!targetElement.hasAttribute('data-original-cursor')) {
+        targetElement.setAttribute('data-original-cursor', targetElement.style.cursor || '');
+      }
+      
+      // Apply the cursor style
       targetElement.style.cursor = showNativeCursor ? 'auto' : 'none';
       
       return () => {
         if (containerRef?.current) {
-          containerRef.current.style.removeProperty('cursor');
+          // Restore original cursor style
+          const originalCursor = containerRef.current.getAttribute('data-original-cursor') || '';
+          containerRef.current.style.cursor = originalCursor;
+          containerRef.current.removeAttribute('data-original-cursor');
         } else {
-          document.body.style.removeProperty('cursor');
+          // Restore original cursor style for body
+          const originalCursor = document.body.getAttribute('data-original-cursor') || '';
+          document.body.style.cursor = originalCursor;
+          document.body.removeAttribute('data-original-cursor');
         }
       };
     }, [containerRef, showNativeCursor]);
