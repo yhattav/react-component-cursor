@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { createPortal } from 'react-dom';
-import { useMousePosition, useSmoothAnimation } from './hooks';
+import { useMousePosition, useSmoothAnimation, useCursorStyle } from './hooks';
 import {
   CursorPosition,
   CursorOffset,
@@ -193,6 +193,9 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     const mousePositionHook = useMousePosition(containerRef, offsetValues.x, offsetValues.y, throttleMs);
     const { position, setPosition, targetPosition, isVisible } = mousePositionHook;
     useSmoothAnimation(targetPosition, smoothness, setPosition);
+
+    // Apply cursor styles to the target element
+    useCursorStyle({ containerRef, showNativeCursor });
 
     const [portalContainer, setPortalContainer] =
       React.useState<HTMLElement | null>(null);
