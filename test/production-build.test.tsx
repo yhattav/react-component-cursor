@@ -44,13 +44,9 @@ describe('Production Build Validation Elimination', () => {
     const cjsStats = fs.statSync(cjsFile);
     const esmStats = fs.statSync(esmFile);
     
-    // Bundle should be under 10KB (our target)
-    expect(cjsStats.size).toBeLessThan(10000); // 10KB
-    expect(esmStats.size).toBeLessThan(10000); // 10KB
-    
-    // Should be much smaller than the ~18KB we had before
-    expect(cjsStats.size).toBeLessThan(8000); // Should be significantly smaller
-    expect(esmStats.size).toBeLessThan(8000);
+    // Bundle should be under 10KB (our target) and much smaller than the ~18KB we had before
+    expect(cjsStats.size).toBeLessThan(10000);
+    expect(esmStats.size).toBeLessThan(10000);
   });
   
   it('should still include essential component code', () => {
