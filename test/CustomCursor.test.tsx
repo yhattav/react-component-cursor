@@ -223,14 +223,6 @@ describe('CustomCursor', () => {
     expect(screen.queryByText('Enabled cursor')).not.toBeInTheDocument();
   });
 
-  it('handles showNativeCursor prop correctly', () => {
-    const { rerender } = render(<CustomCursor showNativeCursor={false}>Cursor 1</CustomCursor>);
-    expect(screen.getByText('Cursor 1')).toBeInTheDocument();
-    
-    rerender(<CustomCursor showNativeCursor={true}>Cursor 2</CustomCursor>);
-    expect(screen.getByText('Cursor 2')).toBeInTheDocument();
-  });
-
   it('handles different children types', () => {
     const { rerender } = render(<CustomCursor>Text content</CustomCursor>);
     expect(screen.getByText('Text content')).toBeInTheDocument();
@@ -508,83 +500,7 @@ describe('CustomCursor', () => {
     });
   });
 
-  describe('Global style injection', () => {
-    beforeEach(() => {
-      // Use real cursor style implementation for these tests
-      process.env.USE_REAL_CURSOR_STYLE = 'true';
-    });
 
-    afterEach(() => {
-      // Reset back to mock
-      delete process.env.USE_REAL_CURSOR_STYLE;
-    });
-
-    it('applies cursor style to body when no containerRef is provided', () => {
-      render(<CustomCursor showNativeCursor={false} id="global-test">Test</CustomCursor>);
-      
-      expect(document.body).toHaveStyle('cursor: none');
-    });
-
-    it('applies cursor style to container when containerRef is provided', () => {
-      const containerRef = React.createRef<HTMLDivElement>();
-      render(
-        <div ref={containerRef}>
-          <CustomCursor showNativeCursor={false} containerRef={containerRef} id="container-test">
-            Test
-          </CustomCursor>
-        </div>
-      );
-      
-      expect(containerRef.current).toHaveStyle('cursor: none');
-    });
-
-    it('applies cursor: auto when showNativeCursor is true', () => {
-      const containerRef = React.createRef<HTMLDivElement>();
-      render(
-        <div ref={containerRef}>
-          <CustomCursor showNativeCursor={true} containerRef={containerRef} id="auto-test">
-            Test
-          </CustomCursor>
-        </div>
-      );
-      
-      expect(containerRef.current).toHaveStyle('cursor: auto');
-    });
-
-    it('cleans up cursor style on unmount', () => {
-      const containerRef = React.createRef<HTMLDivElement>();
-      const { unmount } = render(
-        <div ref={containerRef}>
-          <CustomCursor showNativeCursor={false} containerRef={containerRef} id="cleanup-test">
-            Test
-          </CustomCursor>
-        </div>
-      );
-      
-      // Verify style is applied
-      expect(containerRef.current?.style.cursor).toBe('none');
-      
-      // Store the element before unmounting
-      const container = containerRef.current;
-      
-      unmount();
-      
-      // Clean up the container element
-      if (container?.parentNode) {
-        container.parentNode.removeChild(container);
-      }
-      
-      // Create a new container to verify style is gone
-      const newContainer = document.createElement('div');
-      document.body.appendChild(newContainer);
-      
-      // Verify the new container has no cursor style
-      expect(newContainer.style.cursor).toBe('');
-      
-      // Clean up
-      document.body.removeChild(newContainer);
-    });
-  });
 
   describe('Animation and style injection', () => {
     it('creates keyframe animation styles', () => {

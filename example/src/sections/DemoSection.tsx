@@ -135,7 +135,7 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
     ]);
 
     return (
-      <div className="h-full p-8 relative box-border">
+      <div className="h-full p-8 relative box-border" style={{ cursor: !useContainer ? 'none' : 'auto' }}>
         <div className="mb-8">
           <Title level={1}>Custom Cursor Component Demo</Title>
           <Paragraph className="text-lg mt-4">
@@ -193,7 +193,6 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
             smoothness={2}
             onMove={handleGlobalCursorMove}
             onVisibilityChange={handleCursorVisibilityChange}
-            showNativeCursor={false}
             throttleMs={isPerformanceMode ? 16 : 0} // 60fps when enabled
             showDevIndicator={showDevIndicator}
           >
@@ -220,7 +219,6 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
                 smoothness={2}
                 onMove={handleContainer1CursorMove}
                 onVisibilityChange={handleCursorVisibilityChange}
-                showNativeCursor={false}
                 throttleMs={isPerformanceMode ? 16 : 0}
                 showDevIndicator={showDevIndicator}
               >
@@ -260,7 +258,6 @@ export const DemoSection: React.FC<DemoSectionProps> = React.memo(
                 id="container-2-cursor"
                 containerRef={secondContainerRef}
                 smoothness={3}
-                showNativeCursor={false}
                 offset={{ x: 0, y: -10 }}
                 onMove={handleContainer2CursorMove}
                 onVisibilityChange={handleCursorVisibilityChange}
