@@ -12,16 +12,6 @@ jest.mock('react-dom', () => ({
 
 // Mock the hooks to control the test environment
 jest.mock('../src/hooks', () => {
-  const actualHooks = jest.requireActual('../src/hooks');
-  const mockUseCursorStyle = jest.fn().mockImplementation((...args) => {
-    // Check if we should use the real implementation
-    if (process.env.USE_REAL_CURSOR_STYLE === 'true') {
-      return actualHooks.useCursorStyle(...args);
-    }
-    // Otherwise, just return a mock
-    return undefined;
-  });
-
   return {
     useMousePosition: jest.fn(() => ({
       position: { x: 100, y: 100 },
@@ -30,7 +20,6 @@ jest.mock('../src/hooks', () => {
       isVisible: true,
     })),
     useSmoothAnimation: jest.fn(),
-    useCursorStyle: mockUseCursorStyle,
   };
 });
 
@@ -348,7 +337,6 @@ describe('CustomCursor Performance Tests', () => {
         offset: { x: 10, y: 10 },
         smoothness: 1.5,
         containerRef: React.createRef<HTMLDivElement>(),
-        showNativeCursor: false,
         throttleMs: 16,
         showDevIndicator: true,
         onMove: jest.fn(),

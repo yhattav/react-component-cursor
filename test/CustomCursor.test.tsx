@@ -13,16 +13,6 @@ jest.mock('react-dom', () => ({
 
 // Mock the hooks to control the test environment
 jest.mock('../src/hooks', () => {
-  const actualHooks = jest.requireActual('../src/hooks');
-  const mockUseCursorStyle = jest.fn().mockImplementation((...args) => {
-    // Check if we should use the real implementation
-    if (process.env.USE_REAL_CURSOR_STYLE === 'true') {
-      return actualHooks.useCursorStyle(...args);
-    }
-    // Otherwise, just return a mock
-    return undefined;
-  });
-
   return {
     useMousePosition: jest.fn(() => ({
       position: { x: 100, y: 100 },
@@ -31,7 +21,6 @@ jest.mock('../src/hooks', () => {
       isVisible: true,
     })),
     useSmoothAnimation: jest.fn(),
-    useCursorStyle: mockUseCursorStyle,
   };
 });
 
@@ -661,82 +650,5 @@ describe('CustomCursor', () => {
     });
   });
 
-  describe('Cursor hierarchy', () => {
-    beforeEach(() => {
-      // Use real cursor style implementation for these tests
-      process.env.USE_REAL_CURSOR_STYLE = 'true';
-    });
 
-    afterEach(() => {
-      // Reset back to mock
-      delete process.env.USE_REAL_CURSOR_STYLE;
-    });
-
-    it('respects cursor hierarchy based on container specificity and showNativeCursor', () => {
-      // Create a test page structure:
-      // Page (showNativeCursor: false)
-      // ├── Container1 (showNativeCursor: true)
-      // │   └── InnerContainer1 (showNativeCursor: false)
-      // └── Container2 (showNativeCursor: false)
-      //     └── InnerContainer2 (showNativeCursor: true)
-
-      const pageRef = React.createRef<HTMLDivElement>();
-      const container1Ref = React.createRef<HTMLDivElement>();
-      const innerContainer1Ref = React.createRef<HTMLDivElement>();
-      const container2Ref = React.createRef<HTMLDivElement>();
-      const innerContainer2Ref = React.createRef<HTMLDivElement>();
-
-      render(
-        <div ref={pageRef} data-testid="page">
-          <CustomCursor showNativeCursor={false} containerRef={pageRef}>
-            Page cursor
-          </CustomCursor>
-
-          <div ref={container1Ref} data-testid="container1">
-            <CustomCursor showNativeCursor={true} containerRef={container1Ref}>
-              Container1 cursor
-            </CustomCursor>
-
-            <div ref={innerContainer1Ref} data-testid="innerContainer1">
-              <CustomCursor showNativeCursor={false} containerRef={innerContainer1Ref}>
-                InnerContainer1 cursor
-              </CustomCursor>
-            </div>
-          </div>
-
-          <div ref={container2Ref} data-testid="container2">
-            <CustomCursor showNativeCursor={false} containerRef={container2Ref}>
-              Container2 cursor
-            </CustomCursor>
-
-            <div ref={innerContainer2Ref} data-testid="innerContainer2">
-              <CustomCursor showNativeCursor={true} containerRef={innerContainer2Ref}>
-                InnerContainer2 cursor
-              </CustomCursor>
-            </div>
-          </div>
-        </div>
-      );
-
-      // Test page level (should not show native cursor)
-      const page = screen.getByTestId('page');
-      expect(page).toHaveStyle('cursor: none');
-
-      // Test Container1 (should show native cursor)
-      const container1 = screen.getByTestId('container1');
-      expect(container1).toHaveStyle('cursor: auto');
-
-      // Test InnerContainer1 (should not show native cursor)
-      const innerContainer1 = screen.getByTestId('innerContainer1');
-      expect(innerContainer1).toHaveStyle('cursor: none');
-
-      // Test Container2 (should not show native cursor)
-      const container2 = screen.getByTestId('container2');
-      expect(container2).toHaveStyle('cursor: none');
-
-      // Test InnerContainer2 (should show native cursor)
-      const innerContainer2 = screen.getByTestId('innerContainer2');
-      expect(innerContainer2).toHaveStyle('cursor: auto');
-    });
-  });
 });

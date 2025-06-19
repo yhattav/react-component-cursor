@@ -114,7 +114,6 @@ describe('SSR Compatibility', () => {
           className="custom-class"
           style={{ color: 'red' }}
           smoothness={2}
-          showNativeCursor={false}
           onMove={() => undefined}
           onVisibilityChange={() => undefined}
         >
