@@ -155,7 +155,6 @@ function PerformanceOptimizedExample() {
         id="performance-optimized-cursor"
         containerRef={containerRef}
         smoothness={1}
-        showNativeCursor={false}
         showDevIndicator={false}
         onMove={handleMoveOptimized}
         onVisibilityChange={handleVisibilityChange}

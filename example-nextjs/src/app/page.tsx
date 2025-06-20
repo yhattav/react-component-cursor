@@ -79,12 +79,11 @@ export default function HomePage() {
             <div className="bg-gray-800/30 rounded-xl p-8 border border-green-500/50">
               <h3 className="text-xl font-semibold text-green-400 mb-4">✅ After: Dynamic & Engaging</h3>
               <div className="bg-gray-900 rounded-lg p-6 mb-4 relative overflow-hidden">
-                <CustomCursor 
-                  id="proof-cursor"
-                  smoothness={1}
-                  showNativeCursor={false}
-                  showDevIndicator={false}
-                >
+                              <CustomCursor 
+                id="proof-cursor"
+                smoothness={1}
+                showDevIndicator={false}
+              >
                   <div className="w-4 h-4 bg-gradient-to-r from-green-400 to-blue-500 rounded-full animate-pulse" />
                 </CustomCursor>
                 <div className="text-green-400 text-center py-8">
@@ -228,7 +227,6 @@ export default function HomePage() {
               <CustomCursor
                 id="demo-cursor"
                 smoothness={demoCursorMode === 'particle' ? 1 : 2}
-                showNativeCursor={false}
                 showDevIndicator={false}
                 className="z-40"
               >

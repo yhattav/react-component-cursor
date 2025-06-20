@@ -126,7 +126,6 @@ function InteractiveComponentExample() {
         id="interactive-component-cursor"
         containerRef={containerRef}
         smoothness={1}
-        showNativeCursor={false}
         showDevIndicator={false}
       >
         <InteractiveCursor />
