@@ -489,7 +489,6 @@ describe('CustomCursor', () => {
     });
   });
 
-
   describe('Animation and style injection', () => {
     it('creates keyframe animation styles', () => {
       render(<CustomCursor id="animation-test">Test</CustomCursor>);
@@ -648,5 +647,4 @@ describe('CustomCursor', () => {
       expect(containers).toHaveLength(1);
     });
   });
-
 });
