@@ -142,7 +142,7 @@ export const GallerySection: React.FC<GallerySectionProps> = React.memo(
             fontSize: '24px',
             color: 'white',
             flexShrink: 0,
-            cursor: 'default',
+            cursor: 'none',
           }}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}

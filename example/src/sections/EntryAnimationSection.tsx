@@ -48,7 +48,6 @@ export const EntryAnimationSection: React.FC<EntryAnimationSectionProps> =
           <CustomCursor
             containerRef={containerRef}
             smoothness={2}
-            showNativeCursor={true}
           >
             <div
               style={{

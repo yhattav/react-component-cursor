@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { createPortal } from 'react-dom';
-import { useMousePosition, useSmoothAnimation, useCursorStyle } from './hooks';
+import { useMousePosition, useSmoothAnimation } from './hooks';
 import {
   CursorPosition,
   CursorOffset,
@@ -30,7 +30,6 @@ export interface CustomCursorProps {
   centered?: boolean; // Auto-center cursor on mouse position (default: true)
   
   // Behavior
-  showNativeCursor?: boolean;
   throttleMs?: number; // Performance throttling
   
   // Development
@@ -48,7 +47,7 @@ export interface CustomCursorProps {
 
 const ANIMATION_DURATION = '0.3s';
 const ANIMATION_NAME = 'cursorFadeIn';
-  const DEFAULT_Z_INDEX = 9999;
+const DEFAULT_Z_INDEX = 9999;
 
 const DevIndicator: React.FC<{
   position: { x: number | null; y: number | null };
@@ -91,7 +90,6 @@ const arePropsEqual = (
     prevProps.zIndex !== nextProps.zIndex ||
     prevProps.smoothness !== nextProps.smoothness ||
     prevProps.centered !== nextProps.centered ||
-    prevProps.showNativeCursor !== nextProps.showNativeCursor ||
     prevProps.throttleMs !== nextProps.throttleMs ||
     prevProps.showDevIndicator !== nextProps.showDevIndicator
   ) {
@@ -156,7 +154,6 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     smoothness = 1,
     containerRef,
     centered = true,
-    showNativeCursor = false,
     throttleMs = 0,
     showDevIndicator = true,
     onMove,
@@ -177,7 +174,6 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       smoothness,
       containerRef,
       centered,
-      showNativeCursor,
       throttleMs,
       showDevIndicator,
       onMove,
@@ -197,9 +193,6 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     const mousePositionHook = useMousePosition(containerRef, offsetValues.x, offsetValues.y, throttleMs);
     const { position, setPosition, targetPosition, isVisible } = mousePositionHook;
     useSmoothAnimation(targetPosition, smoothness, setPosition);
-
-    // Apply cursor styles to the target element
-    useCursorStyle({ containerRef, showNativeCursor });
 
     const [portalContainer, setPortalContainer] =
       React.useState<HTMLElement | null>(null);
