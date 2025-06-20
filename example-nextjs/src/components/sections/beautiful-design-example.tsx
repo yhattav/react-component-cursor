@@ -63,19 +63,11 @@ function BeautifulDesignExample() {
       <CustomCursor
         id="beautiful-design-cursor"
         containerRef={containerRef}
-        smoothness={30}
+        smoothness={5}
         showDevIndicator={false}
       >
-        <OrganicCloudCursor amount={8} />
+        <OrganicCloudCursor amount={4} />
       </CustomCursor>
-      {/* <CustomCursor
-        id="beautiful-design-cursor2"
-        containerRef={containerRef}
-        smoothness={40}
-        showDevIndicator={false}
-      >
-        <OrganicCloudCursor /> */}
-      {/* </CustomCursor> */}
       {/* Content */}
       <div className="space-y-4">
         {/* Header */}
