@@ -4,19 +4,37 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 /**
+ * Props for OrganicCloudCursor component
+ */
+interface OrganicCloudCursorProps {
+  /** Base amount multiplier for particle counts (default: 8) */
+  amount?: number;
+}
+
+/**
  * Organic Cloud Cursor Design
  * Beautiful gradient cursor with organic cloud backdrop and particle effects
  * 
  * Features:
- * - Particle-based organic cloud effect with 12 main particles
+ * - Particle-based organic cloud effect with configurable particle counts
  * - Additional smaller particles for depth
  * - Smooth animations with randomized movement patterns
  * - Subtle outer particles with ping animation
+ * 
+ * @param amount - Base multiplier for particle counts:
+ *   - Main particles: amount * 3
+ *   - Small particles: amount * 2  
+ *   - Subtle particles: amount * 0.5
  */
-function OrganicCloudCursor() {
+function OrganicCloudCursor({ amount = 8 }: OrganicCloudCursorProps) {
+  // Calculate particle counts based on amount multiplier
+  const mainParticleCount = Math.round(amount * 3);
+  const smallParticleCount = Math.round(amount * 2);
+  const subtleParticleCount = Math.max(1, Math.round(amount * 0.5));
+
   // Pre-generate stable random values to prevent jumpy animations
   const particles = React.useMemo(() => 
-    [...Array(12)].map((_, i) => ({
+    [...Array(mainParticleCount)].map((_, i) => ({
       id: i,
       size: 20 + (Math.sin(i * 2.3) * 0.5 + 0.5) * 40,
       baseX: Math.sin(i * 1.7) * 60 - 30, 
@@ -30,11 +48,11 @@ function OrganicCloudCursor() {
       blur: 8 + (Math.sin(i * 2.9) * 0.5 + 0.5) * 16,
       duration: 8 + (Math.cos(i * 1.8) * 0.5 + 0.5) * 6,
       delay: (Math.sin(i * 0.7) * 0.5 + 0.5) * 4,
-    })), []
+         })), [mainParticleCount]
   );
 
   const smallParticles = React.useMemo(() => 
-    [...Array(8)].map((_, i) => ({
+    [...Array(smallParticleCount)].map((_, i) => ({
       id: i,
       size: 8 + (Math.sin(i * 3.2) * 0.5 + 0.5) * 15,
       baseX: Math.sin(i * 2.4) * 40 - 20,
@@ -48,8 +66,8 @@ function OrganicCloudCursor() {
       blur: 4 + (Math.sin(i * 1.4) * 0.5 + 0.5) * 8,
       duration: 6 + (Math.cos(i * 2.5) * 0.5 + 0.5) * 4,
       delay: (Math.sin(i * 1.2) * 0.5 + 0.5) * 3,
-    })), []
-  );
+         })), [smallParticleCount]
+   );
 
   return (
     <div className="relative">
@@ -135,7 +153,7 @@ function OrganicCloudCursor() {
       
       {/* Subtle outer particles */}
       <div className="absolute -inset-6">
-        {[...Array(3)].map((_, i) => (
+        {[...Array(subtleParticleCount)].map((_, i) => (
           <div
             key={`outer-${i}`}
             className="absolute w-0.5 h-0.5 bg-purple-300/60 rounded-full animate-ping"
