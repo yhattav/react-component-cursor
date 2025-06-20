@@ -35,7 +35,6 @@ export const GravitySection: React.FC<GravitySectionProps> = ({
           containerRef={gravityRef}
           smoothness={1}
           onMove={handleCursorMove}
-          showNativeCursor={true}
         >
           <div style={{ width: '100vw', height: '100vh' }} />
         </CustomCursor>

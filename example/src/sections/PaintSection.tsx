@@ -19,7 +19,12 @@ export const PaintSection: React.FC = () => {
   return (
     <Card
       ref={paintRef}
-      style={{ height: '400px', background: '#f0f0f0', position: 'relative' }}
+      style={{
+        height: '400px',
+        background: '#f0f0f0',
+        position: 'relative',
+        cursor: 'none',
+      }}
     >
       <Title level={2}>Paint Trail</Title>
       <Paragraph>Move your cursor to paint!</Paragraph>
@@ -40,7 +45,6 @@ export const PaintSection: React.FC = () => {
             borderRadius: '50%',
             top: '50%',
             left: '50%',
-    
             boxShadow: '0 0 10px rgba(255,107,107,0.5)',
           }}
         />

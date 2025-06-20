@@ -50,7 +50,6 @@ describe('Forward Compatibility', () => {
           className="test-class"
           smoothness={2}
           offset={{ x: 10, y: 20 }}
-          showNativeCursor={false}
           throttleMs={16}
           showDevIndicator={false}
           onMove={onMove}
