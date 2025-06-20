@@ -20,15 +20,21 @@ or
 yarn add @yhattav/react-component-cursor
 ```
 
+**Note:** If you wish to, You'll need to hide the native cursor with CSS (like `cursor: none` in the example above). See our [styling guide](docs/CURSOR_STYLING.md) for different approaches.
+
 📖 **New to the library?** Check out our comprehensive [Getting Started Guide](GETTING_STARTED.md) for step-by-step tutorials and examples.
 
 ## Basic Usage
 
 ```tsx
 import { CustomCursor } from '@yhattav/react-component-cursor';
+
 function App() {
   return (
-    <div style={{ cursor: 'none' }}>
+    <>
+      {/* Hide native cursor globally */}
+      <style>{`body { cursor: none !important; }`}</style>
+      
       <CustomCursor>
         <div
           style={{
@@ -40,7 +46,7 @@ function App() {
         />
       </CustomCursor>
       {/* Your app content */}
-    </div>
+    </>
   );
 }
 ```
@@ -65,7 +71,7 @@ The main component for creating custom cursors.
 | `smoothness`          | `number`                         | `1`     | Movement smoothing factor. `1` = instant movement, higher values = smoother but with lag. | **High** when > 1 |
 | `containerRef`        | `RefObject<HTMLElement>`         | -       | Reference to container element. When provided, cursor only appears within this element. | None |
 | `centered`            | `boolean`                        | `true`  | Automatically center cursor content on mouse position. Set to `false` for top-left positioning. | None |
-| `showNativeCursor`    | `boolean`                        | `false` | Whether to show the native cursor alongside the custom one. `false` hides native cursor globally. | None |
+
 | `throttleMs`          | `number`                         | `0`     | Throttle mouse events in milliseconds. `0` = native refresh rate. Values >16ms may affect responsiveness. | **Minimal** impact in practice |
 | `showDevIndicator`    | `boolean`                        | `true`  | **[Dev Only]** Show red debug ring around cursor in development. Automatically removed in production builds. | None in production |
 | `onMove`              | `CursorMoveHandler`              | -       | Callback fired on cursor movement. Receives `{ x, y }` position object. | **Low** per callback |
@@ -330,14 +336,19 @@ For working examples and live demos, see:
 
 **Cursor not appearing:**
 ```tsx
-// ✅ Ensure cursor: 'none' is set on container
-<div style={{ cursor: 'none' }}>
-  <CustomCursor>...</CustomCursor>
-</div>
-
 // ✅ Check if on mobile device (automatically hidden)
 // ✅ Verify enabled={true} prop
 // ✅ Check browser console for validation errors
+// ✅ If desired, hide native cursor with CSS for cleaner look
+```
+
+**Performance issues:**
+```tsx
+// ✅ Reduce smoothness for better performance
+<CustomCursor smoothness={1}>  // Direct positioning
+
+// ✅ Add throttling for complex cursors
+<CustomCursor throttleMs={16}>  // 60fps limit
 ```
 
 **Performance issues:**
@@ -371,7 +382,7 @@ function ContainerExample() {
       ref={containerRef}
       style={{
         position: 'relative',
-        cursor: 'none',
+        cursor: 'none', // Hide native cursor in this container
       }}
     >
       <CustomCursor containerRef={containerRef} smoothness={2}>
@@ -396,25 +407,28 @@ function ContainerExample() {
 function InteractiveCursor() {
   const [isHovered, setIsHovered] = useState(false);
   return (
-    <div style={{ cursor: 'none' }}>
-      <CustomCursor>
-        <div
-          style={{
-            width: isHovered ? '60px' : '20px',
-            height: isHovered ? '60px' : '20px',
-            backgroundColor: '#3b82f6',
-            borderRadius: '50%',
-            transition: 'all 0.2s ease',
-          }}
-        />
-      </CustomCursor>
-      <button
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        Hover me!
-      </button>
-    </div>
+    <>
+      <style>{`body { cursor: none; }`}</style>
+      <div>
+        <CustomCursor>
+          <div
+            style={{
+              width: isHovered ? '60px' : '20px',
+              height: isHovered ? '60px' : '20px',
+              backgroundColor: '#3b82f6',
+              borderRadius: '50%',
+              transition: 'all 0.2s ease',
+            }}
+          />
+        </CustomCursor>
+        <button
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          Hover me!
+        </button>
+      </div>
+    </>
   );
 }
 ```
