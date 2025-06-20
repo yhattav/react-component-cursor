@@ -19,8 +19,8 @@ function OrganicCloudCursor() {
     [...Array(12)].map((_, i) => ({
       id: i,
       size: 20 + (Math.sin(i * 2.3) * 0.5 + 0.5) * 40,
-      baseX: Math.sin(i * 1.7) * 60,
-      baseY: Math.cos(i * 1.3) * 60,
+      baseX: Math.sin(i * 1.7) * 60 - 30, 
+      baseY: Math.cos(i * 1.3) * 60 - 30, 
       moveRangeX: 15 + (Math.sin(i * 3.1) * 0.5 + 0.5) * 20,
       moveRangeY: 15 + (Math.cos(i * 2.7) * 0.5 + 0.5) * 20,
       hue: 147 + (Math.sin(i * 1.9) * 0.5 + 0.5) * 89,
@@ -37,8 +37,8 @@ function OrganicCloudCursor() {
     [...Array(8)].map((_, i) => ({
       id: i,
       size: 8 + (Math.sin(i * 3.2) * 0.5 + 0.5) * 15,
-      baseX: Math.sin(i * 2.4) * 40,
-      baseY: Math.cos(i * 1.8) * 40,
+      baseX: Math.sin(i * 2.4) * 40 - 20,
+      baseY: Math.cos(i * 1.8) * 40 - 20, 
       moveRangeX: 8 + (Math.sin(i * 2.6) * 0.5 + 0.5) * 12,
       moveRangeY: 8 + (Math.cos(i * 3.4) * 0.5 + 0.5) * 12,
       hue: 236 + (Math.sin(i * 2.2) * 0.5 + 0.5) * 19,
