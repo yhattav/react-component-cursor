@@ -1,25 +1,88 @@
+import React, { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { CustomCursor } from '@yhattav/react-component-cursor';
-import { HeroCursor } from '../cursors';
 import { AnimatedParticles } from '../ui/animated-particles';
 import { ScrollIndicator } from '../ui/scroll-indicator';
 import { StatsBadges } from '../ui/stats-badges';
 import { ANIMATION_DURATIONS } from '../../lib/constants';
 
-interface HeroSectionProps {
-  heroCursorMode: number;
-}
+// Cursor variants for the hero section
+const heroCursorVariants = [
+  {
+    id: 'glow',
+    element: <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full blur-md opacity-70" />,
+    name: 'Glow Effect'
+  },
+  {
+    id: 'particle',
+    element: <div className="w-3 h-3 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/50" />,
+    name: 'Particle'
+  },
+  {
+    id: 'emoji',
+    element: <div className="text-3xl">✨</div>,
+    name: 'Emoji'
+  },
+  {
+    id: 'ring',
+    element: <div className="w-6 h-6 border-2 border-purple-400 rounded-full bg-purple-400/20" />,
+    name: 'Ring'
+  }
+];
 
-function HeroSection({ heroCursorMode }: HeroSectionProps) {
+function HeroSection() {
+  const [currentCursorIndex, setCurrentCursorIndex] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
+
   const statsBadges = ['< 10KB Bundle', '0 Dependencies', 'TypeScript Ready'];
 
+  // Handle cursor movement to trigger state changes
+  const handleCursorMove = useCallback((position: { x: number; y: number }) => {
+    // Change cursor variant based on position in hero area
+    const section = document.querySelector('.hero-section');
+    if (section) {
+      const rect = section.getBoundingClientRect();
+      const relativeX = (position.x - rect.left) / rect.width;
+      const relativeY = (position.y - rect.top) / rect.height;
+      
+      // Divide hero area into quadrants to determine cursor variant
+      let newIndex = 0;
+      if (relativeX < 0.5 && relativeY < 0.5) newIndex = 0; // Top-left: glow
+      else if (relativeX >= 0.5 && relativeY < 0.5) newIndex = 1; // Top-right: particle
+      else if (relativeX < 0.5 && relativeY >= 0.5) newIndex = 2; // Bottom-left: emoji
+      else newIndex = 3; // Bottom-right: ring
+      
+      if (newIndex !== currentCursorIndex) {
+        setCurrentCursorIndex(newIndex);
+      }
+    }
+  }, [currentCursorIndex]);
+
+  const handleCursorVisibilityChange = useCallback((isVisible: boolean) => {
+    setIsHovering(isVisible);
+  }, []);
+
+  const currentCursor = heroCursorVariants[currentCursorIndex];
+  console.log(currentCursorIndex)
   return (
     <div className="relative">
-      <CustomCursor smoothness={2} className="z-50">
-        <HeroCursor mode={heroCursorMode} />
+      <CustomCursor 
+        smoothness={2} 
+        className="z-50"
+        onMove={handleCursorMove}
+        onVisibilityChange={handleCursorVisibilityChange}
+      >
+        <motion.div
+          key={currentCursor.id}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.3, type: "spring" }}
+        >
+          {currentCursor.element}
+        </motion.div>
       </CustomCursor>
 
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="hero-section relative min-h-screen flex items-center justify-center overflow-hidden">
         <AnimatedParticles count={20} />
 
         <div className="container mx-auto px-6 py-20 text-center relative z-10">
@@ -52,7 +115,7 @@ function HeroSection({ heroCursorMode }: HeroSectionProps) {
 
             {/* Primary CTAs */}
             <motion.div 
-              className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
+              className="flex flex-col sm:flex-row gap-4 justify-center mb-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1, duration: 0.8 }}
@@ -65,6 +128,25 @@ function HeroSection({ heroCursorMode }: HeroSectionProps) {
               </button>
             </motion.div>
 
+            {/* Cursor State Indicator */}
+            <motion.div 
+              className="mb-16"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2, duration: 0.8 }}
+            >
+              <div className="bg-gray-800/30 backdrop-blur-sm rounded-lg px-4 py-2 inline-block border border-gray-600/30">
+                <div className="flex items-center gap-3 text-sm">
+                  <div className={`w-2 h-2 rounded-full ${isHovering ? 'bg-green-400' : 'bg-gray-400'} transition-colors`} />
+                  <span className="text-gray-300">
+                    Current: <span className="text-white font-semibold">{currentCursor.name}</span>
+                  </span>
+                  <span className="text-gray-500">•</span>
+                  <span className="text-gray-400">Move around to see different cursors</span>
+                </div>
+              </div>
+            </motion.div>
+
             <ScrollIndicator />
           </motion.div>
         </div>
@@ -73,5 +155,4 @@ function HeroSection({ heroCursorMode }: HeroSectionProps) {
   );
 }
 
-export { HeroSection };
-export type { HeroSectionProps }; 
+export { HeroSection }; 
