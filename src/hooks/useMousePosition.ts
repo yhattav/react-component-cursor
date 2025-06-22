@@ -62,8 +62,8 @@ export function useMousePosition(
           e.clientY <= rect.bottom;
 
         if (isInside) {
-          // Set visible immediately when we get first valid position
-          setIsVisible(true);
+          // Set visible immediately when we get first valid position (only if not already visible)
+          if (!isVisible) setIsVisible(true);
           const newPosition = {
             x: e.clientX + offsetX,
             y: e.clientY + offsetY,
@@ -77,8 +77,8 @@ export function useMousePosition(
           });
         }
       } else {
-        // Global cursor - set visible immediately when we get first position
-        setIsVisible(true);
+        // Global cursor - set visible immediately when we get first position (only if not already visible)
+        if (!isVisible) setIsVisible(true);
         const newPosition = {
           x: e.clientX + offsetX,
           y: e.clientY + offsetY,
