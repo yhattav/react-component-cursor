@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { CustomCursor } from '@yhattav/react-component-cursor';
 import { GlowCursor, EmojiCursor, ParticleCursor } from '../cursors';
@@ -33,6 +33,7 @@ const featureCursorVariants = [
 ];
 
 function FeaturesShowcaseSection() {
+  const containerRef = useRef<HTMLElement>(null);
   const [currentCursorIndex, setCursorIndex] = useState(0);
   const [selectedEmoji, setSelectedEmoji] = useState('🎯');
   const [isInPlayground, setIsInPlayground] = useState(false);
@@ -103,8 +104,9 @@ function FeaturesShowcaseSection() {
     : currentCursor.element;
 
   return (
-    <section className="relative py-20">
+    <section ref={containerRef} className="relative py-20">
       <CustomCursor 
+        containerRef={containerRef}
         smoothness={performanceMode ? 1 : 2} 
         className="z-40"
         onMove={handleCursorMove}

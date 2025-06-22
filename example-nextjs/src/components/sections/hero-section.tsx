@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { CustomCursor } from '@yhattav/react-component-cursor';
 import { AnimatedParticles } from '../ui/animated-particles';
@@ -31,6 +31,7 @@ const heroCursorVariants = [
 ];
 
 function HeroSection() {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [currentCursorIndex, setCurrentCursorIndex] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
 
@@ -65,8 +66,9 @@ function HeroSection() {
   const currentCursor = heroCursorVariants[currentCursorIndex];
 
   return (
-    <div className="relative">
+    <div ref={containerRef} className="relative">
       <CustomCursor 
+        containerRef={containerRef}
         smoothness={2} 
         className="z-50"
         onMove={handleCursorMove}

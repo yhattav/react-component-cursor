@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { CustomCursor } from '@yhattav/react-component-cursor';
 import { SOCIAL_PROOF } from '../../lib/constants';
@@ -28,6 +28,7 @@ const proofCursorVariants = [
 ];
 
 function ProofSection() {
+  const containerRef = useRef<HTMLElement>(null);
   const [currentCursorIndex, setCursorIndex] = useState(0);
   const [isHoveringCard, setIsHoveringCard] = useState(false);
   const [interactionCount, setInteractionCount] = useState(0);
@@ -62,8 +63,9 @@ function ProofSection() {
   const currentCursor = proofCursorVariants[currentCursorIndex];
 
   return (
-    <section className="relative py-20 bg-gradient-to-b from-transparent to-gray-900/50">
+    <section ref={containerRef} className="relative py-20 bg-gradient-to-b from-transparent to-gray-900/50">
       <CustomCursor 
+        containerRef={containerRef}
         smoothness={3} 
         className="z-40"
         onMove={handleCursorMove}
