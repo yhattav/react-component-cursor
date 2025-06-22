@@ -18,8 +18,8 @@ describe('Forward Compatibility', () => {
       </CustomCursor>
     );
 
-    // Should accept the extended string type
-    expect(handleVisibilityChange).toHaveBeenCalledWith(true, 'container');
+    // Cursor starts invisible until first mouse movement (correct behavior)
+    expect(handleVisibilityChange).toHaveBeenCalledWith(false, 'container');
   });
 
   it('exports future-ready types', () => {

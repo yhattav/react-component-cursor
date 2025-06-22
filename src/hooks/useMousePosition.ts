@@ -42,6 +42,7 @@ export function useMousePosition(
     x: null,
     y: null,
   });
+  // Cursor is only visible when it actually has a position and should be shown
   const [isVisible, setIsVisible] = useState(false);
 
   const positionRef = useRef(position);
@@ -61,6 +62,8 @@ export function useMousePosition(
           e.clientY <= rect.bottom;
 
         if (isInside) {
+          // Set visible immediately when we get first valid position
+          setIsVisible(true);
           const newPosition = {
             x: e.clientX + offsetX,
             y: e.clientY + offsetY,
@@ -74,6 +77,8 @@ export function useMousePosition(
           });
         }
       } else {
+        // Global cursor - set visible immediately when we get first position
+        setIsVisible(true);
         const newPosition = {
           x: e.clientX + offsetX,
           y: e.clientY + offsetY,
@@ -104,7 +109,8 @@ export function useMousePosition(
 
   const handleMouseEnter = React.useCallback(() => {
     if (containerElement) {
-      setIsVisible(true);
+      // Don't set visible yet - wait for first mouse move to get position
+      // setIsVisible(true) will happen in updateTargetPosition when position is set
     }
   }, [containerElement]);
 
@@ -124,10 +130,11 @@ export function useMousePosition(
       containerElement.addEventListener('mouseleave', handleMouseLeave);
       containerElement.addEventListener('mouseenter', handleMouseEnter as EventListener);
       
-      // Check initial hover state - cursor will be active but won't show until first move
+      // Check initial hover state - prepare for immediate visibility on first move
       const checkInitialHover = () => {
         if (containerElement.matches(':hover')) {
-          setIsVisible(true);
+          // Don't set visible yet - cursor will become visible on first mouse move
+          // This ensures cursor appears immediately after first movement when already hovering
         }
       };
       

@@ -191,8 +191,8 @@ describe('useMousePosition', () => {
         useMousePosition(containerRef, 0, 0, 0)
       );
 
-      // Initially visible when container exists
-      expect(result.current.isVisible).toBe(true);
+      // Initially NOT visible until cursor gets first position (correct behavior)
+      expect(result.current.isVisible).toBe(false);
       expect(result.current.position).toEqual({ x: null, y: null });
       expect(result.current.targetPosition).toEqual({ x: null, y: null });
     });
