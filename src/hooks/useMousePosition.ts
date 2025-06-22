@@ -42,7 +42,7 @@ export function useMousePosition(
     x: null,
     y: null,
   });
-  const [isVisible, setIsVisible] = useState(containerRef?.current !== null);
+  const [isVisible, setIsVisible] = useState(false);
 
   const positionRef = useRef(position);
   positionRef.current = position;
@@ -123,14 +123,23 @@ export function useMousePosition(
     if (containerElement) {
       containerElement.addEventListener('mouseleave', handleMouseLeave);
       containerElement.addEventListener('mouseenter', handleMouseEnter as EventListener);
-    }
-
-    return () => {
-      element.removeEventListener(
-        'mousemove',
-        throttledUpdateTargetPosition as EventListener
-      );
-      if (containerElement) {
+      
+      // Check initial hover state - cursor will be active but won't show until first move
+      const checkInitialHover = () => {
+        if (containerElement.matches(':hover')) {
+          setIsVisible(true);
+        }
+      };
+      
+      // Small delay to ensure DOM is ready
+      const timeoutId = setTimeout(checkInitialHover, 10);
+      
+      return () => {
+        clearTimeout(timeoutId);
+        element.removeEventListener(
+          'mousemove',
+          throttledUpdateTargetPosition as EventListener
+        );
         containerElement.removeEventListener(
           'mouseleave',
           handleMouseLeave
@@ -139,7 +148,14 @@ export function useMousePosition(
           'mouseenter',
           handleMouseEnter as EventListener
         );
-      }
+      };
+    }
+
+    return () => {
+      element.removeEventListener(
+        'mousemove',
+        throttledUpdateTargetPosition as EventListener
+      );
     };
   }, [containerElement, throttledUpdateTargetPosition, handleMouseLeave, handleMouseEnter]);
 
