@@ -63,7 +63,7 @@ function HeroSection() {
   }, []);
 
   const currentCursor = heroCursorVariants[currentCursorIndex];
-  console.log(currentCursorIndex)
+
   return (
     <div className="relative">
       <CustomCursor 
