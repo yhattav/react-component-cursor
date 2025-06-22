@@ -75,7 +75,7 @@ export function InitialRenderVisualTest() {
           <div className="mt-8">
             <button
               onClick={() => {
-                document.getElementById('section2')?.scrollIntoView({ behavior: 'smooth' });
+                section2Ref.current?.scrollIntoView({ behavior: 'smooth' });
               }}
               className="bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors"
             >
@@ -140,7 +140,7 @@ export function InitialRenderVisualTest() {
           <div className="mt-8 space-x-4">
             <button
               onClick={() => {
-                document.getElementById('section1')?.scrollIntoView({ behavior: 'smooth' });
+                section1Ref.current?.scrollIntoView({ behavior: 'smooth' });
               }}
               className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
             >

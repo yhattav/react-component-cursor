@@ -120,33 +120,28 @@ export function useMousePosition(
     
     const element = containerElement || document;
     
-    // Always listen to mousemove (simplified)
+    // Always listen to mousemove
     element.addEventListener(
       'mousemove',
       throttledUpdateTargetPosition as EventListener
     );
 
+    // Add container-specific listeners if container exists
     if (containerElement) {
       containerElement.addEventListener('mouseleave', handleMouseLeave);
       containerElement.addEventListener('mouseenter', handleMouseEnter as EventListener);
-      
-      // Check initial hover state - prepare for immediate visibility on first move
-      const checkInitialHover = () => {
-        if (containerElement.matches(':hover')) {
-          // Don't set visible yet - cursor will become visible on first mouse move
-          // This ensures cursor appears immediately after first movement when already hovering
-        }
-      };
-      
-      // Small delay to ensure DOM is ready
-      const timeoutId = setTimeout(checkInitialHover, 10);
-      
-      return () => {
-        clearTimeout(timeoutId);
-        element.removeEventListener(
-          'mousemove',
-          throttledUpdateTargetPosition as EventListener
-        );
+    }
+
+    // Initial hover detection is handled naturally by mousemove events
+    // No special initialization needed - cursor becomes visible on first movement
+
+    // Unified cleanup function
+    return () => {
+      element.removeEventListener(
+        'mousemove',
+        throttledUpdateTargetPosition as EventListener
+      );
+      if (containerElement) {
         containerElement.removeEventListener(
           'mouseleave',
           handleMouseLeave
@@ -155,14 +150,7 @@ export function useMousePosition(
           'mouseenter',
           handleMouseEnter as EventListener
         );
-      };
-    }
-
-    return () => {
-      element.removeEventListener(
-        'mousemove',
-        throttledUpdateTargetPosition as EventListener
-      );
+      }
     };
   }, [containerElement, throttledUpdateTargetPosition, handleMouseLeave, handleMouseEnter]);
 
