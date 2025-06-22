@@ -42,7 +42,8 @@ export function useMousePosition(
     x: null,
     y: null,
   });
-  const [isVisible, setIsVisible] = useState(containerRef?.current !== null);
+  // Cursor is only visible when it actually has a position and should be shown
+  const [isVisible, setIsVisible] = useState(false);
 
   const positionRef = useRef(position);
   positionRef.current = position;
@@ -61,6 +62,8 @@ export function useMousePosition(
           e.clientY <= rect.bottom;
 
         if (isInside) {
+          // Set visible immediately when we get first valid position (only if not already visible)
+          if (!isVisible) setIsVisible(true);
           const newPosition = {
             x: e.clientX + offsetX,
             y: e.clientY + offsetY,
@@ -74,6 +77,8 @@ export function useMousePosition(
           });
         }
       } else {
+        // Global cursor - set visible immediately when we get first position (only if not already visible)
+        if (!isVisible) setIsVisible(true);
         const newPosition = {
           x: e.clientX + offsetX,
           y: e.clientY + offsetY,
@@ -104,7 +109,8 @@ export function useMousePosition(
 
   const handleMouseEnter = React.useCallback(() => {
     if (containerElement) {
-      setIsVisible(true);
+      // Don't set visible yet - wait for first mouse move to get position
+      // setIsVisible(true) will happen in updateTargetPosition when position is set
     }
   }, [containerElement]);
 
@@ -114,17 +120,22 @@ export function useMousePosition(
     
     const element = containerElement || document;
     
-    // Always listen to mousemove (simplified)
+    // Always listen to mousemove
     element.addEventListener(
       'mousemove',
       throttledUpdateTargetPosition as EventListener
     );
 
+    // Add container-specific listeners if container exists
     if (containerElement) {
       containerElement.addEventListener('mouseleave', handleMouseLeave);
       containerElement.addEventListener('mouseenter', handleMouseEnter as EventListener);
     }
 
+    // Initial hover detection is handled naturally by mousemove events
+    // No special initialization needed - cursor becomes visible on first movement
+
+    // Unified cleanup function
     return () => {
       element.removeEventListener(
         'mousemove',
