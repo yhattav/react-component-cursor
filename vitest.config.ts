@@ -13,6 +13,16 @@ export default defineConfig({
       '**/node_modules/**',
       '**/e2e/**',
       '**/dist/**'
-    ]
+    ],
+    // CI-friendly configuration
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        maxThreads: process.env.CI ? 2 : undefined,
+        minThreads: process.env.CI ? 1 : undefined
+      }
+    },
+    // Better CI reporting
+    reporters: process.env.CI ? ['verbose', 'github-actions'] : ['default']
   }
 })
