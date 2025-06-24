@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { NullablePosition } from '../types.js';
 import { MouseTracker } from '../utils/MouseTracker';
 
@@ -20,11 +20,21 @@ export function useMousePosition(
     y: null,
   });
   const [isVisible, setIsVisible] = useState(false);
+  
+  // Use ref to avoid recreating callback when isVisible changes
+  const isVisibleRef = useRef(false);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    isVisibleRef.current = isVisible;
+  }, [isVisible]);
 
   // Handle position updates from the mouse tracker
   const handlePositionUpdate = useCallback((newPosition: { x: number; y: number }) => {
     // Set visible immediately when we get first position (only if not already visible)
-    if (!isVisible) setIsVisible(true);
+    if (!isVisibleRef.current) {
+      setIsVisible(true);
+    }
     
     setTargetPosition(prev => {
       // Only update if position actually changed
@@ -33,7 +43,7 @@ export function useMousePosition(
       }
       return prev;
     });
-  }, [isVisible]);
+  }, []); // No dependencies - prevents re-subscription to MouseTracker
 
   // Handle container-specific mouse leave/enter
   useEffect(() => {
