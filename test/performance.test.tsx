@@ -1,35 +1,35 @@
 import React from 'react';
 import { render, cleanup, act } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 import { CustomCursor } from '../src';
 import * as hooks from '../src/hooks';
 
 // Mock createPortal to render directly instead of using portals
-jest.mock('react-dom', () => ({
-  ...jest.requireActual('react-dom'),
+vi.mock('react-dom', () => ({
+  ...vi.importActual('react-dom'),
   createPortal: (children: React.ReactNode) => children,
 }));
 
 // Mock the hooks to control the test environment
-jest.mock('../src/hooks', () => {
+vi.mock('../src/hooks', () => {
   return {
-    useMousePosition: jest.fn(() => ({
+    useMousePosition: vi.fn(() => ({
       position: { x: 100, y: 100 },
-      setPosition: jest.fn(),
+      setPosition: vi.fn(),
       targetPosition: { x: 100, y: 100 },
       isVisible: true,
     })),
-    useSmoothAnimation: jest.fn(),
+    useSmoothAnimation: vi.fn(),
   };
 });
 
 // Mock validation to avoid testing it here
-jest.mock('../src/utils/validation', () => ({
-  validateProps: jest.fn(),
+vi.mock('../src/utils/validation', () => ({
+  validateProps: vi.fn(),
 }));
 
 // Get references to mocked functions
-const mockUseMousePosition = hooks.useMousePosition as jest.MockedFunction<typeof hooks.useMousePosition>;
+const mockUseMousePosition = hooks.useMousePosition as ReturnType<typeof vi.fn>;
 
 // Helper to get Chrome-specific memory usage
 const getHeapSize = (): number => {
@@ -86,13 +86,13 @@ const cleanupDOM = () => {
 
 describe('CustomCursor Performance Tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     cleanupDOM();
     
     // Reset mock to default values
     mockUseMousePosition.mockReturnValue({
       position: { x: 100, y: 100 },
-      setPosition: jest.fn(),
+      setPosition: vi.fn(),
       targetPosition: { x: 100, y: 100 },
       isVisible: true,
     });
@@ -164,13 +164,13 @@ describe('CustomCursor Performance Tests', () => {
         id: 'stable-test',
         zIndex: 1000,
         style: { color: 'red' },
-        onMove: jest.fn(),
+        onMove: vi.fn(),
       };
 
       const { rerender } = render(<CustomCursor {...stableProps}>Test</CustomCursor>);
       
       // Clear initial render
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       
       const metrics = measureRenderPerformance(() => {
         // Re-render with identical props - should not trigger re-render due to React.memo
@@ -196,7 +196,7 @@ describe('CustomCursor Performance Tests', () => {
     });
 
     it('optimizes position updates through hooks', () => {
-      const setPositionMock = jest.fn();
+      const setPositionMock = vi.fn();
       
       mockUseMousePosition.mockReturnValue({
         position: { x: 100, y: 100 },
@@ -265,7 +265,7 @@ describe('CustomCursor Performance Tests', () => {
   describe('Animation Performance', () => {
     it('handles smooth animation without performance degradation', () => {
       // Mock animation frame
-      const mockRequestAnimationFrame = jest.spyOn(window, 'requestAnimationFrame')
+      const mockRequestAnimationFrame = vi.spyOn(window, 'requestAnimationFrame')
         .mockImplementation((callback) => {
           // Immediately call the callback for testing
           callback(16.67);
@@ -339,8 +339,8 @@ describe('CustomCursor Performance Tests', () => {
         containerRef: React.createRef<HTMLDivElement>(),
         throttleMs: 16,
         showDevIndicator: true,
-        onMove: jest.fn(),
-        onVisibilityChange: jest.fn(),
+        onMove: vi.fn(),
+        onVisibilityChange: vi.fn(),
       };
 
       const metrics = measureRenderPerformance(() => {

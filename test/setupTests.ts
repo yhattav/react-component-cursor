@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 
 // ===== BROWSER API MOCKS =====
 
@@ -6,7 +7,7 @@ import '@testing-library/jest-dom';
 let rafId = 0;
 const rafCallbacks = new Map<number, FrameRequestCallback>();
 
-global.requestAnimationFrame = jest.fn((callback: FrameRequestCallback) => {
+global.requestAnimationFrame = vi.fn((callback: FrameRequestCallback) => {
   const id = ++rafId;
   rafCallbacks.set(id, callback);
   
@@ -19,7 +20,7 @@ global.requestAnimationFrame = jest.fn((callback: FrameRequestCallback) => {
   return id;
 });
 
-global.cancelAnimationFrame = jest.fn((id: number) => {
+global.cancelAnimationFrame = vi.fn((id: number) => {
   rafCallbacks.delete(id);
 });
 
@@ -33,13 +34,13 @@ global.triggerRAF = (timestamp: number = performance.now()) => {
 // Mock performance.now()
 global.performance = {
   ...global.performance,
-  now: jest.fn(() => Date.now()),
+  now: vi.fn(() => Date.now()),
 };
 
 // ===== DOM API MOCKS =====
 
 // Mock getBoundingClientRect
-const mockGetBoundingClientRect = jest.fn(() => ({
+const mockGetBoundingClientRect = vi.fn(() => ({
   x: 0,
   y: 0,
   width: 800,
@@ -77,11 +78,11 @@ const createdElements = new Set<Element>();
 
 // Mock document methods only if in browser environment
 if (typeof document !== 'undefined') {
-  document.getElementById = jest.fn((id: string) => {
+  document.getElementById = vi.fn((id: string) => {
     return originalGetElementById.call(document, id);
   });
 
-  document.createElement = jest.fn((tagName: string) => {
+  document.createElement = vi.fn((tagName: string) => {
     const element = originalCreateElement.call(document, tagName);
     createdElements.add(element);
     return element;
@@ -127,7 +128,7 @@ if (typeof Element !== 'undefined' && typeof document !== 'undefined') {
 // Mock Element and document methods only if in browser environment
 if (typeof Element !== 'undefined' && typeof document !== 'undefined') {
   // Mock Element.addEventListener
-  Element.prototype.addEventListener = jest.fn(function(
+  Element.prototype.addEventListener = vi.fn(function(
     this: Element,
     type: string,
     listener: EventListenerOrEventListenerObject,
@@ -144,7 +145,7 @@ if (typeof Element !== 'undefined' && typeof document !== 'undefined') {
   });
 
   // Mock Element.removeEventListener
-  Element.prototype.removeEventListener = jest.fn(function(
+  Element.prototype.removeEventListener = vi.fn(function(
     this: Element,
     type: string,
     listener: EventListenerOrEventListenerObject,
@@ -157,7 +158,7 @@ if (typeof Element !== 'undefined' && typeof document !== 'undefined') {
   });
 
   // Mock document.addEventListener
-  document.addEventListener = jest.fn((
+  document.addEventListener = vi.fn((
     type: string,
     listener: EventListenerOrEventListenerObject,
     options?: boolean | AddEventListenerOptions
@@ -173,7 +174,7 @@ if (typeof Element !== 'undefined' && typeof document !== 'undefined') {
   });
 
   // Mock document.removeEventListener
-  document.removeEventListener = jest.fn((
+  document.removeEventListener = vi.fn((
     type: string,
     listener: EventListenerOrEventListenerObject,
     options?: boolean | EventListenerOptions
@@ -225,7 +226,7 @@ if (typeof window === 'undefined') {
 
 // Enable fake timers by default
 beforeEach(() => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
   // Clear RAF callbacks between tests
   rafCallbacks.clear();
   rafId = 0;
@@ -236,14 +237,14 @@ beforeEach(() => {
 afterEach(() => {
   // Just use real timers, don't try to run pending
   try {
-    jest.useRealTimers();
+    vi.useRealTimers();
   } catch (e) {
     // Ignore timer errors in cleanup
   }
   
   // Restore RAF mocks if they've been overridden
   if (!global.requestAnimationFrame || typeof global.requestAnimationFrame !== 'function') {
-    global.requestAnimationFrame = jest.fn((callback: FrameRequestCallback) => {
+    global.requestAnimationFrame = vi.fn((callback: FrameRequestCallback) => {
       const id = ++rafId;
       rafCallbacks.set(id, callback);
       if (process.env.NODE_ENV === 'test') {
@@ -254,7 +255,7 @@ afterEach(() => {
   }
   
   if (!global.cancelAnimationFrame || typeof global.cancelAnimationFrame !== 'function') {
-    global.cancelAnimationFrame = jest.fn((id: number) => {
+    global.cancelAnimationFrame = vi.fn((id: number) => {
       rafCallbacks.delete(id);
     });
   }

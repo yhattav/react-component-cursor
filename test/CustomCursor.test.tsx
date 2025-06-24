@@ -1,37 +1,37 @@
 import React from 'react';
 import { render, screen, cleanup } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 import type { CursorPosition, CursorVisibilityReason } from '../src';
 import { CustomCursor } from '../src';
 import * as hooks from '../src/hooks';
 
 // Mock createPortal to render directly instead of using portals
-jest.mock('react-dom', () => ({
-  ...jest.requireActual('react-dom'),
+vi.mock('react-dom', () => ({
+  ...vi.importActual('react-dom'),
   createPortal: (children: React.ReactNode) => children,
 }));
 
 // Mock the hooks to control the test environment
-jest.mock('../src/hooks', () => {
+vi.mock('../src/hooks', () => {
   return {
-    useMousePosition: jest.fn(() => ({
+    useMousePosition: vi.fn(() => ({
       position: { x: 100, y: 100 },
-      setPosition: jest.fn(),
+      setPosition: vi.fn(),
       targetPosition: { x: 100, y: 100 },
       isVisible: true,
     })),
-    useSmoothAnimation: jest.fn(),
+    useSmoothAnimation: vi.fn(),
   };
 });
 
 // Mock validation to avoid testing it here
-jest.mock('../src/utils/validation', () => ({
-  validateProps: jest.fn(),
+vi.mock('../src/utils/validation', () => ({
+  validateProps: vi.fn(),
 }));
 
 // Get references to mocked functions
-const mockUseMousePosition = hooks.useMousePosition as jest.MockedFunction<typeof hooks.useMousePosition>;
-const mockUseSmoothAnimation = hooks.useSmoothAnimation as jest.MockedFunction<typeof hooks.useSmoothAnimation>;
+const mockUseMousePosition = hooks.useMousePosition as ReturnType<typeof vi.fn>;
+const mockUseSmoothAnimation = hooks.useSmoothAnimation as ReturnType<typeof vi.fn>;
 
 // Helper to clean DOM more safely
 const cleanupDOM = () => {
@@ -60,13 +60,13 @@ const cleanupDOM = () => {
 
 describe('CustomCursor', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     cleanupDOM();
     
     // Reset mocks to default values
     mockUseMousePosition.mockReturnValue({
       position: { x: 100, y: 100 },
-      setPosition: jest.fn(),
+      setPosition: vi.fn(),
       targetPosition: { x: 100, y: 100 },
       isVisible: true,
     });
@@ -112,7 +112,7 @@ describe('CustomCursor', () => {
   });
 
   it('calls onMove callback with correct signature', () => {
-    const onMove = jest.fn<void, [CursorPosition]>();
+    const onMove = vi.fn<[CursorPosition], void>();
     render(<CustomCursor onMove={onMove}>Callback cursor</CustomCursor>);
     
     // Verify the callback was called with the correct signature
@@ -120,7 +120,7 @@ describe('CustomCursor', () => {
   });
 
   it('calls onVisibilityChange callback', () => {
-    const onVisibilityChange = jest.fn<void, [boolean, CursorVisibilityReason]>();
+    const onVisibilityChange = vi.fn<[boolean, CursorVisibilityReason], void>();
     render(<CustomCursor onVisibilityChange={onVisibilityChange}>Visibility cursor</CustomCursor>);
     
     // Verify the callback was called with the correct signature
@@ -138,7 +138,7 @@ describe('CustomCursor', () => {
     // Mock position with offset already applied by the hook
     mockUseMousePosition.mockReturnValue({
       position: { x: 110, y: 120 }, // 100 + 10, 100 + 20
-      setPosition: jest.fn(),
+      setPosition: vi.fn(),
       targetPosition: { x: 110, y: 120 },
       isVisible: true,
     });
@@ -252,19 +252,19 @@ describe('CustomCursor', () => {
   // New comprehensive tests for missing coverage
   describe('React.memo comparison function', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('re-renders when function props change', () => {
-      const onMove1 = jest.fn();
-      const onMove2 = jest.fn();
+      const onMove1 = vi.fn();
+      const onMove2 = vi.fn();
       
       const { rerender } = render(
         <CustomCursor onMove={onMove1} id="test-memo">Test</CustomCursor>
       );
       
       // Clear the mock to reset call count
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       
       // Change function reference - should re-render
       rerender(
@@ -276,7 +276,7 @@ describe('CustomCursor', () => {
     });
 
     it('does not re-render when equivalent props provided', () => {
-      const onMove = jest.fn();
+      const onMove = vi.fn();
       const style = { color: 'red' };
       const offset = { x: 5, y: 10 };
       
@@ -285,7 +285,7 @@ describe('CustomCursor', () => {
       );
       
       // Clear the mock to reset call count
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       
       // Same props - should not re-render (memo should prevent it)
       rerender(
@@ -302,7 +302,7 @@ describe('CustomCursor', () => {
       );
       
       // Clear the mock to reset call count
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       
       // Different style object - should re-render
       rerender(
@@ -318,7 +318,7 @@ describe('CustomCursor', () => {
       );
       
       // Clear the mock to reset call count
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       
       rerender(
         <CustomCursor offset={{ x: 20, y: 10 }} id="offset-test">Test</CustomCursor>
@@ -333,7 +333,7 @@ describe('CustomCursor', () => {
       );
       
       // Clear the mock to reset call count
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       
       // Style object with different number of keys
       rerender(
@@ -349,7 +349,7 @@ describe('CustomCursor', () => {
       );
       
       // Clear the mock to reset call count
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       
       // Different children
       rerender(
@@ -374,7 +374,7 @@ describe('CustomCursor', () => {
       );
       
       // Clear the mock to reset call count
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       
       // Different containerRef current value
       rerender(
@@ -428,7 +428,7 @@ describe('CustomCursor', () => {
     it('handles null position values gracefully', () => {
       mockUseMousePosition.mockReturnValue({
         position: { x: null, y: null },
-        setPosition: jest.fn(),
+        setPosition: vi.fn(),
         targetPosition: { x: null, y: null },
         isVisible: true,
       });
@@ -440,11 +440,11 @@ describe('CustomCursor', () => {
     });
 
     it('does not call onMove when position is null', () => {
-      const onMove = jest.fn();
+      const onMove = vi.fn();
       
       mockUseMousePosition.mockReturnValue({
         position: { x: null, y: null },
-        setPosition: jest.fn(),
+        setPosition: vi.fn(),
         targetPosition: { x: null, y: null },
         isVisible: true,
       });
@@ -455,7 +455,7 @@ describe('CustomCursor', () => {
     });
 
     it('calls onVisibilityChange with disabled reason when disabled', () => {
-      const onVisibilityChange = jest.fn();
+      const onVisibilityChange = vi.fn();
       
       render(<CustomCursor enabled={false} onVisibilityChange={onVisibilityChange}>Test</CustomCursor>);
       
@@ -463,11 +463,11 @@ describe('CustomCursor', () => {
     });
 
     it('handles invisible cursor from useMousePosition', () => {
-      const onVisibilityChange = jest.fn();
+      const onVisibilityChange = vi.fn();
       
       mockUseMousePosition.mockReturnValue({
         position: { x: 100, y: 100 },
-        setPosition: jest.fn(),
+        setPosition: vi.fn(),
         targetPosition: { x: 100, y: 100 },
         isVisible: false,
       });
@@ -572,7 +572,7 @@ describe('CustomCursor', () => {
   describe('Cleanup and error handling', () => {
     it('handles DOM cleanup errors gracefully', () => {
       // Mock console.warn to capture warnings
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(jest.fn());
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(vi.fn());
       
       // Create a cursor that will trigger cleanup
       const { unmount } = render(<CustomCursor id="cleanup-test">Test</CustomCursor>);
@@ -580,7 +580,7 @@ describe('CustomCursor', () => {
       // Mock a removal error by creating a style element without a parent
       const mockStyle = document.createElement('style');
       mockStyle.id = 'cursor-style-cleanup-test';
-      mockStyle.remove = jest.fn(() => {
+      mockStyle.remove = vi.fn(() => {
         throw new Error('Mock removal error');
       });
       

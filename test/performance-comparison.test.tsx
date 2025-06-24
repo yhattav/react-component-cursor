@@ -1,10 +1,11 @@
 import React from 'react';
 import { render, cleanup, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
 import { CustomCursor } from '../src';
 import { MouseTracker } from '../src/utils/MouseTracker';
 
 // Mock performance.now for consistent testing
-const mockPerformanceNow = jest.fn();
+const mockPerformanceNow = vi.fn();
 Object.defineProperty(global.performance, 'now', {
   writable: true,
   value: mockPerformanceNow,
@@ -25,7 +26,7 @@ const MultipleCursors: React.FC<{ count: number }> = ({ count }) => {
 
 describe('Performance Comparison: O(1) vs O(n)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     cleanup();
     MouseTracker.resetInstance();
     mockPerformanceNow.mockReturnValue(0);
@@ -38,7 +39,7 @@ describe('Performance Comparison: O(1) vs O(n)', () => {
 
   describe('Event Listener Efficiency', () => {
     it('should use only one event listener regardless of cursor count', () => {
-      const addEventListenerSpy = jest.spyOn(document, 'addEventListener');
+      const addEventListenerSpy = vi.spyOn(document, 'addEventListener');
       
       // Test with 1 cursor
       render(<MultipleCursors count={1} />);
@@ -73,7 +74,7 @@ describe('Performance Comparison: O(1) vs O(n)', () => {
       for (let i = 0; i < 100; i++) {
         const unsubscribe = tracker.subscribe({
           id: `stress-cursor-${i}`,
-          callback: jest.fn(),
+          callback: vi.fn(),
         });
         unsubscribers.push(unsubscribe);
       }
@@ -97,7 +98,7 @@ describe('Performance Comparison: O(1) vs O(n)', () => {
       const tracker = MouseTracker.getInstance();
       
       // Subscribe multiple cursors with same throttle settings
-      const callbacks = Array.from({ length: 10 }, () => jest.fn());
+      const callbacks = Array.from({ length: 10 }, () => vi.fn());
       callbacks.forEach((callback, i) => {
         tracker.subscribe({
           id: `throttle-cursor-${i}`,
@@ -129,7 +130,7 @@ describe('Performance Comparison: O(1) vs O(n)', () => {
 
   describe('Functional Performance', () => {
     it('should handle rapid mouse events efficiently with multiple cursors', () => {
-      const callbacks = Array.from({ length: 10 }, () => jest.fn());
+      const callbacks = Array.from({ length: 10 }, () => vi.fn());
       const tracker = MouseTracker.getInstance();
       
       // Subscribe all cursors
@@ -155,18 +156,18 @@ describe('Performance Comparison: O(1) vs O(n)', () => {
       const container1 = document.createElement('div');
       const container2 = document.createElement('div');
       
-      container1.getBoundingClientRect = jest.fn(() => ({
+      container1.getBoundingClientRect = vi.fn(() => ({
         left: 0, top: 0, right: 100, bottom: 100,
         width: 100, height: 100, x: 0, y: 0, toJSON: () => ({})
       }));
       
-      container2.getBoundingClientRect = jest.fn(() => ({
+      container2.getBoundingClientRect = vi.fn(() => ({
         left: 200, top: 200, right: 300, bottom: 300,
         width: 100, height: 100, x: 200, y: 200, toJSON: () => ({})
       }));
       
-      const callback1 = jest.fn();
-      const callback2 = jest.fn();
+      const callback1 = vi.fn();
+      const callback2 = vi.fn();
       
       // Subscribe cursors to different containers
       tracker.subscribe({
@@ -214,8 +215,8 @@ describe('Performance Comparison: O(1) vs O(n)', () => {
 
     it('should handle all existing prop combinations', () => {
       const containerRef = React.createRef<HTMLDivElement>();
-      const onMove = jest.fn();
-      const onVisibilityChange = jest.fn();
+      const onMove = vi.fn();
+      const onVisibilityChange = vi.fn();
       
       expect(() => {
         render(
