@@ -20,7 +20,7 @@ The performance monitoring system consists of:
 - **Development Bundles**: Development builds with debug info
 - **Type Definitions**: TypeScript declaration files
 - **Total Size**: Combined production bundle size
-- **Threshold**: 15KB limit (configurable)
+- **Thresholds**: 9KB minified, 3.5KB gzipped (configurable)
 
 ### Render Performance
 - **Single Cursor Rendering**: < 50ms
@@ -314,7 +314,7 @@ npm run perf:baseline
 ## 🎯 Performance Goals
 
 ### Current Targets
-- **Bundle Size**: < 15KB (currently 11.96KB ✅)
+- **Bundle Size**: < 9KB minified, < 3.5KB gzipped (currently 8.37KB/3.19KB ✅)
 - **Memory Usage**: < 1MB delta (currently 0.05MB ✅)
 - **Render Performance**: 100% pass rate (currently 100% ✅)
 - **Test Execution**: < 2s (currently ~1s ✅)
