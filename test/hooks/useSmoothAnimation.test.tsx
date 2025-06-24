@@ -1,5 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
-import { vi } from 'vitest';import { useSmoothAnimation } from '../../src/hooks';
+import { vi } from 'vitest';
+import { useSmoothAnimation } from '../../src/hooks';
 
 describe('useSmoothAnimation', () => {
   let originalMatchMedia: typeof window.matchMedia | undefined;

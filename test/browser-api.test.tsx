@@ -1,7 +1,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { vi } from 'vitest';import { renderHook } from '@testing-library/react';
-import { vi } from 'vitest';import { CustomCursor } from '../src';
+import { vi } from 'vitest';
+import { renderHook } from '@testing-library/react';
+import { CustomCursor } from '../src';
 import { useMousePosition } from '../src/hooks';
 
 describe('Browser API Integration', () => {

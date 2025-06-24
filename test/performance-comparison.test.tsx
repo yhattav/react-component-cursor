@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, cleanup, fireEvent } from '@testing-library/react';
-import { vi } from 'vitest';import { CustomCursor } from '../src';
+import { vi } from 'vitest';
+import { CustomCursor } from '../src';
 import { MouseTracker } from '../src/utils/MouseTracker';
 
 // Mock performance.now for consistent testing

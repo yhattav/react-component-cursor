@@ -1,6 +1,7 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
-import { vi } from 'vitest';import { useMousePosition } from '../../src/hooks/useMousePosition';
+import { vi } from 'vitest';
+import { useMousePosition } from '../../src/hooks/useMousePosition';
 
 describe('useMousePosition', () => {
   beforeEach(() => {
