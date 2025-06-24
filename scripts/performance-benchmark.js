@@ -168,17 +168,17 @@ class PerformanceBenchmark {
     
     try {
       // Run performance tests with detailed output
-      const output = execSync('npm test -- --testPathPattern=performance.test.tsx --json', { 
+      const output = execSync('npm run test:run -- --reporter=json test/performance.test.tsx', { 
         encoding: 'utf8',
         stdio: 'pipe'
       });
       
-      // Extract JSON from output (Jest may include extra output)
+      // Extract JSON from output (Vitest may include extra output)
       const jsonStart = output.indexOf('{');
       const jsonEnd = output.lastIndexOf('}') + 1;
       const jsonString = output.slice(jsonStart, jsonEnd);
       
-      // Parse Jest output
+      // Parse Vitest output
       const testResults = JSON.parse(jsonString);
       const perfTestSuite = testResults.testResults.find(suite => 
         suite.name.includes('performance.test.tsx')
@@ -229,7 +229,7 @@ class PerformanceBenchmark {
         const before = process.memoryUsage();
         
         // Run memory test (simulate component mount/unmount cycles)
-        execSync('npm test -- --testNamePattern="does not leak memory" --silent', { stdio: 'pipe' });
+        execSync('npm run test:run -- -t "does not leak memory" test/performance.test.tsx', { stdio: 'pipe' });
         
         const after = process.memoryUsage();
         results.push({
@@ -285,7 +285,7 @@ class PerformanceBenchmark {
       for (const testName of renderTests) {
         try {
           const startTime = Date.now();
-          execSync(`npm test -- --testPathPattern=performance.test.tsx --testNamePattern="${testName}" --silent`, { 
+          execSync(`npm run test:run -- -t "${testName}" test/performance.test.tsx`, { 
             stdio: 'pipe' 
           });
           const endTime = Date.now();
