@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, cleanup, act } from '@testing-library/react';
-import { vi } from 'vitest';import '@testing-library/jest-dom';
-import { vi } from 'vitest';import { CustomCursor } from '../src';
+import { vi } from 'vitest';
+import { CustomCursor } from '../src';
 import * as hooks from '../src/hooks';
 
 // Mock createPortal to render directly instead of using portals
@@ -29,7 +29,7 @@ vi.mock('../src/utils/validation', () => ({
 }));
 
 // Get references to mocked functions
-const mockUseMousePosition = hooks.useMousePosition as MockedFunction<typeof hooks.useMousePosition>;
+const mockUseMousePosition = hooks.useMousePosition as ReturnType<typeof vi.fn>;
 
 // Helper to get Chrome-specific memory usage
 const getHeapSize = (): number => {

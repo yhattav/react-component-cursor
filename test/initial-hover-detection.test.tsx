@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { CustomCursor } from '../src/index';
 
 // Simple test component
