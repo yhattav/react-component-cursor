@@ -14,7 +14,7 @@ alwaysApply: false
 - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
 - Use functional and declarative programming patterns; avoid classes
 - Prefer iteration and modularization over code duplication
-- Avoid comments to explain code. usually comments mean that the code is not self explanatory and should be rethought and refactored to acheive the readability standard.
+- Avoid comments to explain code. usually comments mean that the code is not self explanatory and should be rethought and refactored to achieve the readability standard.
 
 ## Code Structure
 - Structure files: exported component, subcomponents, helpers, static content, types
