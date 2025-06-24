@@ -151,11 +151,11 @@ describe('Cursor ID Collision Bug Fix', () => {
       });
 
       // Simulate mouse movement
-      const mockEvent = new MouseEvent('mousemove', {
-        clientX: 100,
-        clientY: 200,
-      });
-      document.dispatchEvent(mockEvent);
+      const mouseMoveHandler = mockDocument.addEventListener.mock.calls
+        .find(call => call[0] === 'mousemove')?.[1];
+      
+      mouseMoveHandler({ clientX: 100, clientY: 200 });
+      vi.runAllTimers();
 
       // Only the second callback should be called (overwrote the first)
       expect(callback1).not.toHaveBeenCalled();
