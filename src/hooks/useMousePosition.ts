@@ -30,7 +30,7 @@ export function useMousePosition(
   }, [isVisible]);
 
   // Handle position updates from the mouse tracker
-  const handlePositionUpdate = useCallback((newPosition: { x: number; y: number }) => {
+  const stablePositionUpdateHandler = useCallback((newPosition: { x: number; y: number }) => {
     // Set visible immediately when we get first position (only if not already visible)
     if (!isVisibleRef.current) {
       setIsVisible(true);
@@ -43,7 +43,7 @@ export function useMousePosition(
       }
       return prev;
     });
-  }, []); // No dependencies - prevents re-subscription to MouseTracker
+  }, []);
 
   // Handle container-specific mouse leave/enter
   useEffect(() => {
@@ -74,7 +74,7 @@ export function useMousePosition(
     
     const unsubscribe = mouseTracker.subscribe({
       id,
-      callback: handlePositionUpdate,
+      callback: stablePositionUpdateHandler,
       containerRef,
       throttleMs,
       offsetX,
@@ -82,7 +82,7 @@ export function useMousePosition(
     });
 
     return unsubscribe;
-  }, [id, containerRef, offsetX, offsetY, throttleMs, handlePositionUpdate]);
+  }, [id, containerRef, offsetX, offsetY, throttleMs, stablePositionUpdateHandler]);
 
   // Initialize position when we get the first valid targetPosition
   useEffect(() => {
