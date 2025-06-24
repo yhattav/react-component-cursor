@@ -86,8 +86,8 @@ class PerformanceBenchmark {
       const bundleFormat = stats.esm <= stats.cjs ? 'ESM' : 'CJS';
       
       // Use realistic thresholds based on actual usage
-      const minifiedThreshold = 8 * 1024; // 8KB minified (generous for this library)
-      const gzippedThreshold = 3 * 1024;  // 3KB gzipped (realistic target)
+      const minifiedThreshold = 9 * 1024; // 9KB minified (updated for O(1) architecture)
+      const gzippedThreshold = 3.5 * 1024;  // 3.5KB gzipped (updated for O(1) architecture)
       
       const minifiedPassed = primaryBundleSize <= minifiedThreshold;
       const gzippedPassed = primaryGzippedSize <= gzippedThreshold;

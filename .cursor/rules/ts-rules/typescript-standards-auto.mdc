@@ -1,5 +1,5 @@
 ---
-description:
+description: 
 globs: *.ts, *.tsx, *.js, *.jsx
 alwaysApply: false
 ---
@@ -14,6 +14,35 @@ alwaysApply: false
 - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
 - Use functional and declarative programming patterns; avoid classes
 - Prefer iteration and modularization over code duplication
+- **NEVER use comments to explain code behavior, implementation details, or why something works.** Code must be self-explanatory through naming and structure. Comments indicate the code needs refactoring.
+
+## Comment Elimination Rule
+**If you find yourself writing ANY of these comment patterns, STOP and refactor the code instead:**
+
+### ❌ FORBIDDEN Comment Patterns:
+```typescript
+// No dependencies - prevents re-subscription
+// This fixes the performance issue
+// Handle mouse movement
+// Call immediately  
+// Skip this subscriber if...
+// Use RAF to batch notifications
+// Apply throttling if specified
+// Set up event listener when...
+```
+
+### ✅ REQUIRED Approach - Self-Documenting Code:
+```typescript
+// ❌ BAD: Comment explains behavior
+const handleUpdate = useCallback((data) => {
+  // ...
+}, []); // No dependencies - prevents re-subscription
+
+// ✅ GOOD: Name explains intention
+const stableUpdateHandler = useCallback((data) => {
+  // ...
+}, []);
+```
 
 ## Code Structure
 - Structure files: exported component, subcomponents, helpers, static content, types
@@ -60,5 +89,16 @@ class UserProfile extends React.Component {
 
 // Missing curly braces
 if (loading) return <div>Loading</div>;
+
+// ❌ FORBIDDEN: Explanatory comments
+const handler = useCallback(() => {
+  // ...
+}, []); // Empty array prevents re-renders
+
+// ❌ FORBIDDEN: Implementation explanation
+if (condition) {
+  // This fixes the bug by...
+  doSomething();
+}
 ```
 </example>
