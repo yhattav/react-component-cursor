@@ -31,18 +31,16 @@ describe('Prop Validation', () => {
   });
 
   describe('id validation', () => {
-    it('should error for empty string id', () => {
+    it('should not error for empty string id (auto-generates UUID)', () => {
       render(<CustomCursor id="">Test cursor</CustomCursor>);
-      expect(errorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('id\' must be a non-empty string')
-      );
+      expect(errorSpy).not.toHaveBeenCalled();
     });
 
     it('should error for non-string id', () => {
       // @ts-expect-error Testing invalid prop type
       render(<CustomCursor id={123}>Test cursor</CustomCursor>);
       expect(errorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('id\' must be a non-empty string')
+        expect.stringContaining('id\' must be a string')
       );
     });
 

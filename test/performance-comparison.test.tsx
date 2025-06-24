@@ -173,13 +173,11 @@ describe('Performance Comparison: O(1) vs O(n)', () => {
       tracker.subscribe({
         id: 'container1-cursor',
         callback: callback1,
-        containerRef: { current: container1 },
       });
       
       tracker.subscribe({
         id: 'container2-cursor',
         callback: callback2,
-        containerRef: { current: container2 },
       });
       
       // Test that both cursors are properly subscribed

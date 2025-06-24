@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { CustomCursor } from '@yhattav/react-component-cursor';
 
 export function InitialRenderVisualTest() {
@@ -28,6 +28,7 @@ export function InitialRenderVisualTest() {
         className="h-screen bg-gradient-to-br from-red-100 to-red-200 flex flex-col items-center justify-center relative"
       >
         <CustomCursor
+          id="section1-cursor"
           containerRef={section1Ref}
           onVisibilityChange={setSection1Visible}
           showDevIndicator={true}
@@ -46,9 +47,9 @@ export function InitialRenderVisualTest() {
             <h2 className="text-xl font-semibold text-red-800 mb-4">Expected Bug Behavior:</h2>
             <ul className="text-left text-red-700 space-y-2">
               <li><strong>✅ Page loads with mouse in this section</strong></li>
-              <li><strong>🐛 BUG:</strong> Cursor should be visible but isn't</li>
-              <li><strong>🔧 Workaround:</strong> Move mouse slightly to make cursor appear</li>
-              <li><strong>🧪 Test:</strong> Scroll to Section 2, then back - cursor will work</li>
+              <li><strong>🔧 FIXED:</strong> Both cursors now have unique IDs (no more conflicts!)</li>
+              <li><strong>📝 Note:</strong> Library auto-generates UUIDs when no ID is provided</li>
+              <li><strong>🧪 Test:</strong> Both sections should work independently now</li>
             </ul>
           </div>
 
@@ -92,6 +93,7 @@ export function InitialRenderVisualTest() {
         className="h-screen bg-gradient-to-br from-blue-100 to-blue-200 flex flex-col items-center justify-center relative"
       >
         <CustomCursor
+          id="section2-cursor"
           containerRef={section2Ref}
           onVisibilityChange={setSection2Visible}
           showDevIndicator={true}

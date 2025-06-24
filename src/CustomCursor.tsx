@@ -14,7 +14,7 @@ import { isSSR, safeDocument, isMobileDevice } from './utils/ssr';
 // Clean props interface
 export interface CustomCursorProps {
   // Core Configuration
-  id?: string;
+  id?: string; // Auto-generated UUID if not provided
   enabled?: boolean;
   
   // Content & Styling
@@ -142,9 +142,14 @@ const arePropsEqual = (
   return true;
 };
 
+// Generate a unique ID for each cursor instance
+const generateCursorId = (): string => {
+  return `cursor-${Math.random().toString(36).substr(2, 9)}-${Date.now().toString(36)}`;
+};
+
 export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
   ({
-    id = 'unnamed-cursor',
+    id,
     enabled = true,
     children,
     className = '',
@@ -162,9 +167,12 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     role,
     'aria-label': ariaLabel,
   }) => {
+    // Generate unique ID if not provided
+    const cursorId = React.useMemo(() => id || generateCursorId(), [id]);
+
     // Validate props in development mode (always called first)
     validateProps({
-      id,
+      id: cursorId,
       enabled,
       children,
       className,
@@ -190,7 +198,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     const isMobile = React.useMemo(() => isMobileDevice(), []);
 
     // Always call hooks, even if we'll return null (Rules of Hooks)
-    const mousePositionHook = useMousePosition(id, containerRef, offsetValues.x, offsetValues.y, throttleMs);
+    const mousePositionHook = useMousePosition(cursorId, containerRef, offsetValues.x, offsetValues.y, throttleMs);
     const { position, setPosition, targetPosition, isVisible } = mousePositionHook;
     useSmoothAnimation(targetPosition, smoothness, setPosition);
 
@@ -274,7 +282,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       const doc = safeDocument();
       if (!doc) return;
       
-      const styleId = `cursor-style-${id}`;
+      const styleId = `cursor-style-${cursorId}`;
       const existingStyle = doc.getElementById(styleId);
       if (existingStyle) {
         existingStyle.remove();
@@ -298,7 +306,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
           }
         }
       };
-    }, [id, styleSheetContent]);
+    }, [cursorId, styleSheetContent]);
 
     // Memoize move callback to avoid recreation
     const handleMove = React.useCallback(() => {
@@ -381,11 +389,11 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
 
     return (
       <>
-        <style id={`cursor-style-global-${id}`}>{globalStyleContent}</style>
+        <style id={`cursor-style-global-${cursorId}`}>{globalStyleContent}</style>
         {createPortal(
-          <React.Fragment key={`cursor-${id}`}>
+          <React.Fragment key={`cursor-${cursorId}`}>
             <div
-              id={`custom-cursor-${id}`}
+              id={`custom-cursor-${cursorId}`}
               style={cursorStyle}
               className={className}
               aria-hidden="true"

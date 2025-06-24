@@ -51,10 +51,7 @@ describe('useMousePosition', () => {
         'mouseleave',
         expect.any(Function)
       );
-      expect(addEventListenerSpy).toHaveBeenCalledWith(
-        'mouseenter',
-        expect.any(Function)
-      );
+      // Note: mouseenter is not needed since MouseTracker handles global movement
       
       addEventListenerSpy.mockRestore();
     });
@@ -79,10 +76,7 @@ describe('useMousePosition', () => {
         'mouseleave',
         expect.any(Function)
       );
-      expect(removeEventListenerSpy).toHaveBeenCalledWith(
-        'mouseenter',
-        expect.any(Function)
-      );
+      // Note: mouseenter is not needed since MouseTracker handles global movement
       
       removeEventListenerSpy.mockRestore();
     });

@@ -98,17 +98,12 @@ describe('MouseTracker', () => {
     it('should accept subscription parameters correctly', () => {
       const tracker = MouseTracker.getInstance();
       const callback = vi.fn();
-      const container = document.createElement('div');
-      const containerRef = { current: container };
       
       // Should accept all subscription parameters without error
       expect(() => {
         tracker.subscribe({
           id: 'test-cursor',
           callback,
-          containerRef,
-          offsetX: 10,
-          offsetY: -5,
           throttleMs: 100,
         });
       }).not.toThrow();
@@ -149,13 +144,10 @@ describe('MouseTracker', () => {
         toJSON: () => ({}),
       }));
       
-      const containerRef = { current: container };
-      
       expect(() => {
         tracker.subscribe({
           id: 'container-cursor',
           callback,
-          containerRef,
         });
         
         fireEvent.mouseMove(document, { clientX: 100, clientY: 100 });
@@ -242,13 +234,10 @@ describe('MouseTracker', () => {
         throw new Error('getBoundingClientRect failed');
       });
       
-      const containerRef = { current: container };
-      
       expect(() => {
         tracker.subscribe({
           id: 'error-cursor',
           callback,
-          containerRef,
         });
         
         fireEvent.mouseMove(document, { clientX: 100, clientY: 100 });
@@ -293,11 +282,23 @@ describe('MouseTracker', () => {
     it('should provide current position method', () => {
       const tracker = MouseTracker.getInstance();
       
-      const position = tracker.getCurrentPosition();
+      // Initially should be null (no mouse movement yet)
+      const initialPosition = tracker.getCurrentPosition();
+      expect(initialPosition).toBeNull();
       
-      expect(position).toEqual({ x: 0, y: 0 }); // Initial position
-      expect(typeof position.x).toBe('number');
-      expect(typeof position.y).toBe('number');
+      // After mouse movement, should return position
+      const callback = vi.fn();
+      tracker.subscribe({ id: 'test-cursor', callback });
+      
+      fireEvent.mouseMove(document, { clientX: 100, clientY: 200 });
+      
+      const position = tracker.getCurrentPosition();
+      expect(position).toEqual({ x: 100, y: 200 });
+      expect(position).not.toBeNull();
+      if (position) {
+        expect(typeof position.x).toBe('number');
+        expect(typeof position.y).toBe('number');
+      }
     });
   });
 }); 
