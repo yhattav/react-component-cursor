@@ -1,13 +1,13 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { renderHook } from '@testing-library/react';
-import { CustomCursor } from '../src';
+import { vi } from 'vitest';import { renderHook } from '@testing-library/react';
+import { vi } from 'vitest';import { CustomCursor } from '../src';
 import { useMousePosition } from '../src/hooks';
 
 describe('Browser API Integration', () => {
   describe('requestAnimationFrame Integration', () => {
     it('should call requestAnimationFrame for smooth animations', () => {
-      const rafSpy = jest.spyOn(global, 'requestAnimationFrame');
+      const rafSpy = vi.spyOn(global, 'requestAnimationFrame');
       const { unmount } = render(<CustomCursor smoothness={2}>Test</CustomCursor>);
       
       expect(rafSpy).toHaveBeenCalled();
@@ -17,7 +17,7 @@ describe('Browser API Integration', () => {
     });
 
     it('should work with direct animation when smoothness is 1', () => {
-      const rafSpy = jest.spyOn(global, 'requestAnimationFrame');
+      const rafSpy = vi.spyOn(global, 'requestAnimationFrame');
       
       render(<CustomCursor smoothness={1}>Direct</CustomCursor>);
       
@@ -30,7 +30,7 @@ describe('Browser API Integration', () => {
 
   describe('Event Listener Integration', () => {
     it('should attach document event listeners', () => {
-      const addEventListenerSpy = jest.spyOn(document, 'addEventListener');
+      const addEventListenerSpy = vi.spyOn(document, 'addEventListener');
       
       render(<CustomCursor>Events</CustomCursor>);
       
@@ -39,7 +39,7 @@ describe('Browser API Integration', () => {
     });
 
     it('should remove event listeners on cleanup', () => {
-      const removeEventListenerSpy = jest.spyOn(document, 'removeEventListener');
+      const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
       
       const { unmount } = render(<CustomCursor>Cleanup</CustomCursor>);
       unmount();
@@ -74,7 +74,7 @@ describe('Browser API Integration', () => {
 
   describe('Performance Optimization', () => {
     it('should not use RAF for direct positioning', () => {
-      const rafSpy = jest.spyOn(global, 'requestAnimationFrame');
+      const rafSpy = vi.spyOn(global, 'requestAnimationFrame');
       
       render(<CustomCursor smoothness={1}>Direct</CustomCursor>);
       
@@ -85,7 +85,7 @@ describe('Browser API Integration', () => {
     });
 
     it('should use RAF for smooth animations', () => {
-      const rafSpy = jest.spyOn(global, 'requestAnimationFrame');
+      const rafSpy = vi.spyOn(global, 'requestAnimationFrame');
       
       render(<CustomCursor smoothness={2}>Smooth</CustomCursor>);
       
@@ -117,7 +117,7 @@ describe('Browser API Integration', () => {
 
   describe('Animation Cleanup', () => {
     it('should cancel animation frames on unmount', () => {
-      const cancelSpy = jest.spyOn(global, 'cancelAnimationFrame');
+      const cancelSpy = vi.spyOn(global, 'cancelAnimationFrame');
       
       const { unmount } = render(<CustomCursor smoothness={2}>Cleanup</CustomCursor>);
       unmount();

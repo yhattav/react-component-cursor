@@ -1,19 +1,19 @@
 import { renderHook, act } from '@testing-library/react';
-import { useSmoothAnimation } from '../../src/hooks';
+import { vi } from 'vitest';import { useSmoothAnimation } from '../../src/hooks';
 
 describe('useSmoothAnimation', () => {
   let originalMatchMedia: typeof window.matchMedia | undefined;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
     
     // Safely capture original matchMedia for restoration
     originalMatchMedia = typeof window !== 'undefined' ? window.matchMedia : undefined;
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
     
     // Restore original matchMedia to prevent side effects (only if window exists)
     if (typeof window !== 'undefined' && originalMatchMedia) {
@@ -25,19 +25,19 @@ describe('useSmoothAnimation', () => {
   });
 
   it('smoothly animates position changes', () => {
-    const setPosition = jest.fn();
+    const setPosition = vi.fn();
     const targetPosition = { x: 100, y: 100 };
 
     renderHook(() => useSmoothAnimation(targetPosition, 0.5, setPosition));
 
-    jest.advanceTimersByTime(16); // One frame
+    vi.advanceTimersByTime(16); // One frame
     expect(setPosition).toHaveBeenCalled();
   });
 
   it('uses requestAnimationFrame for smooth animations', () => {
-    const rafSpy = jest.spyOn(global, 'requestAnimationFrame');
-    const cancelRafSpy = jest.spyOn(global, 'cancelAnimationFrame');
-    const setPosition = jest.fn();
+    const rafSpy = vi.spyOn(global, 'requestAnimationFrame');
+    const cancelRafSpy = vi.spyOn(global, 'cancelAnimationFrame');
+    const setPosition = vi.fn();
     const targetPosition = { x: 100, y: 100 };
 
     const { unmount } = renderHook(() => 
@@ -54,7 +54,7 @@ describe('useSmoothAnimation', () => {
   });
 
     it('smoothly interpolates between positions', () => {
-    const setPosition = jest.fn();
+    const setPosition = vi.fn();
     const targetPosition = { x: 100, y: 100 };
     
     // Use a smoothing factor > 1 to trigger animation
@@ -62,7 +62,7 @@ describe('useSmoothAnimation', () => {
 
     // Advance fake timers to trigger animation frame
     act(() => {
-      jest.advanceTimersByTime(16);
+      vi.advanceTimersByTime(16);
     });
 
     // Should have called setPosition during animation
@@ -70,8 +70,8 @@ describe('useSmoothAnimation', () => {
   });
 
   it('skips animation when smoothness is 1', () => {
-    const rafSpy = jest.spyOn(global, 'requestAnimationFrame');
-    const setPosition = jest.fn();
+    const rafSpy = vi.spyOn(global, 'requestAnimationFrame');
+    const setPosition = vi.fn();
     const targetPosition = { x: 100, y: 100 };
 
     renderHook(() => useSmoothAnimation(targetPosition, 1, setPosition));
@@ -84,7 +84,7 @@ describe('useSmoothAnimation', () => {
   });
 
   it('handles null positions correctly', () => {
-    const setPosition = jest.fn();
+    const setPosition = vi.fn();
     const targetPosition = { x: null, y: null };
 
     expect(() => {
@@ -93,8 +93,8 @@ describe('useSmoothAnimation', () => {
   });
 
   it('cancels previous animation when target changes', () => {
-    const cancelRafSpy = jest.spyOn(global, 'cancelAnimationFrame');
-    const setPosition = jest.fn();
+    const cancelRafSpy = vi.spyOn(global, 'cancelAnimationFrame');
+    const setPosition = vi.fn();
     
     const { rerender } = renderHook(
       ({ target }) => useSmoothAnimation(target, 2, setPosition),
@@ -110,11 +110,11 @@ describe('useSmoothAnimation', () => {
   });
 
   it('respects smoothness factor in calculations', () => {
-    const setPosition = jest.fn();
+    const setPosition = vi.fn();
     const targetPosition = { x: 100, y: 100 };
     
     // The hook should use RAF for smooth animations when smoothness > 1
-    const rafSpy = jest.spyOn(global, 'requestAnimationFrame');
+    const rafSpy = vi.spyOn(global, 'requestAnimationFrame');
     
     renderHook(() => useSmoothAnimation(targetPosition, 5, setPosition));
     
@@ -125,10 +125,10 @@ describe('useSmoothAnimation', () => {
 
   it('respects reduced motion preferences', () => {
     // Mock matchMedia to return prefers-reduced-motion
-    const mockMatchMedia = jest.fn(() => ({
+    const mockMatchMedia = vi.fn(() => ({
       matches: true,
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
     }));
     
     Object.defineProperty(window, 'matchMedia', {
@@ -136,9 +136,9 @@ describe('useSmoothAnimation', () => {
       value: mockMatchMedia,
     });
 
-    const setPosition = jest.fn();
+    const setPosition = vi.fn();
     const targetPosition = { x: 100, y: 100 };
-    const rafSpy = jest.spyOn(global, 'requestAnimationFrame');
+    const rafSpy = vi.spyOn(global, 'requestAnimationFrame');
 
     renderHook(() => useSmoothAnimation(targetPosition, 5, setPosition));
 
@@ -156,9 +156,9 @@ describe('useSmoothAnimation', () => {
       value: undefined,
     });
 
-    const setPosition = jest.fn();
+    const setPosition = vi.fn();
     const targetPosition = { x: 100, y: 100 };
-    const rafSpy = jest.spyOn(global, 'requestAnimationFrame');
+    const rafSpy = vi.spyOn(global, 'requestAnimationFrame');
 
     renderHook(() => useSmoothAnimation(targetPosition, 5, setPosition));
 
@@ -171,7 +171,7 @@ describe('useSmoothAnimation', () => {
 
 
   it('stops animating when reaching threshold', () => {
-    const setPosition = jest.fn();
+    const setPosition = vi.fn();
     
     // Mock setPosition to simulate position updates
     setPosition.mockImplementation((updateFn) => {
@@ -188,7 +188,7 @@ describe('useSmoothAnimation', () => {
     renderHook(() => useSmoothAnimation(targetPosition, 10, setPosition));
 
     act(() => {
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
     });
   });
 });

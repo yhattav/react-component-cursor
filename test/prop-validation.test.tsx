@@ -1,6 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { vi, type MockInstance } from 'vitest';
 import { CustomCursor } from '../src';
 
 // Mock console methods to capture validation messages
@@ -8,17 +9,17 @@ const originalError = console.error;
 const originalWarn = console.warn;
 
 describe('Prop Validation', () => {
-  let errorSpy: jest.SpyInstance;
-  let warnSpy: jest.SpyInstance;
+  let errorSpy: MockInstance;
+  let warnSpy: MockInstance;
 
   beforeEach(() => {
     // Ensure we're in development mode for validation
     process.env.NODE_ENV = 'development';
     
-    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {
+    errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {
       // Mock implementation for console.error
     });
-    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {
+    warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
       // Mock implementation for console.warn
     });
   });
@@ -39,7 +40,8 @@ describe('Prop Validation', () => {
     });
 
     it('should error for non-string id', () => {
-      render(<CustomCursor id={123 as any}>Test cursor</CustomCursor>);
+      // @ts-expect-error Testing invalid prop type
+      render(<CustomCursor id={123}>Test cursor</CustomCursor>);
       expect(errorSpy).toHaveBeenCalledWith(
         expect.stringContaining('id\' must be a non-empty string')
       );
@@ -53,7 +55,8 @@ describe('Prop Validation', () => {
 
   describe('smoothness validation', () => {
     it('should error for non-number smoothness', () => {
-      render(<CustomCursor smoothness={'invalid' as any}>Test cursor</CustomCursor>);
+      // @ts-expect-error Testing invalid prop type
+      render(<CustomCursor smoothness={'invalid'}>Test cursor</CustomCursor>);
       expect(errorSpy).toHaveBeenCalledWith(
         expect.stringContaining('smoothness\' must be a number')
       );
@@ -82,7 +85,8 @@ describe('Prop Validation', () => {
 
   describe('throttleMs validation', () => {
     it('should error for non-number throttleMs', () => {
-      render(<CustomCursor throttleMs={'invalid' as any}>Test cursor</CustomCursor>);
+      // @ts-expect-error Testing invalid prop type
+      render(<CustomCursor throttleMs={'invalid'}>Test cursor</CustomCursor>);
       expect(errorSpy).toHaveBeenCalledWith(
         expect.stringContaining('throttleMs\' must be a number')
       );
@@ -111,7 +115,8 @@ describe('Prop Validation', () => {
 
   describe('zIndex validation', () => {
     it('should error for non-number zIndex', () => {
-      render(<CustomCursor zIndex={'invalid' as any}>Test cursor</CustomCursor>);
+      // @ts-expect-error Testing invalid prop type
+      render(<CustomCursor zIndex={'invalid'}>Test cursor</CustomCursor>);
       expect(errorSpy).toHaveBeenCalledWith(
         expect.stringContaining('zIndex\' must be a number')
       );
@@ -133,21 +138,24 @@ describe('Prop Validation', () => {
 
   describe('offset validation', () => {
     it('should error for non-object offset', () => {
-      render(<CustomCursor offset={'invalid' as any}>Test cursor</CustomCursor>);
+      // @ts-expect-error Testing invalid prop type
+      render(<CustomCursor offset={'invalid'}>Test cursor</CustomCursor>);
       expect(errorSpy).toHaveBeenCalledWith(
         expect.stringContaining('offset\' must be an object with x and y properties')
       );
     });
 
     it('should error for invalid x in offset', () => {
-      render(<CustomCursor offset={{ x: 'invalid' as any, y: 10 }}>Test cursor</CustomCursor>);
+      // @ts-expect-error Testing invalid prop type
+      render(<CustomCursor offset={{ x: 'invalid' , y: 10 }}>Test cursor</CustomCursor>);
       expect(errorSpy).toHaveBeenCalledWith(
         expect.stringContaining('offset.x\' must be a number')
       );
     });
 
     it('should error for invalid y in offset', () => {
-      render(<CustomCursor offset={{ x: 10, y: 'invalid' as any }}>Test cursor</CustomCursor>);
+      // @ts-expect-error Testing invalid prop type
+      render(<CustomCursor offset={{ x: 10, y: 'invalid'  }}>Test cursor</CustomCursor>);
       expect(errorSpy).toHaveBeenCalledWith(
         expect.stringContaining('offset.y\' must be a number')
       );
@@ -161,7 +169,8 @@ describe('Prop Validation', () => {
 
   describe('containerRef validation', () => {
     it('should error for non-ref containerRef', () => {
-      render(<CustomCursor containerRef={'invalid' as any}>Test cursor</CustomCursor>);
+      // @ts-expect-error Testing invalid prop type
+      render(<CustomCursor containerRef={'invalid'}>Test cursor</CustomCursor>);
       expect(errorSpy).toHaveBeenCalledWith(
         expect.stringContaining('containerRef\' must be a React ref object')
       );
@@ -176,7 +185,8 @@ describe('Prop Validation', () => {
 
   describe('showDevIndicator validation', () => {
     it('should error for non-boolean showDevIndicator', () => {
-      render(<CustomCursor showDevIndicator={'invalid' as any}>Test cursor</CustomCursor>);
+      // @ts-expect-error Testing invalid prop type
+      render(<CustomCursor showDevIndicator={'invalid'}>Test cursor</CustomCursor>);
       expect(errorSpy).toHaveBeenCalledWith(
         expect.stringContaining('showDevIndicator\' must be a boolean')
       );
@@ -193,22 +203,24 @@ describe('Prop Validation', () => {
 
   describe('callback validation', () => {
     it('should error for non-function onMove', () => {
-      render(<CustomCursor onMove={'invalid' as any}>Test cursor</CustomCursor>);
+      // @ts-expect-error Testing invalid prop type
+      render(<CustomCursor onMove={'invalid'}>Test cursor</CustomCursor>);
       expect(errorSpy).toHaveBeenCalledWith(
         expect.stringContaining('onMove\' must be a function')
       );
     });
 
     it('should error for non-function onVisibilityChange', () => {
-      render(<CustomCursor onVisibilityChange={'invalid' as any}>Test cursor</CustomCursor>);
+      // @ts-expect-error Testing invalid prop type
+      render(<CustomCursor onVisibilityChange={'invalid'}>Test cursor</CustomCursor>);
       expect(errorSpy).toHaveBeenCalledWith(
         expect.stringContaining('onVisibilityChange\' must be a function')
       );
     });
 
     it('should not error for valid callbacks', () => {
-      const onMove = jest.fn();
-      const onVisibilityChange = jest.fn();
+      const onMove = vi.fn();
+      const onVisibilityChange = vi.fn();
       render(
         <CustomCursor onMove={onMove} onVisibilityChange={onVisibilityChange}>
           Test cursor

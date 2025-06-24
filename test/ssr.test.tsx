@@ -1,27 +1,28 @@
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
 
 import React from 'react';
 import { renderToString } from 'react-dom/server';
+import { vi, type Mocked } from 'vitest';
 import { CustomCursor } from '../src';
 import * as ssrUtils from '../src/utils/ssr';
 
 // Mock the SSR utilities to test both scenarios
-jest.mock('../src/utils/ssr', () => ({
-  isSSR: jest.fn(),
-  isBrowser: jest.fn(),
-  safeDocument: jest.fn(),
-  safeWindow: jest.fn(),
-  browserOnly: jest.fn(),
-  isMobileDevice: jest.fn(),
+vi.mock('../src/utils/ssr', () => ({
+  isSSR: vi.fn(),
+  isBrowser: vi.fn(),
+  safeDocument: vi.fn(),
+  safeWindow: vi.fn(),
+  browserOnly: vi.fn(),
+  isMobileDevice: vi.fn(),
 }));
 
-const mockSSRUtils = ssrUtils as jest.Mocked<typeof ssrUtils>;
+const mockSSRUtils = ssrUtils as Mocked<typeof ssrUtils>;
 
 describe('SSR Compatibility', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Mock mobile detection to return false in SSR (no window/navigator)
     mockSSRUtils.isMobileDevice.mockReturnValue(false);
   });
@@ -45,7 +46,7 @@ describe('SSR Compatibility', () => {
     });
 
     it('should execute browserOnly functions safely when mocked for SSR', () => {
-      const testFn = jest.fn(() => 'browser-result');
+      const testFn = vi.fn(() => 'browser-result');
       const fallback = 'fallback-result';
       
       mockSSRUtils.browserOnly.mockImplementation((_fn, fallbackValue) => {
@@ -130,7 +131,7 @@ describe('SSR Compatibility', () => {
       mockSSRUtils.isSSR.mockReturnValue(true);
       
       // Simulate Next.js dynamic import pattern
-      const DynamicCursor = (props: any) => {
+      const DynamicCursor = (props: React.ComponentProps<typeof CustomCursor>) => {
         if (typeof window === 'undefined') {
           return null; // SSR
         }
@@ -150,7 +151,7 @@ describe('SSR Compatibility', () => {
       mockSSRUtils.isSSR.mockReturnValue(true);
       
       // Simulate Gatsby conditional rendering pattern
-      const GatsbyCursor = (props: any) => {
+      const GatsbyCursor = (props: React.ComponentProps<typeof CustomCursor>) => {
         const [mounted, setMounted] = React.useState(false);
         
         React.useEffect(() => {
@@ -177,8 +178,8 @@ describe('SSR Compatibility', () => {
       mockSSRUtils.isSSR.mockReturnValue(true);
       mockSSRUtils.safeDocument.mockReturnValue(null);
       
-      const onMove = jest.fn();
-      const onVisibilityChange = jest.fn();
+      const onMove = vi.fn();
+      const onVisibilityChange = vi.fn();
       
       renderToString(
         <CustomCursor
@@ -238,7 +239,7 @@ describe('Browser Environment Tests', () => {
     mockSSRUtils.isSSR.mockReturnValue(false);
     mockSSRUtils.isBrowser.mockReturnValue(true);
     mockSSRUtils.safeDocument.mockReturnValue(document);
-    mockSSRUtils.safeWindow.mockReturnValue(window as any);
+    mockSSRUtils.safeWindow.mockReturnValue(window);
     mockSSRUtils.isMobileDevice.mockReturnValue(false); // Desktop browser
   });
 
@@ -255,7 +256,7 @@ describe('Browser Environment Tests', () => {
   it('should execute browserOnly functions', () => {
     mockSSRUtils.browserOnly.mockImplementation((fn) => fn());
     
-    const testFn = jest.fn(() => 'browser-result');
+    const testFn = vi.fn(() => 'browser-result');
     mockSSRUtils.browserOnly(testFn);
     
     expect(testFn).toHaveBeenCalled();

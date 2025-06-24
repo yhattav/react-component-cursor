@@ -1,11 +1,11 @@
 import { MouseTracker } from '../../src/utils/MouseTracker';
 import { fireEvent } from '@testing-library/react';
-
+import { vi } from 'vitest';
 // Clean up any existing instances before each test
 beforeEach(() => {
   // Clean up all spies to prevent contamination
-  jest.clearAllMocks();
-  jest.restoreAllMocks();
+  vi.clearAllMocks();
+  vi.restoreAllMocks();
   
   // Reset MouseTracker instance
   MouseTracker.resetInstance();
@@ -16,8 +16,8 @@ afterEach(() => {
   MouseTracker.resetInstance();
   
   // Clean up all spies
-  jest.clearAllMocks();
-  jest.restoreAllMocks();
+  vi.clearAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe('MouseTracker', () => {
@@ -41,7 +41,7 @@ describe('MouseTracker', () => {
   describe('Subscription Management', () => {
     it('should accept subscriptions and return unsubscribe function', () => {
       const tracker = MouseTracker.getInstance();
-      const callback = jest.fn();
+      const callback = vi.fn();
       
       const unsubscribe = tracker.subscribe({
         id: 'test-cursor',
@@ -54,7 +54,7 @@ describe('MouseTracker', () => {
 
     it('should remove subscription when unsubscribe is called', () => {
       const tracker = MouseTracker.getInstance();
-      const callback = jest.fn();
+      const callback = vi.fn();
       
       const unsubscribe = tracker.subscribe({
         id: 'test-cursor',
@@ -70,9 +70,9 @@ describe('MouseTracker', () => {
 
     it('should handle multiple subscriptions', () => {
       const tracker = MouseTracker.getInstance();
-      const callback1 = jest.fn();
-      const callback2 = jest.fn();
-      const callback3 = jest.fn();
+      const callback1 = vi.fn();
+      const callback2 = vi.fn();
+      const callback3 = vi.fn();
       
       tracker.subscribe({ id: 'cursor-1', callback: callback1 });
       tracker.subscribe({ id: 'cursor-2', callback: callback2 });
@@ -84,9 +84,9 @@ describe('MouseTracker', () => {
 
   describe('Event Handling', () => {
     it('should set up event listener when first subscriber is added', () => {
-      const addEventListenerSpy = jest.spyOn(document, 'addEventListener');
+      const addEventListenerSpy = vi.spyOn(document, 'addEventListener');
       const tracker = MouseTracker.getInstance();
-      const callback = jest.fn();
+      const callback = vi.fn();
       
       tracker.subscribe({ id: 'cursor-1', callback });
       
@@ -97,7 +97,7 @@ describe('MouseTracker', () => {
 
     it('should accept subscription parameters correctly', () => {
       const tracker = MouseTracker.getInstance();
-      const callback = jest.fn();
+      const callback = vi.fn();
       const container = document.createElement('div');
       const containerRef = { current: container };
       
@@ -118,7 +118,7 @@ describe('MouseTracker', () => {
 
     it('should handle mouse events without errors', () => {
       const tracker = MouseTracker.getInstance();
-      const callback = jest.fn();
+      const callback = vi.fn();
       
       tracker.subscribe({ id: 'test-cursor', callback });
       
@@ -133,11 +133,11 @@ describe('MouseTracker', () => {
   describe('Container Bounds', () => {
     it('should accept container refs without errors', () => {
       const tracker = MouseTracker.getInstance();
-      const callback = jest.fn();
+      const callback = vi.fn();
       const container = document.createElement('div');
       
       // Mock getBoundingClientRect
-      container.getBoundingClientRect = jest.fn(() => ({
+      container.getBoundingClientRect = vi.fn(() => ({
         left: 50,
         top: 50,
         right: 150,
@@ -166,7 +166,7 @@ describe('MouseTracker', () => {
   describe('Throttling Setup', () => {
     it('should accept throttling configuration', () => {
       const tracker = MouseTracker.getInstance();
-      const callback = jest.fn();
+      const callback = vi.fn();
       
       expect(() => {
         tracker.subscribe({
@@ -182,13 +182,13 @@ describe('MouseTracker', () => {
 
   describe('Performance Optimization', () => {
     it('should only have one event listener regardless of subscriber count', () => {
-      const addEventListenerSpy = jest.spyOn(document, 'addEventListener');
+      const addEventListenerSpy = vi.spyOn(document, 'addEventListener');
       const tracker = MouseTracker.getInstance();
       
       // Add multiple subscribers
-      tracker.subscribe({ id: 'cursor-1', callback: jest.fn() });
-      tracker.subscribe({ id: 'cursor-2', callback: jest.fn() });
-      tracker.subscribe({ id: 'cursor-3', callback: jest.fn() });
+      tracker.subscribe({ id: 'cursor-1', callback: vi.fn() });
+      tracker.subscribe({ id: 'cursor-2', callback: vi.fn() });
+      tracker.subscribe({ id: 'cursor-3', callback: vi.fn() });
       
       // Should only have one mousemove listener added by this test
       expect(addEventListenerSpy).toHaveBeenCalledWith('mousemove', expect.any(Function));
@@ -203,11 +203,11 @@ describe('MouseTracker', () => {
     });
 
     it('should remove event listener when last subscriber unsubscribes', () => {
-      const removeEventListenerSpy = jest.spyOn(document, 'removeEventListener');
+      const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
       const tracker = MouseTracker.getInstance();
       
-      const unsubscribe1 = tracker.subscribe({ id: 'cursor-1', callback: jest.fn() });
-      const unsubscribe2 = tracker.subscribe({ id: 'cursor-2', callback: jest.fn() });
+      const unsubscribe1 = tracker.subscribe({ id: 'cursor-1', callback: vi.fn() });
+      const unsubscribe2 = tracker.subscribe({ id: 'cursor-2', callback: vi.fn() });
       
       // Remove first subscriber
       unsubscribe1();
@@ -234,11 +234,11 @@ describe('MouseTracker', () => {
   describe('Error Handling', () => {
     it('should handle container getBoundingClientRect errors gracefully', () => {
       const tracker = MouseTracker.getInstance();
-      const callback = jest.fn();
+      const callback = vi.fn();
       const container = document.createElement('div');
       
       // Mock getBoundingClientRect to throw error
-      container.getBoundingClientRect = jest.fn(() => {
+      container.getBoundingClientRect = vi.fn(() => {
         throw new Error('getBoundingClientRect failed');
       });
       
@@ -257,7 +257,7 @@ describe('MouseTracker', () => {
 
     it('should handle subscription and unsubscription without errors', () => {
       const tracker = MouseTracker.getInstance();
-      const callback = jest.fn();
+      const callback = vi.fn();
       
       expect(() => {
         const unsubscribe = tracker.subscribe({ id: 'test-cursor', callback });
@@ -271,10 +271,10 @@ describe('MouseTracker', () => {
     it('should return no-op unsubscribe function during SSR', () => {
       // Mock SSR environment
       const originalWindow = global.window;
-      delete (global as any).window;
+      Reflect.deleteProperty(global, 'window');
       
       const tracker = MouseTracker.getInstance();
-      const callback = jest.fn();
+      const callback = vi.fn();
       
       const unsubscribe = tracker.subscribe({
         id: 'ssr-cursor',

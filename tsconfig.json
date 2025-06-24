@@ -16,8 +16,8 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["jest", "@testing-library/jest-dom", "node"]
+    "types": ["vitest/globals", "@testing-library/jest-dom", "node"]
   },
-  "include": ["src"],
+  "include": ["src", "test"],
   "exclude": ["node_modules", "dist"]
 }

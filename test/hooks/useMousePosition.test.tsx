@@ -1,10 +1,10 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
-import { useMousePosition } from '../../src/hooks/useMousePosition';
+import { vi } from 'vitest';import { useMousePosition } from '../../src/hooks/useMousePosition';
 
 describe('useMousePosition', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Hook Interface', () => {
@@ -42,7 +42,7 @@ describe('useMousePosition', () => {
         writable: true 
       });
       
-      const addEventListenerSpy = jest.spyOn(mockElement, 'addEventListener');
+      const addEventListenerSpy = vi.spyOn(mockElement, 'addEventListener');
       
       renderHook(() => useMousePosition('test-hook-3', containerRef, 0, 0, 0));
       
@@ -66,7 +66,7 @@ describe('useMousePosition', () => {
         writable: true 
       });
       
-      const removeEventListenerSpy = jest.spyOn(mockElement, 'removeEventListener');
+      const removeEventListenerSpy = vi.spyOn(mockElement, 'removeEventListener');
       
       const { unmount } = renderHook(() => 
         useMousePosition('test-hook-4', containerRef, 0, 0, 0)

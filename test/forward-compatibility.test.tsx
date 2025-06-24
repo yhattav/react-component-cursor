@@ -1,6 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 import {
   CustomCursor,
   type CursorVisibilityReason,
@@ -10,7 +11,7 @@ import {
 
 describe('Forward Compatibility', () => {
   it('supports extended visibility reasons', () => {
-    const handleVisibilityChange = jest.fn<void, [boolean, CursorVisibilityReason]>();
+    const handleVisibilityChange = vi.fn<[boolean, CursorVisibilityReason], void>();
     
     render(
       <CustomCursor onVisibilityChange={handleVisibilityChange}>
@@ -39,8 +40,8 @@ describe('Forward Compatibility', () => {
 
   it('maintains backward compatibility', () => {
     // Test that all existing functionality still works unchanged
-    const onMove = jest.fn();
-    const onVisibilityChange = jest.fn();
+    const onMove = vi.fn();
+    const onVisibilityChange = vi.fn();
 
     expect(() => {
       render(
