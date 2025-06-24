@@ -190,7 +190,7 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
     const isMobile = React.useMemo(() => isMobileDevice(), []);
 
     // Always call hooks, even if we'll return null (Rules of Hooks)
-    const mousePositionHook = useMousePosition(containerRef, offsetValues.x, offsetValues.y, throttleMs);
+    const mousePositionHook = useMousePosition(id, containerRef, offsetValues.x, offsetValues.y, throttleMs);
     const { position, setPosition, targetPosition, isVisible } = mousePositionHook;
     useSmoothAnimation(targetPosition, smoothness, setPosition);
 

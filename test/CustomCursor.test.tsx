@@ -63,7 +63,7 @@ describe('CustomCursor', () => {
     jest.clearAllMocks();
     cleanupDOM();
     
-    // Reset mock to default values
+    // Reset mocks to default values
     mockUseMousePosition.mockReturnValue({
       position: { x: 100, y: 100 },
       setPosition: jest.fn(),
@@ -175,6 +175,7 @@ describe('CustomCursor', () => {
     render(
       <div ref={containerRef}>
         <CustomCursor 
+          id="test-cursor"
           containerRef={containerRef} 
           offset={{ x: 5, y: 10 }}
           throttleMs={16}
@@ -184,8 +185,9 @@ describe('CustomCursor', () => {
       </div>
     );
     
-    // Verify useMousePosition was called with at least the expected parameters
+    // Verify useMousePosition was called with the expected parameters
     expect(mockUseMousePosition).toHaveBeenCalledWith(
+      'test-cursor',
       containerRef,
       5,
       10,

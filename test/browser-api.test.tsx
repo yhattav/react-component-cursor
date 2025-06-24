@@ -51,7 +51,7 @@ describe('Browser API Integration', () => {
 
   describe('Mouse Position Hook', () => {
     it('should initialize with null position', () => {
-      const { result } = renderHook(() => useMousePosition(undefined, 0, 0));
+      const { result } = renderHook(() => useMousePosition('test-browser-1', undefined, 0, 0));
       
       expect(result.current.position).toEqual({ x: null, y: null });
       expect(typeof result.current.isVisible).toBe('boolean');
@@ -61,13 +61,13 @@ describe('Browser API Integration', () => {
       const container = document.createElement('div');
       
       expect(() => {
-        renderHook(() => useMousePosition({ current: container }, 0, 0));
+        renderHook(() => useMousePosition('test-browser-2', { current: container }, 0, 0));
       }).not.toThrow();
     });
 
     it('should handle null refs', () => {
       expect(() => {
-        renderHook(() => useMousePosition({ current: null }, 0, 0));
+        renderHook(() => useMousePosition('test-browser-3', { current: null }, 0, 0));
       }).not.toThrow();
     });
   });

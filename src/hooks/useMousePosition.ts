@@ -1,32 +1,9 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { NullablePosition } from '../types.js';
-import { isSSR } from '../utils/ssr';
-
-// Throttle utility function
-const throttle = <T extends (...args: never[]) => void>(
-  func: T,
-  delay: number
-): T => {
-  let timeoutId: NodeJS.Timeout | null = null;
-  let lastExecTime = 0;
-  
-  return ((...args: Parameters<T>) => {
-    const currentTime = Date.now();
-    
-    if (currentTime - lastExecTime > delay) {
-      func(...args);
-      lastExecTime = currentTime;
-    } else {
-      if (timeoutId) clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        func(...args);
-        lastExecTime = Date.now();
-      }, delay - (currentTime - lastExecTime));
-    }
-  }) as T;
-};
+import { MouseTracker } from '../utils/MouseTracker';
 
 export function useMousePosition(
+  id: string,
   containerRef: React.RefObject<HTMLElement> | undefined,
   offsetX: number,
   offsetY: number,
@@ -42,119 +19,62 @@ export function useMousePosition(
     x: null,
     y: null,
   });
-  // Cursor is only visible when it actually has a position and should be shown
   const [isVisible, setIsVisible] = useState(false);
 
-  const positionRef = useRef(position);
-  positionRef.current = position;
-
-  // Memoize container element to avoid re-creating listeners
-  const containerElement = React.useMemo(() => containerRef?.current, [containerRef?.current]);
-
-  const updateTargetPosition = useCallback(
-    (e: MouseEvent) => {
-      if (containerElement) {
-        const rect = containerElement.getBoundingClientRect();
-        const isInside =
-          e.clientX >= rect.left &&
-          e.clientX <= rect.right &&
-          e.clientY >= rect.top &&
-          e.clientY <= rect.bottom;
-
-        if (isInside) {
-          // Set visible immediately when we get first valid position (only if not already visible)
-          if (!isVisible) setIsVisible(true);
-          const newPosition = {
-            x: e.clientX + offsetX,
-            y: e.clientY + offsetY,
-          };
-          setTargetPosition(prev => {
-            // Only update if position actually changed
-            if (prev.x !== newPosition.x || prev.y !== newPosition.y) {
-              return newPosition;
-            }
-            return prev;
-          });
-        }
-      } else {
-        // Global cursor - set visible immediately when we get first position (only if not already visible)
-        if (!isVisible) setIsVisible(true);
-        const newPosition = {
-          x: e.clientX + offsetX,
-          y: e.clientY + offsetY,
-        };
-        setTargetPosition(prev => {
-          // Only update if position actually changed
-          if (prev.x !== newPosition.x || prev.y !== newPosition.y) {
-            return newPosition;
-          }
-          return prev;
-        });
+  // Handle position updates from the mouse tracker
+  const handlePositionUpdate = useCallback((newPosition: { x: number; y: number }) => {
+    // Set visible immediately when we get first position (only if not already visible)
+    if (!isVisible) setIsVisible(true);
+    
+    setTargetPosition(prev => {
+      // Only update if position actually changed
+      if (prev.x !== newPosition.x || prev.y !== newPosition.y) {
+        return newPosition;
       }
-    },
-    [containerElement, offsetX, offsetY]
-  );
+      return prev;
+    });
+  }, [isVisible]);
 
-  // Create throttled version if needed - memoize to avoid recreation
-  const throttledUpdateTargetPosition = React.useMemo(() => {
-    return throttleMs > 0 ? throttle(updateTargetPosition, throttleMs) : updateTargetPosition;
-  }, [updateTargetPosition, throttleMs]);
-
-  // Memoize mouse event handlers to prevent recreation
-  const handleMouseLeave = React.useCallback(() => {
-    if (containerElement) {
-      setIsVisible(false);
-    }
-  }, [containerElement]);
-
-  const handleMouseEnter = React.useCallback(() => {
-    if (containerElement) {
-      // Don't set visible yet - wait for first mouse move to get position
-      // setIsVisible(true) will happen in updateTargetPosition when position is set
-    }
-  }, [containerElement]);
-
+  // Handle container-specific mouse leave/enter
   useEffect(() => {
-    // Skip event listener setup during SSR
-    if (isSSR()) return;
+    if (!containerRef?.current) return;
+
+    const container = containerRef.current;
     
-    const element = containerElement || document;
-    
-    // Always listen to mousemove
-    element.addEventListener(
-      'mousemove',
-      throttledUpdateTargetPosition as EventListener
-    );
-
-    // Add container-specific listeners if container exists
-    if (containerElement) {
-      containerElement.addEventListener('mouseleave', handleMouseLeave);
-      containerElement.addEventListener('mouseenter', handleMouseEnter as EventListener);
-    }
-
-    // Initial hover detection is handled naturally by mousemove events
-    // No special initialization needed - cursor becomes visible on first movement
-
-    // Unified cleanup function
-    return () => {
-      element.removeEventListener(
-        'mousemove',
-        throttledUpdateTargetPosition as EventListener
-      );
-      if (containerElement) {
-        containerElement.removeEventListener(
-          'mouseleave',
-          handleMouseLeave
-        );
-        containerElement.removeEventListener(
-          'mouseenter',
-          handleMouseEnter as EventListener
-        );
-      }
+    const handleMouseLeave = () => {
+      setIsVisible(false);
     };
-  }, [containerElement, throttledUpdateTargetPosition, handleMouseLeave, handleMouseEnter]);
 
-  // Initialize position when we get the first valid targetPosition - optimize to avoid unnecessary updates
+    const handleMouseEnter = () => {
+      // Don't set visible yet - wait for position update from MouseTracker
+    };
+
+    container.addEventListener('mouseleave', handleMouseLeave);
+    container.addEventListener('mouseenter', handleMouseEnter);
+
+    return () => {
+      container.removeEventListener('mouseleave', handleMouseLeave);
+      container.removeEventListener('mouseenter', handleMouseEnter);
+    };
+  }, [containerRef]);
+
+  // Subscribe to mouse tracker
+  useEffect(() => {
+    const mouseTracker = MouseTracker.getInstance();
+    
+    const unsubscribe = mouseTracker.subscribe({
+      id,
+      callback: handlePositionUpdate,
+      containerRef,
+      throttleMs,
+      offsetX,
+      offsetY,
+    });
+
+    return unsubscribe;
+  }, [id, containerRef, offsetX, offsetY, throttleMs, handlePositionUpdate]);
+
+  // Initialize position when we get the first valid targetPosition
   useEffect(() => {
     if (position.x === null && position.y === null && targetPosition.x !== null && targetPosition.y !== null) {
       setPosition(targetPosition);
