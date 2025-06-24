@@ -21,10 +21,10 @@ export function validateProps(props: CustomCursorProps): void {
     onVisibilityChange,
   } = props;
 
-  // Validate id
-  if (id !== undefined && (typeof id !== 'string' || id.trim() === '')) {
+  // Validate id (empty strings are allowed since we auto-generate UUIDs)
+  if (id !== undefined && typeof id !== 'string') {
     console.error(
-      `CustomCursor: 'id' must be a non-empty string. Received: ${typeof id === 'string' ? `"${id}"` : id}`
+      `CustomCursor: 'id' must be a string. Received: ${id} (${typeof id}). Note: empty strings are allowed and will auto-generate a UUID.`
     );
   }
 

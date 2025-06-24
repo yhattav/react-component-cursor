@@ -22,7 +22,7 @@ describe('Development Build Features', () => {
     
     // These strings SHOULD appear in development builds
     const validationStrings = [
-      'must be a non-empty string',
+      'must be a string',
       'must be a number', 
       'must be non-negative',
       'validateProps',

@@ -61,7 +61,7 @@ The main component for creating custom cursors.
 
 | Prop                  | Type                             | Default | Description                                              | Performance Impact |
 | --------------------- | -------------------------------- | ------- | -------------------------------------------------------- | -------------------|
-| `id`                  | `string`                         | `'unnamed-cursor'` | Unique identifier for the cursor instance. Used for DOM element IDs and cleanup. | None |
+| `id`                  | `string`                         | auto-generated UUID | Unique identifier for the cursor instance. Auto-generated if not provided. Used for DOM element IDs and cleanup. | None |
 | `enabled`             | `boolean`                        | `true`  | Whether the cursor is enabled and visible. When `false`, cursor is hidden but still tracks mouse. | None |
 | `children`            | `ReactNode`                      | -       | The React component/element to use as cursor content. Can be any valid React node. | Varies by content complexity |
 | `className`           | `string`                         | `''`    | Additional CSS classes applied to the cursor container element. | None |

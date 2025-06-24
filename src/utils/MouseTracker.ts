@@ -4,10 +4,7 @@ import { isSSR } from './ssr';
 export interface MouseSubscription {
   id: string;
   callback: (position: { x: number; y: number }) => void;
-  containerRef?: React.RefObject<HTMLElement>;
   throttleMs?: number;
-  offsetX?: number;
-  offsetY?: number;
 }
 
 interface SubscriberState {
@@ -19,7 +16,7 @@ interface SubscriberState {
 class MouseTracker {
   private static instance: MouseTracker | null = null;
   private subscribers = new Map<string, SubscriberState>();
-  private currentPosition: { x: number; y: number } = { x: 0, y: 0 };
+  private currentPosition: { x: number; y: number } | null = null;
   private isListening = false;
   private rafId: number | null = null;
 
@@ -94,7 +91,9 @@ class MouseTracker {
   }
 
   private handleMouseMove(event: MouseEvent): void {
-    this.currentPosition = { x: event.clientX, y: event.clientY };
+    const newPosition = { x: event.clientX, y: event.clientY };
+    
+    this.currentPosition = newPosition;
     
     // Use RAF to batch notifications for better performance
     if (this.rafId === null) {
@@ -106,25 +105,14 @@ class MouseTracker {
   }
 
   private notifySubscribers(): void {
+    // Don't notify if we don't have a position yet
+    if (!this.currentPosition) return;
+    
     const currentTime = Date.now();
     
     this.subscribers.forEach((subscriberState) => {
       const { subscription, lastCallTime, timeoutId } = subscriberState;
-      const { containerRef, throttleMs = 0, offsetX = 0, offsetY = 0 } = subscription;
-
-      // Apply container bounds check if specified
-      if (containerRef?.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        const isInside = 
-          this.currentPosition.x >= rect.left &&
-          this.currentPosition.x <= rect.right &&
-          this.currentPosition.y >= rect.top &&
-          this.currentPosition.y <= rect.bottom;
-          
-        if (!isInside) {
-          return; // Skip this subscriber if mouse is outside container
-        }
-      }
+      const { throttleMs = 0 } = subscription;
 
       // Apply throttling if specified
       if (throttleMs > 0) {
@@ -132,7 +120,7 @@ class MouseTracker {
         
         if (timeSinceLastCall >= throttleMs) {
           // Call immediately
-          this.callSubscriber(subscriberState, offsetX, offsetY);
+          this.callSubscriber(subscriberState);
         } else {
           // Schedule delayed call
           if (timeoutId) {
@@ -140,30 +128,27 @@ class MouseTracker {
           }
           
           subscriberState.timeoutId = setTimeout(() => {
-            this.callSubscriber(subscriberState, offsetX, offsetY);
+            this.callSubscriber(subscriberState);
             subscriberState.timeoutId = null;
           }, throttleMs - timeSinceLastCall);
         }
       } else {
         // No throttling, call immediately
-        this.callSubscriber(subscriberState, offsetX, offsetY);
+        this.callSubscriber(subscriberState);
       }
     });
   }
 
-  private callSubscriber(subscriberState: SubscriberState, offsetX: number, offsetY: number): void {
-    const position = {
-      x: this.currentPosition.x + offsetX,
-      y: this.currentPosition.y + offsetY,
-    };
+  private callSubscriber(subscriberState: SubscriberState): void {
+    if (!this.currentPosition) return;
     
-    subscriberState.subscription.callback(position);
+    subscriberState.subscription.callback(this.currentPosition);
     subscriberState.lastCallTime = Date.now();
   }
 
   // Public method to get current position (useful for initial positioning)
-  getCurrentPosition(): { x: number; y: number } {
-    return { ...this.currentPosition };
+  getCurrentPosition(): { x: number; y: number } | null {
+    return this.currentPosition ? { ...this.currentPosition } : null;
   }
 
   // For testing/debugging

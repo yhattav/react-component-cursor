@@ -1,7 +1,6 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { NullablePosition } from '../types.js';
 import { MouseTracker } from '../utils/MouseTracker';
-
 export function useMousePosition(
   id: string,
   containerRef: React.RefObject<HTMLElement> | undefined,
@@ -15,81 +14,79 @@ export function useMousePosition(
   isVisible: boolean;
 } {
   const [position, setPosition] = useState<NullablePosition>({ x: null, y: null });
-  const [targetPosition, setTargetPosition] = useState<NullablePosition>({
-    x: null,
-    y: null,
-  });
-  const [isVisible, setIsVisible] = useState(false);
+  const [targetPosition, setTargetPosition] = useState<NullablePosition>({ x: null, y: null });
+
+  // Simple rule: visible if we have a valid position
+  const isVisible = targetPosition.x !== null && targetPosition.y !== null;
   
-  // Use ref to avoid recreating callback when isVisible changes
-  const isVisibleRef = useRef(false);
 
-  // Keep ref in sync with state
-  useEffect(() => {
-    isVisibleRef.current = isVisible;
-  }, [isVisible]);
 
-  // Handle position updates from the mouse tracker
-  const stablePositionUpdateHandler = useCallback((newPosition: { x: number; y: number }) => {
-    // Set visible immediately when we get first position (only if not already visible)
-    if (!isVisibleRef.current) {
-      setIsVisible(true);
-    }
-    
-    setTargetPosition(prev => {
-      // Only update if position actually changed
-      if (prev.x !== newPosition.x || prev.y !== newPosition.y) {
-        return newPosition;
+  // Handle position updates from MouseTracker
+  const handlePositionUpdate = useCallback((globalPosition: { x: number; y: number }) => {
+    // Apply offsets
+    const adjustedPosition = {
+      x: globalPosition.x + offsetX,
+      y: globalPosition.y + offsetY,
+    };
+
+    // Check container bounds if specified
+    if (containerRef?.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      
+      const isInside = 
+        globalPosition.x >= rect.left &&
+        globalPosition.x <= rect.right &&
+        globalPosition.y >= rect.top &&
+        globalPosition.y <= rect.bottom;
+        
+      if (isInside) {
+        setTargetPosition(adjustedPosition);
+      } else {
+        setTargetPosition({ x: null, y: null });
       }
-      return prev;
-    });
-  }, []);
+    } else {
+      setTargetPosition(adjustedPosition);
+    }
+  }, [id, containerRef, offsetX, offsetY]);
 
-  // Handle container-specific mouse leave/enter
+  // Handle mouse leave - hide cursor
   useEffect(() => {
     if (!containerRef?.current) return;
 
     const container = containerRef.current;
     
     const handleMouseLeave = () => {
-      setIsVisible(false);
-    };
-
-    const handleMouseEnter = () => {
-      // Don't set visible yet - wait for position update from MouseTracker
+      setTargetPosition({ x: null, y: null });
     };
 
     container.addEventListener('mouseleave', handleMouseLeave);
-    container.addEventListener('mouseenter', handleMouseEnter);
 
     return () => {
       container.removeEventListener('mouseleave', handleMouseLeave);
-      container.removeEventListener('mouseenter', handleMouseEnter);
     };
   }, [containerRef]);
 
-  // Subscribe to mouse tracker
+  // Subscribe to MouseTracker
   useEffect(() => {
     const mouseTracker = MouseTracker.getInstance();
     
     const unsubscribe = mouseTracker.subscribe({
       id,
-      callback: stablePositionUpdateHandler,
-      containerRef,
+      callback: handlePositionUpdate,
       throttleMs,
-      offsetX,
-      offsetY,
     });
 
-    return unsubscribe;
-  }, [id, containerRef, offsetX, offsetY, throttleMs, stablePositionUpdateHandler]);
+    return () => {
+      unsubscribe();
+    };
+  }, [id, throttleMs, handlePositionUpdate]);
 
-  // Initialize position when we get the first valid targetPosition
+  // Sync position with targetPosition
   useEffect(() => {
-    if (position.x === null && position.y === null && targetPosition.x !== null && targetPosition.y !== null) {
+    if (targetPosition.x !== null && targetPosition.y !== null) {
       setPosition(targetPosition);
     }
-  }, [targetPosition, position.x, position.y]);
+  }, [targetPosition]);
 
   return { position, setPosition, targetPosition, isVisible };
 }
