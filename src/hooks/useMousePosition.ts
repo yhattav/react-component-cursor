@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { NullablePosition } from '../types.js';
-import { MouseTracker } from '../utils/MouseTracker';
+import { CursorCoordinator } from '../utils/CursorCoordinator';
 export function useMousePosition(
   id: string,
   containerRef: React.RefObject<HTMLElement> | undefined,
@@ -21,8 +21,8 @@ export function useMousePosition(
   
 
 
-  // Handle position updates from MouseTracker
-  const handlePositionUpdate = useCallback((globalPosition: { x: number; y: number }) => {
+  // Core function to check position against container bounds and update target
+  const updateTargetWithBoundsCheck = useCallback((globalPosition: { x: number; y: number }) => {
     // Apply offsets
     const adjustedPosition = {
       x: globalPosition.x + offsetX,
@@ -47,7 +47,12 @@ export function useMousePosition(
     } else {
       setTargetPosition(adjustedPosition);
     }
-  }, [id, containerRef, offsetX, offsetY]);
+  }, [containerRef, offsetX, offsetY]);
+
+  // Handle new mouse position from CursorCoordinator
+  const handleMousePositionUpdate = useCallback((globalPosition: { x: number; y: number }) => {
+    updateTargetWithBoundsCheck(globalPosition);
+  }, [updateTargetWithBoundsCheck]);
 
   // Handle mouse leave - hide cursor
   useEffect(() => {
@@ -66,20 +71,33 @@ export function useMousePosition(
     };
   }, [containerRef]);
 
-  // Subscribe to MouseTracker
+  // Handle layout changes (scroll/resize) - re-check current position against new bounds
+  const handleLayoutChange = useCallback(() => {
+    if (targetPosition.x !== null && targetPosition.y !== null) {
+      // Convert back from adjusted position to global position for bounds checking
+      const globalPosition = {
+        x: targetPosition.x - offsetX,
+        y: targetPosition.y - offsetY,
+      };
+      updateTargetWithBoundsCheck(globalPosition);
+    }
+  }, [targetPosition, offsetX, offsetY, updateTargetWithBoundsCheck]);
+
+  // Subscribe to CursorCoordinator
   useEffect(() => {
-    const mouseTracker = MouseTracker.getInstance();
+    const cursorCoordinator = CursorCoordinator.getInstance();
     
-    const unsubscribe = mouseTracker.subscribe({
+    const unsubscribe = cursorCoordinator.subscribe({
       id,
-      callback: handlePositionUpdate,
+      onPositionUpdate: handleMousePositionUpdate,
+      onLayoutChange: handleLayoutChange,
       throttleMs,
     });
 
     return () => {
       unsubscribe();
     };
-  }, [id, throttleMs, handlePositionUpdate]);
+  }, [id, throttleMs, handleMousePositionUpdate, handleLayoutChange]);
 
   // Sync position with targetPosition
   useEffect(() => {
