@@ -68,16 +68,27 @@ describe('Development Build Features', () => {
     const cjsDevFile = path.join(distPath, 'index.dev.js');
     const cjsDevContent = fs.readFileSync(cjsDevFile, 'utf-8');
     
-    // Essential functionality should still be present
-    const essentialPatterns = [
+    // Essential functionality should still be present in main bundle
+    const mainBundlePatterns = [
       'CustomCursor',
       'createPortal',
-      'mousemove',
       'cursor-container',
     ];
     
-    essentialPatterns.forEach(pattern => {
+    mainBundlePatterns.forEach(pattern => {
       expect(cjsDevContent).toContain(pattern);
     });
+    
+    // mousemove should be in the coordinator chunk (dynamic import)
+    const coordinatorFiles = fs.readdirSync(distPath).filter(file => 
+      file.includes('CursorCoordinator') && file.includes('.dev.js')
+    );
+    
+    expect(coordinatorFiles.length).toBeGreaterThan(0);
+    
+    const coordinatorFile = path.join(distPath, coordinatorFiles[0]);
+    const coordinatorContent = fs.readFileSync(coordinatorFile, 'utf-8');
+    
+    expect(coordinatorContent).toContain('mousemove');
   });
 }); 

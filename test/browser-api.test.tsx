@@ -30,19 +30,26 @@ describe('Browser API Integration', () => {
   });
 
   describe('Event Listener Integration', () => {
-    it('should attach document event listeners', () => {
+    it('should attach document event listeners', async () => {
       const addEventListenerSpy = vi.spyOn(document, 'addEventListener');
       
       render(<CustomCursor>Events</CustomCursor>);
+      
+      // Wait for dynamic import to complete
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       expect(addEventListenerSpy).toHaveBeenCalled();
       addEventListenerSpy.mockRestore();
     });
 
-    it('should remove event listeners on cleanup', () => {
+    it('should remove event listeners on cleanup', async () => {
       const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
       
       const { unmount } = render(<CustomCursor>Cleanup</CustomCursor>);
+      
+      // Wait for dynamic import to complete
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
       unmount();
       
       expect(removeEventListenerSpy).toHaveBeenCalled();
