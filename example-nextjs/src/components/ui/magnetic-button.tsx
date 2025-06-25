@@ -5,6 +5,7 @@ import { CustomCursor } from '@yhattav/react-component-cursor';
 interface MagneticButtonProps {
   children: React.ReactNode;
   className?: string;
+  variant?: 'default' | 'outline';
   onClick?: () => void;
   disabled?: boolean;
   'data-testid'?: string;
@@ -13,6 +14,7 @@ interface MagneticButtonProps {
 export const MagneticButton: React.FC<MagneticButtonProps> = ({
   children,
   className = '',
+  variant = 'default',
   onClick,
   disabled = false,
   'data-testid': dataTestId,
@@ -50,20 +52,29 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
     }
   }, []);
 
+  // Define styles based on variant
+  const getButtonStyles = () => {
+    const baseStyles = `
+      inline-flex items-center justify-center
+      font-bold py-4 px-8 rounded-lg text-lg 
+      transition-all duration-300 w-60
+      ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+    `;
+    
+    switch (variant) {
+      case 'outline':
+        return `${baseStyles} border-2 border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white`;
+      default:
+        return `${baseStyles} bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-xl`;
+    }
+  };
+
   return (
     <>
       <div ref={containerRef} className="inline-block">
         <motion.button
           ref={buttonRef}
-          className={`
-            inline-flex items-center justify-center
-            bg-gradient-to-r from-blue-500 to-purple-600 
-            hover:from-blue-600 hover:to-purple-700 
-            text-white font-bold py-4 px-8 rounded-lg text-lg 
-            transition-colors duration-300 shadow-xl
-            ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-            ${className}
-          `}
+          className={`${getButtonStyles()} ${className}`}
           onClick={handleClick}
           animate={{
             x: cursorPosition.x,
