@@ -124,8 +124,6 @@ function HeroSection() {
               transition={{ delay: 1, duration: 0.8 }}
             >
               <MagneticButton 
-                magneticRadius={120}
-                magneticStrength={0.4}
                 onClick={() => console.log('Get Started clicked!')}
                 data-testid="get-started-magnetic"
               >
