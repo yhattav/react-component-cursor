@@ -47,22 +47,39 @@ describe('Performance Comparison: O(1) vs O(n)', () => {
       // Test with 1 cursor
       render(<MultipleCursors count={1} />);
       
-      // Wait for dynamic import to complete
-      await new Promise(resolve => setTimeout(resolve, 50));
+      // Wait for dynamic import to complete with proper detection
+      await vi.waitFor(
+        () => {
+          const mousemoveListeners = addEventListenerSpy.mock.calls.filter(
+            call => call[0] === 'mousemove'
+          );
+          expect(mousemoveListeners.length).toBeGreaterThan(0);
+        },
+        { timeout: 1000 }
+      );
       
       const listenersAfter1 = addEventListenerSpy.mock.calls.filter(
         call => call[0] === 'mousemove'
       ).length;
       
       cleanup();
+      CursorCoordinator.resetInstance();
       MouseTracker.resetInstance();
       addEventListenerSpy.mockClear();
       
       // Test with 5 cursors
       render(<MultipleCursors count={5} />);
       
-      // Wait for dynamic import to complete
-      await new Promise(resolve => setTimeout(resolve, 50));
+      // Wait for dynamic import to complete with proper detection
+      await vi.waitFor(
+        () => {
+          const mousemoveListeners = addEventListenerSpy.mock.calls.filter(
+            call => call[0] === 'mousemove'
+          );
+          expect(mousemoveListeners.length).toBeGreaterThan(0);
+        },
+        { timeout: 1000 }
+      );
       
       const listenersAfter5 = addEventListenerSpy.mock.calls.filter(
         call => call[0] === 'mousemove'
@@ -120,23 +137,25 @@ describe('Performance Comparison: O(1) vs O(n)', () => {
     });
 
     it('should clean up properly when cursors unmount', async () => {
-      const { unmount } = render(<MultipleCursors count={5} />);
-      
-      // Wait for dynamic import and component initialization
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // Access the coordinator (which is what components actually use)
+      // Test cleanup directly with the coordinator (without component lifecycle complexity)
       const coordinator = CursorCoordinator.getInstance();
       
-      // Unmount all cursors
-      unmount();
+      // Subscribe 5 cursors directly
+      const unsubscribers = Array.from({ length: 5 }, (_, i) => 
+        coordinator.subscribe({
+          id: `cleanup-test-${i}`,
+          onPositionChange: vi.fn(),
+        })
+      );
       
-      // Wait for cleanup to complete
-      await new Promise(resolve => setTimeout(resolve, 50));
+      // Verify subscriptions
+      expect(coordinator.getSubscriberCount()).toBe(5);
       
-      // After dynamic import and proper architecture, subscribers are managed by coordinator
-      // This test verifies that the system cleans up properly on unmount
-      expect(() => coordinator).not.toThrow();
+      // Unsubscribe all
+      unsubscribers.forEach(unsub => unsub());
+      
+      // Verify cleanup
+      expect(coordinator.getSubscriberCount()).toBe(0);
     });
   });
 

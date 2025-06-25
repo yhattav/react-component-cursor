@@ -73,13 +73,18 @@ export function useMousePosition(
 
   // Subscribe to CursorCoordinator (dynamically loaded)
   useEffect(() => {
-    let unsubscribe: (() => void) | null = null;
+    let isCleanedUp = false;
+    // Use an object to store unsubscribe so cleanup can access latest value
+    const subscriptionRef = { unsubscribe: null as (() => void) | null };
 
     // Dynamic import of the entire coordinator chunk
     import('../utils/CursorCoordinator').then(({ CursorCoordinator }) => {
+      // Don't subscribe if component already unmounted
+      if (isCleanedUp) return;
+      
       const cursorCoordinator = CursorCoordinator.getInstance();
       
-      unsubscribe = cursorCoordinator.subscribe({
+      subscriptionRef.unsubscribe = cursorCoordinator.subscribe({
         id,
         onPositionChange: handleUpdate,
         throttleMs,
@@ -87,7 +92,9 @@ export function useMousePosition(
     });
 
     return () => {
-      unsubscribe?.();
+      isCleanedUp = true;
+      // Access the latest unsubscribe function via reference
+      subscriptionRef.unsubscribe?.();
     };
   }, [id, throttleMs, handleUpdate]);
 

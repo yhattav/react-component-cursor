@@ -134,6 +134,10 @@ class CursorCoordinator {
     });
   }
 
+  getSubscriberCount(): number {
+    return this.subscribers.size;
+  }
+
   // Cleanup method for testing
   static resetInstance(): void {
     if (CursorCoordinator.instance) {

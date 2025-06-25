@@ -44,6 +44,9 @@ describe('Cursor ID Collision Bug Fix', () => {
     vi.clearAllMocks();
     // Reset MouseTracker singleton
     MouseTracker.resetInstance();
+    // Clear global position storage that interferes with tests
+    (global as any).window = { ...mockWindow };
+    delete (global as any).window.__mouseTrackerPosition__;
   });
 
   afterEach(() => {
@@ -223,15 +226,12 @@ describe('Cursor ID Collision Bug Fix', () => {
       
       const callback = vi.fn();
       
-      // Subscribe with throttling
+      // Subscribe with throttling (fresh instance, no current position yet)
       mouseTracker.subscribe({
         id: 'throttled-cursor',
         callback,
         throttleMs: 100,
       });
-      
-      // Clear any immediate callbacks from subscription
-      callback.mockClear();
       
       // Get the mousemove handler
       const mouseMoveHandler = mockDocument.addEventListener.mock.calls
@@ -242,7 +242,7 @@ describe('Cursor ID Collision Bug Fix', () => {
       mouseMoveHandler({ clientX: 101, clientY: 101 });
       mouseMoveHandler({ clientX: 102, clientY: 102 });
       
-      // Should only be called once immediately for the first event
+      // Should only be called once immediately for the first event (throttling in effect)
       vi.runAllTimers();
       expect(callback).toHaveBeenCalledTimes(1);
       expect(callback).toHaveBeenCalledWith({ x: 102, y: 102 }); // Latest position
@@ -253,31 +253,29 @@ describe('Cursor ID Collision Bug Fix', () => {
     it('should demonstrate how ID collisions caused the original bug', () => {
       const mouseTracker = MouseTracker.getInstance();
       
-      // Clear any existing position to ensure clean test
-      vi.clearAllTimers();
-      
       // This simulates the original bug where both cursors used "unnamed-cursor"
       const section1Callback = vi.fn();
       const section2Callback = vi.fn();
       
       // Both cursors subscribe with the same default ID (original bug)
-      mouseTracker.subscribe({
+      const unsubscribe1 = mouseTracker.subscribe({
         id: 'unnamed-cursor', // Default ID that caused collisions
         callback: section1Callback,
         throttleMs: 0,
       });
       
-      // Clear any immediate callbacks from the first subscription
-      section1Callback.mockClear();
-      
-      mouseTracker.subscribe({
+      const unsubscribe2 = mouseTracker.subscribe({
         id: 'unnamed-cursor', // Same ID - this overwrites the first one!
         callback: section2Callback,
         throttleMs: 0,
       });
       
-      // Only 1 subscriber due to collision
+      // Only 1 subscriber due to collision (Map overwrites)
       expect(mouseTracker.getSubscriberCount()).toBe(1);
+      
+      // Clear any immediate callbacks from subscription
+      section1Callback.mockClear();
+      section2Callback.mockClear();
       
       // Simulate mouse movement
       const mouseMoveHandler = mockDocument.addEventListener.mock.calls
@@ -289,6 +287,10 @@ describe('Cursor ID Collision Bug Fix', () => {
       // Only section2Callback should be called (it overwrote section1Callback)
       expect(section1Callback).not.toHaveBeenCalled();
       expect(section2Callback).toHaveBeenCalledWith({ x: 100, y: 100 });
+      
+      // Cleanup
+      unsubscribe1();
+      unsubscribe2();
     });
 
     it('should demonstrate how unique IDs fix the bug', () => {
