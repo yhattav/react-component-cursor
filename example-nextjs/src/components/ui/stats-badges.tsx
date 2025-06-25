@@ -16,7 +16,7 @@ function StatsBadges({ badges, delay = 0.8 }: StatsBadgesProps) {
       {badges.map((badge, index) => (
         <span 
           key={index}
-          className="bg-gray-800/50 px-4 py-2 rounded-full border border-gray-700"
+          className="bg-gray-800/50 px-4 py-2 rounded-full border border-gray-700 text-gray-200"
         >
           {badge}
         </span>
