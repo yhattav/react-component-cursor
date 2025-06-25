@@ -78,18 +78,22 @@ export function useMousePosition(
     const subscriptionRef = { unsubscribe: null as (() => void) | null };
 
     // Dynamic import of the entire coordinator chunk
-    import('../utils/CursorCoordinator').then(({ CursorCoordinator }) => {
-      // Don't subscribe if component already unmounted
-      if (isCleanedUp) return;
-      
-      const cursorCoordinator = CursorCoordinator.getInstance();
-      
-      subscriptionRef.unsubscribe = cursorCoordinator.subscribe({
-        id,
-        onPositionChange: handleUpdate,
-        throttleMs,
+    import('../utils/CursorCoordinator')
+      .then(({ CursorCoordinator }) => {
+        // Don't subscribe if component already unmounted
+        if (isCleanedUp) return;
+        
+        const cursorCoordinator = CursorCoordinator.getInstance();
+        
+        subscriptionRef.unsubscribe = cursorCoordinator.subscribe({
+          id,
+          onPositionChange: handleUpdate,
+          throttleMs,
+        });
+      })
+      .catch((error) => {
+        console.warn('Failed to load cursor coordinator:', error);
       });
-    });
 
     return () => {
       isCleanedUp = true;
