@@ -26,20 +26,20 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
 
   const handleCursorMove = useCallback((position: { x: number; y: number }) => {
     const container = containerRef.current;
-    const button = buttonRef.current;
-    if (!container || !button) return;
+    if (!container) return;
 
-    // Get button position to calculate relative offset
-    const buttonRect = button.getBoundingClientRect();
+    // Get container position to calculate relative offset (fixed reference point)
+    const containerRect = container.getBoundingClientRect();
     
-    // Convert global cursor position to relative position within button
-    const relativeX = position.x - buttonRect.left - buttonRect.width / 2;
-    const relativeY = position.y - buttonRect.top - buttonRect.height / 2;
+    // Convert global cursor position to relative position within container
+    const relativeX = position.x - containerRect.left - containerRect.width / 2;
+    const relativeY = position.y - containerRect.top - containerRect.height / 2;
     
-    // Limit the magnetic pull distance
-    const maxPull = 8; // Maximum pixels to pull the button
-    const limitedX = Math.max(-maxPull, Math.min(maxPull, relativeX * 0.1));
-    const limitedY = Math.max(-maxPull, Math.min(maxPull, relativeY * 0.1));
+    // Apply magnetic pull with reasonable limits
+    const maxPull = 15; // Maximum pixels to pull the button
+    const sensitivity = 0.3; // How responsive the magnetic effect is
+    const limitedX = Math.max(-maxPull, Math.min(maxPull, relativeX * sensitivity));
+    const limitedY = Math.max(-maxPull, Math.min(maxPull, relativeY * sensitivity));
     
     setCursorPosition({ x: limitedX, y: limitedY });
     setIsHovering(true);
