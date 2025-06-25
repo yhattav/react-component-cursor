@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { NullablePosition } from '../types.js';
-import { MouseTracker } from '../utils/MouseTracker';
+
 export function useMousePosition(
   id: string,
   containerRef: React.RefObject<HTMLElement> | undefined,
@@ -21,8 +21,8 @@ export function useMousePosition(
   
 
 
-  // Handle position updates from MouseTracker
-  const handlePositionUpdate = useCallback((globalPosition: { x: number; y: number }) => {
+  // Core function to check position against container bounds and update target
+  const updateTargetWithBoundsCheck = useCallback((globalPosition: { x: number; y: number }) => {
     // Apply offsets
     const adjustedPosition = {
       x: globalPosition.x + offsetX,
@@ -47,7 +47,12 @@ export function useMousePosition(
     } else {
       setTargetPosition(adjustedPosition);
     }
-  }, [id, containerRef, offsetX, offsetY]);
+  }, [containerRef, offsetX, offsetY]);
+
+  // Handle updates from coordinator (mouse movement, scroll, resize) - unified callback
+  const handleUpdate = useCallback((globalPosition: { x: number; y: number }) => {
+    updateTargetWithBoundsCheck(globalPosition);
+  }, [updateTargetWithBoundsCheck]);
 
   // Handle mouse leave - hide cursor
   useEffect(() => {
@@ -66,20 +71,36 @@ export function useMousePosition(
     };
   }, [containerRef]);
 
-  // Subscribe to MouseTracker
+  // Subscribe to CursorCoordinator (dynamically loaded)
   useEffect(() => {
-    const mouseTracker = MouseTracker.getInstance();
-    
-    const unsubscribe = mouseTracker.subscribe({
-      id,
-      callback: handlePositionUpdate,
-      throttleMs,
-    });
+    let isCleanedUp = false;
+    // Use an object to store unsubscribe so cleanup can access latest value
+    const subscriptionRef = { unsubscribe: null as (() => void) | null };
+
+    // Dynamic import of the entire coordinator chunk
+    import('../utils/CursorCoordinator')
+      .then(({ CursorCoordinator }) => {
+        // Don't subscribe if component already unmounted
+        if (isCleanedUp) return;
+        
+        const cursorCoordinator = CursorCoordinator.getInstance();
+        
+        subscriptionRef.unsubscribe = cursorCoordinator.subscribe({
+          id,
+          onPositionChange: handleUpdate,
+          throttleMs,
+        });
+      })
+      .catch((error) => {
+        console.warn('Failed to load cursor coordinator:', error);
+      });
 
     return () => {
-      unsubscribe();
+      isCleanedUp = true;
+      // Access the latest unsubscribe function via reference
+      subscriptionRef.unsubscribe?.();
     };
-  }, [id, throttleMs, handlePositionUpdate]);
+  }, [id, throttleMs, handleUpdate]);
 
   // Sync position with targetPosition
   useEffect(() => {

@@ -51,6 +51,16 @@ class MouseTracker {
       this.startListening();
     }
 
+    // Immediately notify new subscriber if we have a current position
+    if (this.currentPosition) {
+      // Use setTimeout to avoid synchronous callback during subscription
+      setTimeout(() => {
+        if (this.subscribers.has(subscription.id)) {
+          this.callSubscriber(subscriberState);
+        }
+      }, 0);
+    }
+
     // Return unsubscribe function
     return () => {
       this.unsubscribe(subscription.id);
@@ -76,6 +86,9 @@ class MouseTracker {
     
     document.addEventListener('mousemove', this.handleMouseMove);
     this.isListening = true;
+    
+    // Store position globally for persistence across navigation
+    this.loadGlobalPosition();
   }
 
   private stopListening(): void {
@@ -94,6 +107,7 @@ class MouseTracker {
     const newPosition = { x: event.clientX, y: event.clientY };
     
     this.currentPosition = newPosition;
+    this.saveGlobalPosition();
     
     // Use RAF to batch notifications for better performance
     if (this.rafId === null) {
@@ -144,6 +158,31 @@ class MouseTracker {
     
     subscriberState.subscription.callback(this.currentPosition);
     subscriberState.lastCallTime = Date.now();
+  }
+
+
+
+  private loadGlobalPosition(): void {
+    // Try to load position from global storage for persistence across navigation
+    try {
+      const stored = (window as any).__mouseTrackerPosition__;
+      if (stored && typeof stored.x === 'number' && typeof stored.y === 'number') {
+        this.currentPosition = stored;
+      }
+    } catch {
+      // Ignore errors when accessing global position
+    }
+  }
+
+  private saveGlobalPosition(): void {
+    // Save current position globally for persistence
+    if (this.currentPosition) {
+      try {
+        (window as any).__mouseTrackerPosition__ = { ...this.currentPosition };
+      } catch {
+        // Ignore errors when saving global position
+      }
+    }
   }
 
   // Public method to get current position (useful for initial positioning)
