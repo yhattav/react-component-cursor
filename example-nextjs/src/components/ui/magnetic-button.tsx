@@ -26,16 +26,22 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
 
   const handleCursorMove = useCallback((position: { x: number; y: number }) => {
     const container = containerRef.current;
-    if (!container) return;
+    const button = buttonRef.current;
+    if (!container || !button) return;
 
-    // Get container position to calculate relative offset
-    const containerRect = container.getBoundingClientRect();
+    // Get button position to calculate relative offset
+    const buttonRect = button.getBoundingClientRect();
     
-    // Convert global cursor position to relative position within container
-    const relativeX = position.x - containerRect.left - containerRect.width / 2;
-    const relativeY = position.y - containerRect.top - containerRect.height / 2;
+    // Convert global cursor position to relative position within button
+    const relativeX = position.x - buttonRect.left - buttonRect.width / 2;
+    const relativeY = position.y - buttonRect.top - buttonRect.height / 2;
     
-    setCursorPosition({ x: relativeX, y: relativeY });
+    // Limit the magnetic pull distance
+    const maxPull = 8; // Maximum pixels to pull the button
+    const limitedX = Math.max(-maxPull, Math.min(maxPull, relativeX * 0.1));
+    const limitedY = Math.max(-maxPull, Math.min(maxPull, relativeY * 0.1));
+    
+    setCursorPosition({ x: limitedX, y: limitedY });
     setIsHovering(true);
   }, []);
 
@@ -57,7 +63,7 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
     const baseStyles = `
       inline-flex items-center justify-center
       font-bold py-4 px-8 rounded-lg text-lg 
-      transition-all duration-300 w-60
+      transition-colors duration-300 w-60
       ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
     `;
     
