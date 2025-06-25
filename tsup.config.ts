@@ -7,7 +7,7 @@ export default defineConfig([
     format: ['cjs', 'esm'],
     outDir: 'dist',
     dts: true,
-    splitting: false,
+    splitting: true,
     sourcemap: true,
     clean: true,
     minify: true,
@@ -28,7 +28,7 @@ export default defineConfig([
     format: ['cjs', 'esm'],
     outDir: 'dist',
     dts: false, // Only need types once
-    splitting: false,
+    splitting: true,
     sourcemap: true,
     clean: false, // Don't clean, we're building alongside production
     minify: false, // Keep readable for development

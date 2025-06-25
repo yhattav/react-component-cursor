@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { NullablePosition } from '../types.js';
-import { CursorCoordinator } from '../utils/CursorCoordinator';
+
 export function useMousePosition(
   id: string,
   containerRef: React.RefObject<HTMLElement> | undefined,
@@ -71,18 +71,23 @@ export function useMousePosition(
     };
   }, [containerRef]);
 
-  // Subscribe to CursorCoordinator
+  // Subscribe to CursorCoordinator (dynamically loaded)
   useEffect(() => {
-    const cursorCoordinator = CursorCoordinator.getInstance();
-    
-    const unsubscribe = cursorCoordinator.subscribe({
-      id,
-      onPositionChange: handleUpdate,
-      throttleMs,
+    let unsubscribe: (() => void) | null = null;
+
+    // Dynamic import of the entire coordinator chunk
+    import('../utils/CursorCoordinator').then(({ CursorCoordinator }) => {
+      const cursorCoordinator = CursorCoordinator.getInstance();
+      
+      unsubscribe = cursorCoordinator.subscribe({
+        id,
+        onPositionChange: handleUpdate,
+        throttleMs,
+      });
     });
 
     return () => {
-      unsubscribe();
+      unsubscribe?.();
     };
   }, [id, throttleMs, handleUpdate]);
 
