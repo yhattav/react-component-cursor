@@ -36,7 +36,7 @@ function HeroSection() {
   const [currentCursorIndex, setCurrentCursorIndex] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
 
-  const statsBadges = ['< 10KB Bundle', '0 Dependencies', 'TypeScript Ready'];
+  const statsBadges = ['Small bundle', '0 Dependencies', 'TypeScript Ready'];
 
   // Handle cursor movement to trigger state changes
   const handleCursorMove = useCallback((position: { x: number; y: number }) => {
