@@ -124,14 +124,30 @@ function HeroSection() {
               transition={{ delay: 1, duration: 0.8 }}
             >
               <MagneticButton 
-                onClick={() => console.log('Get Started clicked!')}
+                onClick={() => {
+                  // Navigate to the Quick Start section
+                  const quickStartSection = document.getElementById('quick-start-section');
+                  if (quickStartSection) {
+                    quickStartSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
                 data-testid="get-started-magnetic"
               >
                 Get Started in 2 Minutes
               </MagneticButton>
-              <button className="border-2 border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white font-bold py-4 px-8 rounded-lg text-lg transition-all duration-300">
+              <MagneticButton 
+                variant="outline"
+                onClick={() => {
+                  // Navigate to the Interactive Examples section
+                  const examplesSection = document.getElementById('interactive-examples-section');
+                  if (examplesSection) {
+                    examplesSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                data-testid="see-examples-magnetic"
+              >
                 See Live Examples ↓
-              </button>
+              </MagneticButton>
             </motion.div>
 
             {/* Cursor State Indicator */}

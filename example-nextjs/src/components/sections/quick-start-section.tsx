@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 function QuickStartSection() {
   return (
-    <section className="py-20 bg-gradient-to-b from-gray-900/50 to-black">
+    <section id="quick-start-section" className="py-20 bg-gradient-to-b from-gray-900/50 to-black">
       <div className="container mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
