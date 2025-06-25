@@ -4,6 +4,7 @@ import { CustomCursor } from '@yhattav/react-component-cursor';
 import { AnimatedParticles } from '../ui/animated-particles';
 import { ScrollIndicator } from '../ui/scroll-indicator';
 import { StatsBadges } from '../ui/stats-badges';
+import { MagneticButton } from '../ui/magnetic-button';
 import { ANIMATION_DURATIONS } from '../../lib/constants';
 
 // Cursor variants for the hero section
@@ -122,9 +123,14 @@ function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1, duration: 0.8 }}
             >
-              <button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition-all duration-300 transform hover:scale-105 shadow-xl">
+              <MagneticButton 
+                magneticRadius={120}
+                magneticStrength={0.4}
+                onClick={() => console.log('Get Started clicked!')}
+                data-testid="get-started-magnetic"
+              >
                 Get Started in 2 Minutes
-              </button>
+              </MagneticButton>
               <button className="border-2 border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white font-bold py-4 px-8 rounded-lg text-lg transition-all duration-300">
                 See Live Examples ↓
               </button>
