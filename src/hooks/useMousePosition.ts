@@ -49,8 +49,8 @@ export function useMousePosition(
     }
   }, [containerRef, offsetX, offsetY]);
 
-  // Handle new mouse position from CursorCoordinator
-  const handleMousePositionUpdate = useCallback((globalPosition: { x: number; y: number }) => {
+  // Handle updates from coordinator (mouse movement, scroll, resize) - unified callback
+  const handleUpdate = useCallback((globalPosition: { x: number; y: number }) => {
     updateTargetWithBoundsCheck(globalPosition);
   }, [updateTargetWithBoundsCheck]);
 
@@ -71,33 +71,20 @@ export function useMousePosition(
     };
   }, [containerRef]);
 
-  // Handle layout changes (scroll/resize) - re-check current position against new bounds
-  const handleLayoutChange = useCallback(() => {
-    if (targetPosition.x !== null && targetPosition.y !== null) {
-      // Convert back from adjusted position to global position for bounds checking
-      const globalPosition = {
-        x: targetPosition.x - offsetX,
-        y: targetPosition.y - offsetY,
-      };
-      updateTargetWithBoundsCheck(globalPosition);
-    }
-  }, [targetPosition, offsetX, offsetY, updateTargetWithBoundsCheck]);
-
   // Subscribe to CursorCoordinator
   useEffect(() => {
     const cursorCoordinator = CursorCoordinator.getInstance();
     
     const unsubscribe = cursorCoordinator.subscribe({
       id,
-      onPositionUpdate: handleMousePositionUpdate,
-      onLayoutChange: handleLayoutChange,
+      onPositionChange: handleUpdate,
       throttleMs,
     });
 
     return () => {
       unsubscribe();
     };
-  }, [id, throttleMs, handleMousePositionUpdate, handleLayoutChange]);
+  }, [id, throttleMs, handleUpdate]);
 
   // Sync position with targetPosition
   useEffect(() => {

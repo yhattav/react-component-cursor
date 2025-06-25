@@ -3,8 +3,7 @@ import { MouseTracker } from './MouseTracker';
 
 export interface CursorSubscription {
   id: string;
-  onPositionUpdate: (position: { x: number; y: number }) => void;
-  onLayoutChange: () => void;
+  onPositionChange: (position: { x: number; y: number }) => void;
   throttleMs?: number;
 }
 
@@ -18,6 +17,7 @@ class CursorCoordinator {
   private static instance: CursorCoordinator | null = null;
   private subscribers = new Map<string, CoordinatorSubscriberState>();
   private mouseTracker: MouseTracker;
+  private currentGlobalPosition: { x: number; y: number } | null = null;
   private isListening = false;
   private rafId: number | null = null;
 
@@ -56,7 +56,8 @@ class CursorCoordinator {
     const mouseUnsubscribe = this.mouseTracker.subscribe({
       id: `coordinator-${subscription.id}`,
       callback: (position) => {
-        this.handlePositionUpdate(subscription.id, position);
+        this.updateGlobalPosition(position);
+        this.notifyPositionChange(subscription.id, position);
       },
       throttleMs: subscription.throttleMs,
     });
@@ -108,23 +109,29 @@ class CursorCoordinator {
     // Batch layout change notifications using RAF
     if (this.rafId === null) {
       this.rafId = requestAnimationFrame(() => {
-        this.notifyLayoutChange();
+        this.notifyAllSubscribersWithCurrentPosition();
         this.rafId = null;
       });
     }
   }
 
-  private notifyLayoutChange(): void {
-    this.subscribers.forEach((subscriberState) => {
-      subscriberState.subscription.onLayoutChange();
-    });
+  private updateGlobalPosition(position: { x: number; y: number }): void {
+    this.currentGlobalPosition = position;
   }
 
-  private handlePositionUpdate(subscriptionId: string, position: { x: number; y: number }): void {
+  private notifyPositionChange(subscriptionId: string, position: { x: number; y: number }): void {
     const subscriberState = this.subscribers.get(subscriptionId);
     if (!subscriberState) return;
 
-    subscriberState.subscription.onPositionUpdate(position);
+    subscriberState.subscription.onPositionChange(position);
+  }
+
+  private notifyAllSubscribersWithCurrentPosition(): void {
+    if (!this.currentGlobalPosition) return;
+    
+    this.subscribers.forEach((subscriberState) => {
+      subscriberState.subscription.onPositionChange(this.currentGlobalPosition!);
+    });
   }
 
   // Cleanup method for testing
