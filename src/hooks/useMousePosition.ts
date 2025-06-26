@@ -102,12 +102,13 @@ export function useMousePosition(
     };
   }, [id, throttleMs, handleUpdate]);
 
-  // Sync position with targetPosition
+  // Initialize position when targetPosition first becomes available
+  // After initialization, useSmoothAnimation handles all updates
   useEffect(() => {
-    if (targetPosition.x !== null && targetPosition.y !== null) {
+    if (targetPosition.x !== null && targetPosition.y !== null && position.x === null && position.y === null) {
       setPosition(targetPosition);
     }
-  }, [targetPosition]);
+  }, [targetPosition, position]);
 
   return { position, setPosition, targetPosition, isVisible };
 }
