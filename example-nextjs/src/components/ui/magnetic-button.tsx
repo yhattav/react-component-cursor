@@ -9,7 +9,18 @@ interface MagneticButtonProps {
   onClick?: () => void;
   disabled?: boolean;
   'data-testid'?: string;
+  /** Maximum pixels the button can be pulled toward the cursor */
+  maxPull?: number;
+  /** How responsive the magnetic effect is (0-1, where 1 is very sensitive) */
+  sensitivity?: number;
+  /** Scale factor when hovering */
+  hoverScale?: number;
 }
+
+// Default magnetic effect constants
+const DEFAULT_MAX_PULL = 15;
+const DEFAULT_SENSITIVITY = 0.3;
+const DEFAULT_HOVER_SCALE = 1.05;
 
 export const MagneticButton: React.FC<MagneticButtonProps> = ({
   children,
@@ -18,6 +29,9 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
   onClick,
   disabled = false,
   'data-testid': dataTestId,
+  maxPull = DEFAULT_MAX_PULL,
+  sensitivity = DEFAULT_SENSITIVITY,
+  hoverScale = DEFAULT_HOVER_SCALE,
 }) => {
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
@@ -35,15 +49,13 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
     const relativeX = position.x - containerRect.left - containerRect.width / 2;
     const relativeY = position.y - containerRect.top - containerRect.height / 2;
     
-    // Apply magnetic pull with reasonable limits
-    const maxPull = 15; // Maximum pixels to pull the button
-    const sensitivity = 0.3; // How responsive the magnetic effect is
+    // Apply magnetic pull with configurable limits
     const limitedX = Math.max(-maxPull, Math.min(maxPull, relativeX * sensitivity));
     const limitedY = Math.max(-maxPull, Math.min(maxPull, relativeY * sensitivity));
     
     setCursorPosition({ x: limitedX, y: limitedY });
     setIsHovering(true);
-  }, []);
+  }, [maxPull, sensitivity]);
 
   const handleClick = useCallback(() => {
     if (!disabled && onClick) {
@@ -85,7 +97,7 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
           animate={{
             x: cursorPosition.x,
             y: cursorPosition.y,
-            scale: isHovering ? 1.05 : 1
+            scale: isHovering ? hoverScale : 1
           }}
           transition={{
             type: "spring",
