@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { NullablePosition } from '../types.js';
 
 export function useMousePosition(
@@ -15,6 +15,7 @@ export function useMousePosition(
 } {
   const [position, setPosition] = useState<NullablePosition>({ x: null, y: null });
   const [targetPosition, setTargetPosition] = useState<NullablePosition>({ x: null, y: null });
+  const isInitialized = useRef(false);
 
   // Simple rule: visible if we have a valid position
   const isVisible = targetPosition.x !== null && targetPosition.y !== null;
@@ -105,10 +106,11 @@ export function useMousePosition(
   // Initialize position when targetPosition first becomes available
   // After initialization, useSmoothAnimation handles all updates
   useEffect(() => {
-    if (targetPosition.x !== null && targetPosition.y !== null && position.x === null && position.y === null) {
+    if (targetPosition.x !== null && targetPosition.y !== null && !isInitialized.current) {
       setPosition(targetPosition);
+      isInitialized.current = true;
     }
-  }, [targetPosition, position]);
+  }, [targetPosition]);
 
   return { position, setPosition, targetPosition, isVisible };
 }
