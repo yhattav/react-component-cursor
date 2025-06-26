@@ -77,7 +77,7 @@ export function useSmoothAnimation(
     const prefersReducedMotion = mediaQuery?.matches ?? false;
     
     // If smoothFactor is 1 or user prefers reduced motion, set position directly
-    if (smoothFactor === 1 || prefersReducedMotion) {
+    if (smoothFactor <= 1 || prefersReducedMotion) {
       setPosition(targetPosition);
       return;
     }
