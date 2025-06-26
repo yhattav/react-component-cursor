@@ -7,7 +7,7 @@ import { PerformanceOptimizedExample } from './performance-optimized-example';
 
 function InteractiveExamplesSection() {
   return (
-    <section className="relative py-24 px-6 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+    <section id="interactive-examples-section" className="relative py-24 px-6 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16">

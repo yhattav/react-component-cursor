@@ -1,190 +1,223 @@
-# React Custom Cursor - Next.js SSR Example
+# React Component Cursor - Next.js Example
 
-This is a comprehensive Next.js example that showcases the **server-side rendering (SSR) capabilities** of `@yhattav/react-component-cursor` while demonstrating SEO best practices.
+This is a comprehensive showcase of the `@yhattav/react-component-cursor` library built with Next.js 14, featuring advanced cursor interactions and real-time demonstrations.
 
-## 🌟 Features Demonstrated
+## 🎯 Refactored Architecture
 
-### SSR & SEO
-- ✅ **Full Server-Side Rendering** with Next.js App Router
-- ✅ **SEO Optimization** with meta tags, Open Graph, and Twitter Cards
-- ✅ **Structured Data** (JSON-LD) for better search engine understanding
-- ✅ **Dynamic Sitemap** generation
-- ✅ **Robots.txt** configuration
-- ✅ **Performance Optimizations** for production builds
+### Section-Based Cursor Management
 
-### Custom Cursor Showcase
-- 🎯 **Multiple Cursor Modes**: Glow effect, emoji cursors, trail effects
-- ⚡ **Interactive Demo Areas** with real-time cursor switching
-- 🎨 **Beautiful UI** with Tailwind CSS and Framer Motion
-- 📱 **Responsive Design** that works on all devices
-- 🔧 **TypeScript Integration** with full type safety
+This example demonstrates a **refactored approach** to custom cursor management where:
 
-## 🚀 Key SSR Benefits
+- **Each section has its own single `CustomCursor` component**
+- **Cursor appearance changes based on React state within each section**
+- **State changes are triggered by cursor events (`onMove`, `onVisibilityChange`)**
+- **Better isolation and control compared to multiple overlapping cursors**
 
-1. **SEO Optimization**: Search engines can crawl and index the content
-2. **Performance**: Initial page load with pre-rendered HTML
-3. **Social Sharing**: Proper meta tags for social media previews
-4. **Accessibility**: Content available without JavaScript
+### Key Benefits
 
-## 🛠️ Technical Implementation
+1. **🎯 Better Control**: Each section manages its own cursor state independently
+2. **⚡ Performance**: Single cursor per section reduces conflicts and improves performance
+3. **🔧 Maintainability**: State management is centralized within each section
+4. **🎨 Flexibility**: Easy to customize cursor behavior based on section-specific logic
 
-### SSR Compatibility
-The custom cursor library is designed to work seamlessly with SSR:
+## 🏗️ Implementation Examples
 
-```tsx
-// The cursor automatically handles SSR by returning null during server rendering
-<CustomCursor>
-  <div className="cursor-content">✨ Custom Cursor</div>
+### Hero Section
+```typescript
+const handleCursorMove = useCallback((position: { x: number; y: number }) => {
+  // Change cursor variant based on position in hero area
+  const section = document.querySelector('.hero-section');
+  if (section) {
+    const rect = section.getBoundingClientRect();
+    const relativeX = (position.x - rect.left) / rect.width;
+    const relativeY = (position.y - rect.top) / rect.height;
+    
+    // Divide hero area into quadrants to determine cursor variant
+    let newIndex = 0;
+    if (relativeX < 0.5 && relativeY < 0.5) newIndex = 0; // Top-left: glow
+    else if (relativeX >= 0.5 && relativeY < 0.5) newIndex = 1; // Top-right: particle
+    else if (relativeX < 0.5 && relativeY >= 0.5) newIndex = 2; // Bottom-left: emoji
+    else newIndex = 3; // Bottom-right: ring
+    
+    if (newIndex !== currentCursorIndex) {
+      setCurrentCursorIndex(newIndex);
+    }
+  }
+}, [currentCursorIndex]);
+
+<CustomCursor 
+  onMove={handleCursorMove}
+  onVisibilityChange={handleCursorVisibilityChange}
+>
+  <motion.div key={currentCursor.id}>
+    {currentCursor.element}
+  </motion.div>
 </CustomCursor>
 ```
 
-### Key SSR Features:
-- **Graceful Degradation**: Returns `null` during SSR
-- **No Hydration Mismatches**: Prevents React hydration errors
-- **Client-Side Activation**: Cursor activates after hydration
-- **Performance Optimized**: Minimal impact on server-side bundle
+### Proof Section
+```typescript
+const handleCursorMove = useCallback((position: { x: number; y: number }) => {
+  // Check if cursor is over interactive elements
+  const element = document.elementFromPoint(position.x, position.y);
+  const isOverCard = element?.closest('.proof-card') !== null;
+  const isOverButton = element?.closest('.proof-button') !== null;
+  
+  let newIndex = 0;
+  if (isOverButton) {
+    newIndex = 2; // Interactive cursor for buttons
+  } else if (isOverCard) {
+    newIndex = 1; // Hovering cursor for cards
+  } else {
+    newIndex = 0; // Default cursor
+  }
+  
+  if (newIndex !== currentCursorIndex) {
+    setCursorIndex(newIndex);
+  }
+}, [currentCursorIndex]);
+```
 
-## 📦 Getting Started
+### Features Showcase Section
+```typescript
+const handleCursorMove = useCallback((position: { x: number; y: number }) => {
+  // Update movement stats
+  setInteractionStats(prev => ({ ...prev, movements: prev.movements + 1 }));
 
-### Prerequisites
-- Node.js 18+ 
-- npm or yarn
+  // Determine which feature area the cursor is in
+  const element = document.elementFromPoint(position.x, position.y);
+  const demoArea = element?.closest('.demo-area');
+  const featureCard = element?.closest('.feature-card');
+  const emojiSelector = element?.closest('.emoji-selector');
+  const performanceArea = element?.closest('.performance-area');
 
-### Installation & Setup
+  let newIndex = 0;
+  if (performanceArea) {
+    newIndex = 3; // Particle cursor for performance demo
+    setPerformanceMode(true);
+  } else if (emojiSelector) {
+    newIndex = 2; // Emoji cursor in emoji area
+  } else if (featureCard?.classList.contains('glow-feature')) {
+    newIndex = 1; // Glow cursor for glow feature
+  } else if (demoArea) {
+    setIsInPlayground(true);
+  } else {
+    newIndex = 0; // Default cursor
+    setIsInPlayground(false);
+  }
 
-1. **Install Dependencies**
-   ```bash
-   npm install
-   ```
+  if (newIndex !== currentCursorIndex && !isInPlayground) {
+    setCursorIndex(newIndex);
+  }
+}, [currentCursorIndex, isInPlayground]);
+```
 
-2. **Development Mode**
-   ```bash
-   npm run dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000) to see the result.
-
-3. **Production Build**
-   ```bash
-   npm run build
-   npm start
-   ```
-
-4. **Static Export** (for GitHub Pages)
-   ```bash
-   npm run export
-   ```
-
-## 🏗️ Project Structure
+## 📁 File Structure
 
 ```
 src/
 ├── app/
-│   ├── layout.tsx          # Root layout with SEO metadata
-│   ├── page.tsx            # Main showcase page
-│   ├── sitemap.ts          # Dynamic sitemap generation
-│   ├── robots.ts           # SEO robots configuration
-│   └── globals.css         # Global styles
-├── components/             # Reusable components (future)
-└── utils/                  # Utility functions (future)
+│   ├── page.tsx                 # Main page with section orchestration
+│   └── layout.tsx              # Root layout
+├── components/
+│   ├── sections/               # Refactored section components
+│   │   ├── hero-section.tsx           # ✅ Refactored with single cursor
+│   │   ├── proof-section.tsx          # ✅ Refactored with single cursor  
+│   │   ├── features-showcase-section.tsx # ✅ Refactored with single cursor
+│   │   ├── beautiful-design-example.tsx  # Container-scoped cursor
+│   │   ├── interactive-component-example.tsx # State-driven cursor
+│   │   └── performance-optimized-example.tsx # Performance-focused cursor
+│   ├── cursors/               # Cursor component library
+│   │   ├── glow-cursor.tsx
+│   │   ├── emoji-cursor.tsx
+│   │   ├── particle-cursor.tsx
+│   │   └── index.ts
+│   └── ui/                    # Shared UI components
+│       ├── animated-particles.tsx
+│       ├── code-snippet.tsx
+│       └── stats-badges.tsx
+└── lib/
+    └── constants.ts           # Shared constants and types
 ```
 
-## 🎯 Demo Features
+## 🚀 Key Features Demonstrated
 
-### Interactive Cursor Modes
-1. **Glow Effect**: Gradient background with blur effect
-2. **Emoji Cursor**: Customizable emoji with selection palette  
-3. **Trail Effect**: Animated trailing cursor with ping effect
-4. **Default**: Standard browser cursor
+### 1. **Position-Based Cursor Changes**
+- Hero section divides area into quadrants
+- Each quadrant triggers different cursor variant
+- Smooth transitions between states
 
-### Real-time Interaction
-- Switch between cursor modes instantly
-- Hover effects on interactive areas
-- Smooth animations with Framer Motion
-- Performance monitoring in development mode
+### 2. **Element-Based Cursor Detection**
+- Proof section detects hover over specific elements
+- Uses `document.elementFromPoint()` for precise detection
+- Different cursors for cards vs buttons vs default areas
 
-## 🔧 Configuration
+### 3. **Feature-Specific Interactions**
+- Features showcase section has complex interaction logic
+- Performance mode toggles based on cursor location
+- Real-time statistics tracking
+- Dynamic emoji selection
 
-### Next.js Configuration
-The project is configured for optimal SSR and deployment:
+### 4. **State-Driven Animations**
+- All cursor changes use Framer Motion for smooth transitions
+- Each cursor variant has unique animation properties
+- State indicators show current cursor mode and context
+
+## 🎨 Cursor Variants
+
+Each section defines its own cursor variants:
 
 ```typescript
-// next.config.ts
-const nextConfig = {
-  output: 'export',           // Static export for GitHub Pages
-  basePath: '/react-component-cursor',
-  trailingSlash: true,
-  images: { unoptimized: true },
-  experimental: { optimizeCss: true },
-}
+const heroCursorVariants = [
+  {
+    id: 'glow',
+    element: <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full blur-md opacity-70" />,
+    name: 'Glow Effect'
+  },
+  {
+    id: 'particle',
+    element: <div className="w-3 h-3 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/50" />,
+    name: 'Particle'
+  },
+  // ... more variants
+];
 ```
 
-### SEO Configuration
-Comprehensive SEO setup in `layout.tsx`:
-- Meta tags with keywords and descriptions
-- Open Graph tags for social sharing
-- Twitter Card optimization
-- JSON-LD structured data
-- Canonical URLs
-
-## 📊 Performance Features
-
-### Build Optimizations
-- **Tree Shaking**: Unused code elimination
-- **Bundle Splitting**: Optimal code splitting
-- **CSS Optimization**: Minimal CSS footprint
-- **Image Optimization**: Optimized static assets
-
-### Runtime Performance
-- **Smooth Animations**: 60fps cursor tracking
-- **Memory Efficiency**: Optimized event handling
-- **Throttling Support**: Configurable performance throttling
-
-## 🚀 Deployment
-
-### GitHub Pages
-This example is configured for GitHub Pages deployment:
+## 🔧 Development
 
 ```bash
-npm run deploy
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
 ```
 
-The build creates an optimized static export that can be deployed to any static hosting provider.
+## 📊 Performance Considerations
 
-### Other Platforms
-- **Vercel**: Deploy with zero configuration
-- **Netlify**: Drag and drop the `out` folder
-- **AWS S3**: Upload static files to S3 bucket
+- **Single cursor per section**: Reduces DOM complexity and conflicts
+- **Efficient element detection**: Uses native `document.elementFromPoint()`
+- **Debounced state updates**: Prevents excessive re-renders
+- **Smooth animations**: Hardware-accelerated transforms with Framer Motion
+- **Performance monitoring**: Real-time FPS and memory tracking
 
-## 🧪 Testing SSR
+## 🎯 Best Practices Demonstrated
 
-To verify SSR is working correctly:
+1. **Section Isolation**: Each section manages its own cursor independently
+2. **Event-Driven State**: Use cursor events to trigger state changes
+3. **Smooth Transitions**: Always animate cursor changes for better UX
+4. **Performance Tracking**: Monitor and display performance metrics
+5. **Accessibility**: Respect reduced motion preferences
+6. **TypeScript**: Full type safety for cursor variants and handlers
 
-1. **View Page Source**: Right-click → "View Page Source"
-2. **Check for Content**: HTML should contain the full page content
-3. **Disable JavaScript**: Page should still display content
-4. **Network Tab**: Initial response should include rendered HTML
+This refactored approach provides much better control over cursor behavior while maintaining clean, maintainable code that scales well across complex applications.
 
-## 📈 SEO Benefits
+## 🌟 Live Demo
 
-This example demonstrates real-world SEO benefits:
-
-- **Search Engine Visibility**: Content crawlable by search engines
-- **Social Media Sharing**: Rich previews on platforms
-- **Performance Scores**: High Lighthouse scores
-- **Accessibility**: Screen reader compatible
-- **Mobile Optimization**: Responsive design
-
-## 🔗 Related Links
-
-- **Main Library**: [@yhattav/react-component-cursor](https://www.npmjs.com/package/@yhattav/react-component-cursor)
-- **Documentation**: [Library Docs](https://yhattav.github.io/react-component-cursor)
-- **Vite Example**: [../example](../example)
-- **GitHub Repository**: [Source Code](https://github.com/yhattav/react-component-cursor)
-
-## 📝 License
-
-This example is part of the `@yhattav/react-component-cursor` project and follows the same MIT license.
-
----
-
-**Built with ❤️ to showcase SSR capabilities and promote the React Custom Cursor library**
+Visit the live demo to experience these cursor interactions in action. Each section demonstrates different aspects of the refactored architecture, showcasing how single-cursor-per-section approach provides better control and performance than traditional multi-cursor implementations.
