@@ -13,9 +13,9 @@ function StatsBadges({ badges, delay = 0.8 }: StatsBadgesProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.8 }}
     >
-      {badges.map((badge, index) => (
+      {badges.map((badge) => (
         <span 
-          key={index}
+          key={badge}
           className="bg-gray-800/50 px-4 py-2 rounded-full border border-gray-700 text-gray-200"
         >
           {badge}
