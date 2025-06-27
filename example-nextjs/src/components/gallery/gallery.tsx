@@ -61,11 +61,11 @@ export function Gallery({ items }: GalleryProps) {
         ))}
       </div>
 
-      {/* Cursor with image */}
+      {/* Cursor with image - controlled z-index to stay below hovered text */}
       <CustomCursor
         containerRef={containerRef}
         smoothness={1}
-        className="z-40"
+        zIndex={40}
       >
         {hoveredItem ? (
           <div 
@@ -114,7 +114,10 @@ export function Gallery({ items }: GalleryProps) {
           return (
             <div
               key={item.id}
-              className="cursor-none p-4 flex-shrink-0"
+              className="cursor-none p-4 flex-shrink-0 relative"
+              style={{
+                zIndex: hoveredItem?.id === item.id ? 50 : 10
+              }}
               onMouseEnter={() => handleMouseEnter(item)}
               onMouseLeave={handleMouseLeave}
             >

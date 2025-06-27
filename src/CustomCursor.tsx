@@ -212,6 +212,8 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
 
       const existingContainer = doc.getElementById('cursor-container');
       if (existingContainer) {
+        // Update existing container's z-index to match current props
+        existingContainer.style.zIndex = zIndex.toString();
         return existingContainer;
       }
 
@@ -221,10 +223,10 @@ export const CustomCursor: React.FC<CustomCursorProps> = React.memo(
       container.style.top = '0';
       container.style.left = '0';
       container.style.pointerEvents = 'none';
-      container.style.zIndex = DEFAULT_Z_INDEX.toString();
+      container.style.zIndex = zIndex.toString(); // Use user's zIndex instead of DEFAULT_Z_INDEX
       doc.body.appendChild(container);
       return container;
-    }, []);
+    }, [zIndex]); // Add zIndex to dependencies
 
     React.useEffect(() => {
       setPortalContainer(getPortalContainerMemo());
