@@ -7,6 +7,7 @@ export interface GalleryItem {
   id: number;
   title: string;
   imageUrl: string;
+  photographer: string;
 }
 
 export interface GalleryProps {
@@ -138,10 +139,10 @@ export function Gallery({ items }: GalleryProps) {
                 {item.title}
               </h2>
               
-              {/* Subtle category text like in reference */}
+              {/* Photographer credit */}
               <div className="mt-1">
                 <span className="text-white/40 text-sm font-light tracking-wide">
-                  Digital Art
+                  Photo by {item.photographer}
                 </span>
               </div>
             </div>

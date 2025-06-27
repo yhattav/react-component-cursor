@@ -3,57 +3,67 @@
 import React from 'react';
 import { Gallery } from '../../components/gallery/gallery';
 
-// Sample gallery data - using placeholder images for now
+// Static gallery data from Unsplash collection with photographer credits
 const galleryItems = [
   {
     id: 1,
-    title: "Neon Dreams",
-    imageUrl: "https://picsum.photos/300/400?random=1"
+    title: "Blue House",
+    imageUrl: "https://images.unsplash.com/photo-1534670022376-eb2368089516?w=280&h=350&fit=crop&crop=center",
+    photographer: "Annie Spratt"
   },
   {
     id: 2,
-    title: "Digital Horizon",
-    imageUrl: "https://picsum.photos/300/400?random=2"
+    title: "Yellow Object",
+    imageUrl: "https://images.unsplash.com/photo-1720788051492-f6eaa0025cc5?w=280&h=350&fit=crop&crop=center",
+    photographer: "Edoardo Matteoni"
   },
   {
     id: 3,
-    title: "Electric Pulse",
-    imageUrl: "https://picsum.photos/300/400?random=3"
+    title: "Arched Corridor",
+    imageUrl: "https://images.unsplash.com/photo-1746542296681-2ed4aa1b8133?w=280&h=350&fit=crop&crop=center",
+    photographer: "Raghavendra Badaskar"
   },
   {
     id: 4,
-    title: "Cyber Vista",
-    imageUrl: "https://picsum.photos/300/400?random=4"
+    title: "USGS Landscape",
+    imageUrl: "https://images.unsplash.com/photo-1722080768196-8983bbbb5c0f?w=280&h=350&fit=crop&crop=center",
+    photographer: "USGS"
   },
   {
     id: 5,
-    title: "Quantum Glow",
-    imageUrl: "https://picsum.photos/300/400?random=5"
+    title: "Wooden Frame",
+    imageUrl: "https://images.unsplash.com/photo-1614621589216-7bb3a18a4fc8?w=280&h=350&fit=crop&crop=center",
+    photographer: "Luke Oslizlo"
   },
   {
     id: 6,
-    title: "Fractal Energy",
-    imageUrl: "https://picsum.photos/300/400?random=6"
+    title: "Abstract Texture",
+    imageUrl: "https://images.unsplash.com/photo-1556139954-ec19cce61d61?w=280&h=350&fit=crop&crop=center",
+    photographer: "Pawel Czerwinski"
   },
   {
     id: 7,
-    title: "Matrix Flow",
-    imageUrl: "https://picsum.photos/300/400?random=7"
+    title: "Geometric Forms",
+    imageUrl: "https://images.unsplash.com/photo-1534670022376-eb2368089516?w=280&h=350&fit=crop&crop=center",
+    photographer: "Annie Spratt"
   },
   {
     id: 8,
-    title: "Binary Storm",
-    imageUrl: "https://picsum.photos/300/400?random=8"
+    title: "Minimalist Space",
+    imageUrl: "https://images.unsplash.com/photo-1720788051492-f6eaa0025cc5?w=280&h=350&fit=crop&crop=center",
+    photographer: "Edoardo Matteoni"
   },
   {
     id: 9,
-    title: "Neural Network",
-    imageUrl: "https://picsum.photos/300/400?random=9"
+    title: "Dramatic Light",
+    imageUrl: "https://images.unsplash.com/photo-1746542296681-2ed4aa1b8133?w=280&h=350&fit=crop&crop=center",
+    photographer: "Raghavendra Badaskar"
   },
   {
     id: 10,
-    title: "Data Stream",
-    imageUrl: "https://picsum.photos/300/400?random=10"
+    title: "Natural Tones",
+    imageUrl: "https://images.unsplash.com/photo-1722080768196-8983bbbb5c0f?w=280&h=350&fit=crop&crop=center",
+    photographer: "USGS"
   }
 ];
 
