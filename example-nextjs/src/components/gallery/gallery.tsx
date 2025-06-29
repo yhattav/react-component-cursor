@@ -17,7 +17,41 @@ export interface GalleryProps {
 export function Gallery({ items }: GalleryProps) {
   const [hoveredItem, setHoveredItem] = useState<GalleryItem | null>(null);
   const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set());
+  const [cursorOffset, setCursorOffset] = useState({ x: 30, y: -160 });
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Calculate dynamic offset using linear interpolation based on cursor position percentage
+  const calculateDynamicOffset = useCallback((cursorPosition: { x: number; y: number }) => {
+    if (!containerRef.current) return { x: 30, y: -160 };
+
+    const container = containerRef.current.getBoundingClientRect();
+    
+    // Calculate cursor position as percentage within container (0 to 1)
+    const xPercent = (cursorPosition.x - container.left) / container.width;
+    const yPercent = (cursorPosition.y - container.top) / container.height;
+    
+    // Clamp percentages to 0-1 range
+    const xPercentClamped = Math.max(0, Math.min(1, xPercent));
+    const yPercentClamped = Math.max(0, Math.min(1, yPercent));
+    
+    // Define offset ranges for smooth linear interpolation
+    const X_OFFSET_MIN = 50;    // When cursor at left edge (0%), show image on right
+    const X_OFFSET_MAX = -290;  // When cursor at right edge (100%), show image on left
+    const Y_OFFSET_MIN = 50;    // When cursor at top edge (0%), show image below
+    const Y_OFFSET_MAX = -370;  // When cursor at bottom edge (100%), show image above
+    
+    // Linear interpolation: min + (max - min) * percentage
+    const offsetX = X_OFFSET_MIN + (X_OFFSET_MAX - X_OFFSET_MIN) * xPercentClamped;
+    const offsetY = Y_OFFSET_MIN + (Y_OFFSET_MAX - Y_OFFSET_MIN) * yPercentClamped;
+
+    return { x: offsetX, y: offsetY };
+  }, []);
+
+  // Handle cursor movement to update offset
+  const handleCursorMove = useCallback((position: { x: number; y: number }) => {
+    const newOffset = calculateDynamicOffset(position);
+    setCursorOffset(newOffset);
+  }, [calculateDynamicOffset]);
 
   // Preload all images for instant hover response
   useEffect(() => {
@@ -66,14 +100,11 @@ export function Gallery({ items }: GalleryProps) {
         containerRef={containerRef}
         smoothness={30}
         zIndex={40}
+        offset={cursorOffset}
+        onMove={handleCursorMove}
       >
         {hoveredItem ? (
-          <div 
-            className="pointer-events-none relative"
-            style={{
-              transform: 'translate(30px, -160px)',
-            }}
-          >
+          <div className="pointer-events-none relative">
             <img
               src={hoveredItem.imageUrl}
               alt={hoveredItem.title}
