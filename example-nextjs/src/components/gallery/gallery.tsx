@@ -46,7 +46,7 @@ export function Gallery({ items }: GalleryProps) {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-full min-h-[80vh]" style={{ cursor: 'none' }}>
+    <div ref={containerRef} className="relative w-full min-h-[80vh]">
       {/* Hidden preloaded images for instant display */}
       <div className="absolute opacity-0 pointer-events-none -z-50">
         {items.map(item => (
@@ -64,7 +64,7 @@ export function Gallery({ items }: GalleryProps) {
       {/* Cursor with image - controlled z-index to stay below hovered text */}
       <CustomCursor
         containerRef={containerRef}
-        smoothness={1}
+        smoothness={30}
         zIndex={40}
       >
         {hoveredItem ? (
@@ -114,8 +114,9 @@ export function Gallery({ items }: GalleryProps) {
           return (
             <div
               key={item.id}
-              className="cursor-none p-4 flex-shrink-0 relative"
+              className="p-4 flex-shrink-0 relative"
               style={{
+                mixBlendMode: 'difference',
                 zIndex: hoveredItem?.id === item.id ? 50 : 10
               }}
               onMouseEnter={() => handleMouseEnter(item)}
@@ -125,7 +126,7 @@ export function Gallery({ items }: GalleryProps) {
                 className={`
                   ${textSize} font-bold
                   text-white/70
-                  cursor-none select-none
+                  select-none
                   transition-all duration-75 ease-out
                   ${hoveredItem?.id === item.id 
                     ? 'text-white scale-105' 
