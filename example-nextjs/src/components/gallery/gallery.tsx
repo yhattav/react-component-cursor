@@ -177,7 +177,7 @@ export function Gallery({ items }: GalleryProps) {
               {/* Photographer credit */}
               <div className="mt-1">
                 <span className="text-white/40 text-sm font-light tracking-wide">
-                  Photo by {item.photographer}
+                  by {item.photographer}
                 </span>
               </div>
             </div>

@@ -3,7 +3,10 @@
 import React from 'react';
 import { Gallery } from '../../components/gallery/gallery';
 
-// Static gallery data from Unsplash collection with photographer credits
+// Static gallery data from Unsplash collections with photographer credits
+// Main collection: https://unsplash.com/collections/gqB4Wz3Rbww/Gallery-Photos
+// Split collection: https://unsplash.com/collections/9wzfIe6cwVs/split-collection
+// Fixed: All 10 unique images, no duplicates, correct attributions
 const galleryItems = [
   {
     id: 1,
@@ -25,7 +28,7 @@ const galleryItems = [
   },
   {
     id: 4,
-    title: "USGS Landscape",
+    title: "Landscape",
     imageUrl: "https://images.unsplash.com/photo-1722080768196-8983bbbb5c0f?w=280&h=350&fit=crop&crop=center",
     photographer: "USGS"
   },
@@ -43,27 +46,27 @@ const galleryItems = [
   },
   {
     id: 7,
-    title: "Geometric Forms",
-    imageUrl: "https://images.unsplash.com/photo-1534670022376-eb2368089516?w=280&h=350&fit=crop&crop=center",
-    photographer: "Annie Spratt"
+    title: "Poppy Field",
+    imageUrl: "https://images.unsplash.com/photo-1748549812944-2f39b088e4d5?w=280&h=350&fit=crop&crop=center",
+    photographer: "Anna Spoljar"
   },
   {
     id: 8,
-    title: "Minimalist Space",
-    imageUrl: "https://images.unsplash.com/photo-1720788051492-f6eaa0025cc5?w=280&h=350&fit=crop&crop=center",
-    photographer: "Edoardo Matteoni"
+    title: "Orange Bubbles",
+    imageUrl: "https://images.unsplash.com/photo-1518842013791-b874be246c34?w=280&h=350&fit=crop&crop=center",
+    photographer: "Sharon Pittaway"
   },
   {
     id: 9,
-    title: "Dramatic Light",
-    imageUrl: "https://images.unsplash.com/photo-1746542296681-2ed4aa1b8133?w=280&h=350&fit=crop&crop=center",
-    photographer: "Raghavendra Badaskar"
+    title: "Fiery Abstract",
+    imageUrl: "https://images.unsplash.com/photo-1744035522988-08bf64003759?w=280&h=350&fit=crop&crop=center",
+    photographer: "Solen Feyissa"
   },
   {
     id: 10,
-    title: "Natural Tones",
-    imageUrl: "https://images.unsplash.com/photo-1722080768196-8983bbbb5c0f?w=280&h=350&fit=crop&crop=center",
-    photographer: "USGS"
+    title: "Ocean Waves",
+    imageUrl: "https://images.unsplash.com/photo-1497449711066-ecd7e3d6a484?w=280&h=350&fit=crop&crop=center",
+    photographer: "Jorge Vasconez"
   }
 ];
 
