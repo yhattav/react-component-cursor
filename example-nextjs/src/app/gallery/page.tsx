@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Gallery } from '../../components/gallery/gallery';
+import { Gallery } from '../../components/gallery';
 
 // Static gallery data from Unsplash collections with photographer credits
 // Main collection: https://unsplash.com/collections/gqB4Wz3Rbww/Gallery-Photos
