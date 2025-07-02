@@ -67,7 +67,7 @@ export const Playground: React.FC<PlaygroundProps> = ({
   const [copied, setCopied] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const updateConfig = useCallback((key: keyof CursorConfig, value: any) => {
+  const updateConfig = useCallback((key: keyof CursorConfig, value: unknown) => {
     setConfig(prev => ({ ...prev, [key]: value }));
   }, []);
 

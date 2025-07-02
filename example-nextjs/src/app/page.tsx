@@ -7,6 +7,7 @@ import { HeroSection } from '../components/sections/hero-section';
 import { ProofSection } from '../components/sections/proof-section';
 import { FeaturesShowcaseSection } from '../components/sections/features-showcase-section';
 import { InteractiveExamplesSection } from '../components/sections/interactive-examples-section';
+import { PlaygroundSection } from '../components/sections/playground-section';
 import { QuickStartSection } from '../components/sections/quick-start-section';
 import { Footer } from '../components/sections/footer';
 
@@ -25,10 +26,13 @@ function HomePage() {
       {/* 4. INTERACTIVE EXAMPLES - See It In Action (30-60 seconds) */}
       <InteractiveExamplesSection />
 
-      {/* 5. QUICK START - Get Started (60+ seconds) */}
+      {/* 5. PLAYGROUND - Experiment & Generate Code */}
+      <PlaygroundSection />
+
+      {/* 6. QUICK START - Get Started (60+ seconds) */}
       <QuickStartSection />
 
-      {/* 6. FOOTER */}
+      {/* 7. FOOTER */}
       <Footer />
     </main>
   );
