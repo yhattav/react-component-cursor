@@ -143,7 +143,7 @@ export const Playground: React.FC<PlaygroundProps> = ({
       <div 
         ref={containerRef}
         className={`bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700 ${
-          config.enabled && config.hideNativeCursor ? 'hide-all-cursors' : ''
+          config.enabled && config.hideNativeCursor ? 'hide-cursor' : ''
         }`}
       >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
