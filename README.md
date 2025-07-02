@@ -67,7 +67,7 @@ The main component for creating custom cursors.
 | `className`           | `string`                         | `''`    | Additional CSS classes applied to the cursor container element. | None |
 | `style`               | `CSSProperties`                  | `{}`    | Additional inline styles applied to the cursor container. Use for custom positioning, size, etc. | None |
 | `offset`              | `CursorOffset`                   | `{ x: 0, y: 0 }` | Pixel offset from the actual mouse position. Applied before centering. | None |
-| `zIndex`              | `number`                         | `9999`  | CSS z-index of the cursor element. Ensures cursor appears above other content. | None |
+| `zIndex`              | `number`                         | `9999`  | CSS z-index of the cursor container (all custom cursors elements on the page use the same single container). Ensures cursor appears above other content. | None |
 | `smoothness`          | `number`                         | `1`     | Movement smoothing factor. `1` = instant movement, higher values = smoother but with lag. | **High** when > 1 |
 | `containerRef`        | `RefObject<HTMLElement>`         | -       | Reference to container element. When provided, cursor only appears within this element. | None |
 | `centered`            | `boolean`                        | `true`  | Automatically center cursor content on mouse position. Set to `false` for top-left positioning. | None |
