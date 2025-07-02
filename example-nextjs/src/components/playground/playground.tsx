@@ -45,6 +45,21 @@ const renderCursorContent = () => {
   );
 };
 
+const renderFallbackCursor = () => {
+  return (
+    <div
+      style={{
+        width: '8px',
+        height: '8px',
+        backgroundColor: '#6b7280',
+        borderRadius: '50%',
+        border: '1px solid #374151',
+        transition: 'all 0.2s ease',
+      }}
+    />
+  );
+};
+
 export const Playground: React.FC<PlaygroundProps> = ({ 
   enabledProps = Object.keys(defaultConfig) 
 }) => {
@@ -96,7 +111,21 @@ export const Playground: React.FC<PlaygroundProps> = ({
 
   return (
     <div className="relative w-full max-w-4xl mx-auto">
-      {/* Container-scoped cursor */}
+      {/* Fallback cursor - always visible at lower z-index */}
+      <CustomCursor
+        enabled={config.hideNativeCursor}
+        containerRef={containerRef}
+        smoothness={1}
+        offset={{ x: 0, y: 0 }}
+        centered={true}
+        throttleMs={0}
+        zIndex={config.zIndex - 1}
+        showDevIndicator={false}
+      >
+        {renderFallbackCursor()}
+      </CustomCursor>
+
+      {/* Main interactive cursor */}
       <CustomCursor
         enabled={config.enabled}
         containerRef={containerRef}
@@ -185,8 +214,8 @@ export const Playground: React.FC<PlaygroundProps> = ({
                   <input
                     type="range"
                     min="0.1"
-                    max="5"
-                    step="0.1"
+                    max="100"
+                    step="1"
                     value={config.smoothness}
                     onChange={(e) => updateConfig('smoothness', parseFloat(e.target.value))}
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
@@ -234,7 +263,7 @@ export const Playground: React.FC<PlaygroundProps> = ({
                     type="range"
                     min="0"
                     max="100"
-                    step="5"
+                    step="1"
                     value={config.throttleMs}
                     onChange={(e) => updateConfig('throttleMs', parseInt(e.target.value))}
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
