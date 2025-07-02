@@ -14,6 +14,14 @@ export interface GalleryProps {
   items: GalleryItem[];
 }
 
+const sizes = [
+  'text-4xl md:text-6xl',
+  'text-3xl md:text-5xl', 
+  'text-5xl md:text-7xl',
+  'text-3xl md:text-4xl',
+  'text-4xl md:text-5xl',
+];
+
 export function Gallery({ items }: GalleryProps) {
   const [hoveredItem, setHoveredItem] = useState<GalleryItem | null>(null);
   const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set());
@@ -132,14 +140,6 @@ export function Gallery({ items }: GalleryProps) {
       >
         {items.map((item, index) => {
           // Vary text sizes to create visual interest like reference
-          const sizes = [
-            'text-4xl md:text-6xl',
-            'text-3xl md:text-5xl', 
-            'text-5xl md:text-7xl',
-            'text-3xl md:text-4xl',
-            'text-4xl md:text-5xl',
-          ];
-          
           const textSize = sizes[index % sizes.length];
           
           return (
