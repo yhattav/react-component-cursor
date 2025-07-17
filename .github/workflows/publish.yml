@@ -1,4 +1,4 @@
-name: Publish Package
+name: Publish Beta Package
 
 on:
   workflow_run:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  publish:
+  publish-beta:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
@@ -32,41 +32,47 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Get latest beta version
+      - name: Get next beta version
         id: get-version
         run: |
           # Get package name from package.json
           PACKAGE_NAME=$(node -p "require('./package.json').name")
           echo "Package name: $PACKAGE_NAME"
 
-          # Get all versions and filter for latest beta
-          LATEST_VERSION=$(npm view "${PACKAGE_NAME}@beta" version 2>/dev/null || echo "0.1.0-beta.0")
-          if [ -z "$LATEST_VERSION" ] || [ "$LATEST_VERSION" = "null" ]; then
-            LATEST_VERSION="0.1.0-beta.0"
+          # Get current base version from package.json
+          BASE_VERSION=$(node -p "require('./package.json').version")
+          echo "Base version from package.json: $BASE_VERSION"
+
+          # Get latest beta version from npm
+          LATEST_BETA=$(npm view "${PACKAGE_NAME}@beta" version 2>/dev/null || echo "")
+          
+          if [ -z "$LATEST_BETA" ] || [ "$LATEST_BETA" = "null" ]; then
+            # No beta exists, create first beta from base version
+            NEXT_VERSION="${BASE_VERSION}-beta.1"
+          else
+            echo "Current beta version: $LATEST_BETA"
+            # Extract beta number and increment
+            BETA_NUM=$(echo $LATEST_BETA | grep -o 'beta\.[0-9]*' | cut -d'.' -f2)
+            NEXT_BETA=$((BETA_NUM + 1))
+            NEXT_VERSION="${BASE_VERSION}-beta.${NEXT_BETA}"
           fi
-          echo "Current version: $LATEST_VERSION"
 
-          # Extract the base version and beta number
-          BASE_VERSION=$(echo $LATEST_VERSION | cut -d'-' -f1)
-          BETA_NUM=$(echo $LATEST_VERSION | grep -o 'beta\.[0-9]*' | cut -d'.' -f2)
-          NEXT_BETA=$((BETA_NUM + 1))
-          NEXT_VERSION="${BASE_VERSION}-beta.${NEXT_BETA}"
-
-          echo "Next version will be: $NEXT_VERSION"
+          echo "Next beta version will be: $NEXT_VERSION"
           echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
 
       - name: Update package.json version
         run: |
           npm version ${{ steps.get-version.outputs.next_version }} --no-git-tag-version
 
-      - name: Publish to npm
+      - name: Publish beta to npm
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_AUTOMATION_TOKEN }}" > .npmrc
-          # Publish the package with beta tag
           npm publish --access public --tag beta
-          # Update the beta tag to point to this version
-          PACKAGE_NAME=$(node -p "require('./package.json').name")
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          npm dist-tag add ${PACKAGE_NAME}@${PACKAGE_VERSION} beta
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTOMATION_TOKEN }}
+
+      - name: Create beta release summary
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          echo "Published beta version: $PACKAGE_VERSION"
+          echo "Install with: npm install @yhattav/react-component-cursor@beta"

@@ -1,0 +1,153 @@
+name: Release Stable Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      custom_version:
+        description: 'Custom version (optional - overrides version_type)'
+        required: false
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run full test suite
+        run: |
+          npm run test:run
+          npm run test:coverage
+          npm run e2e
+
+      - name: Run performance benchmarks
+        run: npm run perf:ci
+
+      - name: Build package
+        run: npm run build
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.custom_version }}" ]; then
+            NEW_VERSION="${{ github.event.inputs.custom_version }}"
+            echo "Using custom version: $NEW_VERSION"
+          else
+            # Get current version and bump it
+            CURRENT_VERSION=$(node -p "require('./package.json').version")
+            echo "Current version: $CURRENT_VERSION"
+            
+            # Remove any beta suffix for version calculation
+            BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'-' -f1)
+            echo "Base version: $BASE_VERSION"
+            
+            # Calculate new version based on type
+            case "${{ github.event.inputs.version_type }}" in
+              "major")
+                NEW_VERSION=$(npm version major --no-git-tag-version --preid='' | cut -d'v' -f2)
+                ;;
+              "minor")
+                NEW_VERSION=$(npm version minor --no-git-tag-version --preid='' | cut -d'v' -f2)
+                ;;
+              "patch")
+                NEW_VERSION=$(npm version patch --no-git-tag-version --preid='' | cut -d'v' -f2)
+                ;;
+            esac
+          fi
+          
+          echo "New version will be: $NEW_VERSION"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          
+          # Set the version in package.json
+          npm version $NEW_VERSION --no-git-tag-version
+
+      - name: Verify package integrity
+        run: |
+          npm run build
+          npm pack --dry-run
+
+      - name: Create release commit and tag
+        run: |
+          VERSION=${{ steps.version.outputs.new_version }}
+          git add package.json package-lock.json
+          git commit -m "Release v$VERSION"
+          git tag -a "v$VERSION" -m "Release v$VERSION"
+
+      - name: Publish to npm
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_AUTOMATION_TOKEN }}" > .npmrc
+          npm publish --access public --tag latest
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTOMATION_TOKEN }}
+
+      - name: Push changes and tags
+        run: |
+          git push origin main
+          git push origin --tags
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.new_version }}
+          release_name: Release v${{ steps.version.outputs.new_version }}
+          body: |
+            ## Release v${{ steps.version.outputs.new_version }}
+            
+            This is a stable release of @yhattav/react-component-cursor.
+            
+            ### Installation
+            ```bash
+            npm install @yhattav/react-component-cursor@latest
+            ```
+            
+            ### What's New
+            - Stable release ready for production use
+            - All beta features are now stable
+            
+            See the [README](https://github.com/yhattav/react-component-cursor/blob/main/README.md) for usage instructions.
+          draft: false
+          prerelease: false
+
+      - name: Update latest dist-tag
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          npm dist-tag add ${PACKAGE_NAME}@${PACKAGE_VERSION} latest
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTOMATION_TOKEN }}
+
+      - name: Release summary
+        run: |
+          VERSION=${{ steps.version.outputs.new_version }}
+          echo "🚀 Successfully released v$VERSION!"
+          echo "📦 Package: @yhattav/react-component-cursor@$VERSION"
+          echo "🏷️ npm tag: latest"
+          echo "📥 Install: npm install @yhattav/react-component-cursor"
