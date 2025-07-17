@@ -6,18 +6,14 @@ This PR introduces infrastructure for stable npm releases while maintaining the 
 
 ## Key Changes
 
-### 🚀 New Stable Release Workflow (`.github/workflows/release.yml`)
-- **Manual trigger**: Stable releases are created via GitHub Actions UI
-- **Version control**: Supports patch/minor/major bumps or custom versions
-- **Quality gates**: Full test suite, e2e tests, and performance benchmarks
-- **Comprehensive process**: Creates git tags, GitHub releases, and npm publication
-- **npm tag**: Publishes to `@latest` (default for `npm install`)
-
-### 🔄 Updated Beta Release Workflow (`.github/workflows/publish.yml`)
-- **Streamlined**: Focused on beta releases only
-- **Automatic**: Continues to trigger on main branch CI success
-- **Improved logic**: Better version calculation and error handling
-- **npm tag**: Publishes to `@beta`
+### 🚀 Unified Release Workflow (`.github/workflows/release.yml`)
+- **Single workflow**: Handles both beta and stable releases intelligently
+- **Automatic beta**: Triggers on main branch CI success (basic tests)
+- **Manual stable**: GitHub Actions UI with full quality gates
+- **Manual beta**: Optional manual beta releases for testing
+- **Smart testing**: Basic tests for betas, full suite for stable
+- **Version management**: Supports patch/minor/major bumps or custom versions
+- **npm tags**: `@beta` for betas, `@latest` for stable
 
 ### 📦 Package Configuration Updates
 - **Version bump**: Updated from `0.1.0` to `1.0.0` (first stable release)

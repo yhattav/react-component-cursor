@@ -4,53 +4,59 @@ This document outlines the release process for `@yhattav/react-component-cursor`
 
 ## Overview
 
-The project supports two types of releases:
+The project uses a **unified release workflow** that handles both beta and stable releases:
 
 1. **Beta Releases** - Automatic releases from the `main` branch
-2. **Stable Releases** - Manual releases triggered via GitHub Actions
+2. **Stable Releases** - Manual releases triggered via GitHub Actions  
+3. **Manual Beta Releases** - Manual beta releases for testing specific versions
 
-## Beta Releases (Automatic)
+## Unified Release Workflow
 
-Beta releases happen automatically when:
-- CI passes on the `main` branch
-- Code is merged to `main`
+**Single File**: `.github/workflows/release.yml`
 
-### Process:
+### Beta Releases (Automatic)
+
+**Trigger**: Automatic after CI success on `main` branch
+
+**Process**:
 1. Every successful CI run on `main` triggers a beta release
 2. Version format: `X.Y.Z-beta.N` (e.g., `1.0.0-beta.1`)
-3. Published with `@beta` npm tag
-4. Install with: `npm install @yhattav/react-component-cursor@beta`
+3. Runs basic tests only (for speed)
+4. Published with `@beta` npm tag
+5. Install with: `npm install @yhattav/react-component-cursor@beta`
 
-### Beta Workflow:
-- **File**: `.github/workflows/publish.yml`
-- **Trigger**: Automatic after CI success on `main`
-- **npm tag**: `beta`
+### Stable Releases (Manual)
 
-## Stable Releases (Manual)
+**Trigger**: Manual via GitHub Actions UI
 
-Stable releases are created manually when the team decides a version is ready for production.
-
-### Process:
-1. Navigate to **Actions** → **Release Stable Version** in GitHub
+**Process**:
+1. Navigate to **Actions** → **Release Package** in GitHub
 2. Click **Run workflow**
-3. Choose version bump type:
+3. Choose release type: **stable**
+4. Choose version bump type:
    - **patch**: Bug fixes (1.0.0 → 1.0.1)
    - **minor**: New features (1.0.0 → 1.1.0)
    - **major**: Breaking changes (1.0.0 → 2.0.0)
-4. Optionally specify a custom version
-5. The workflow will:
-   - Run full test suite + e2e tests
-   - Run performance benchmarks
-   - Build and verify package
-   - Create release commit and tag
+5. Optionally specify a custom version
+6. The workflow will:
+   - Run **full test suite** + e2e tests + performance benchmarks
+   - Build and verify package integrity
+   - Create release commit and git tag
    - Publish to npm with `@latest` tag
-   - Create GitHub Release
-   - Update documentation
+   - Create GitHub Release with changelog
+   - Push changes to repository
 
-### Stable Workflow:
-- **File**: `.github/workflows/release.yml`
-- **Trigger**: Manual via GitHub Actions UI
-- **npm tag**: `latest`
+### Manual Beta Releases (Optional)
+
+**Trigger**: Manual via GitHub Actions UI
+
+**Process**:
+1. Navigate to **Actions** → **Release Package** in GitHub
+2. Click **Run workflow**
+3. Choose release type: **beta**
+4. Runs basic tests and creates a beta release
+
+**Use Cases**: Testing specific features, creating release candidates
 
 ## Version Management
 
