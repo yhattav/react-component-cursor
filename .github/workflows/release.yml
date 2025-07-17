@@ -111,18 +111,25 @@ jobs:
               BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'-' -f1)
               echo "Base version: $BASE_VERSION"
               
-              # Calculate new version based on type
-              case "${{ github.event.inputs.version_type }}" in
-                "major")
-                  NEW_VERSION=$(npm version major --no-git-tag-version --preid='' | cut -d'v' -f2)
-                  ;;
-                "minor")
-                  NEW_VERSION=$(npm version minor --no-git-tag-version --preid='' | cut -d'v' -f2)
-                  ;;
-                "patch")
-                  NEW_VERSION=$(npm version patch --no-git-tag-version --preid='' | cut -d'v' -f2)
-                  ;;
-              esac
+                           # Calculate new version based on type using semantic versioning
+             case "${{ github.event.inputs.version_type }}" in
+               "major")
+                 # Extract major, minor, patch from base version
+                 MAJOR=$(echo $BASE_VERSION | cut -d'.' -f1)
+                 NEW_VERSION="$((MAJOR + 1)).0.0"
+                 ;;
+               "minor")
+                 MAJOR=$(echo $BASE_VERSION | cut -d'.' -f1)
+                 MINOR=$(echo $BASE_VERSION | cut -d'.' -f2)
+                 NEW_VERSION="${MAJOR}.$((MINOR + 1)).0"
+                 ;;
+               "patch")
+                 MAJOR=$(echo $BASE_VERSION | cut -d'.' -f1)
+                 MINOR=$(echo $BASE_VERSION | cut -d'.' -f2)
+                 PATCH=$(echo $BASE_VERSION | cut -d'.' -f3)
+                 NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
+                 ;;
+             esac
             fi
             
             echo "tag=latest" >> $GITHUB_OUTPUT
@@ -155,7 +162,7 @@ jobs:
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           
           # Set the version in package.json
-          npm version $NEW_VERSION --no-git-tag-version
+          npm version "$NEW_VERSION" --no-git-tag-version
 
       - name: Verify package integrity
         if: steps.release-type.outputs.type == 'stable'
@@ -166,7 +173,7 @@ jobs:
       - name: Create release commit and tag
         if: steps.release-type.outputs.type == 'stable'
         run: |
-          VERSION=${{ steps.version.outputs.version }}
+          VERSION="${{ steps.version.outputs.version }}"
           git add package.json package-lock.json
           git commit -m "Release v$VERSION"
           git tag -a "v$VERSION" -m "Release v$VERSION"
@@ -186,12 +193,10 @@ jobs:
 
       - name: Create GitHub Release
         if: steps.release-type.outputs.type == 'stable'
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.version.outputs.version }}
-          release_name: Release v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
           body: |
             ## Release v${{ steps.version.outputs.version }}
             
@@ -206,9 +211,9 @@ jobs:
 
       - name: Release summary
         run: |
-          VERSION=${{ steps.version.outputs.version }}
-          TYPE=${{ steps.release-type.outputs.type }}
-          TAG=${{ steps.version.outputs.tag }}
+          VERSION="${{ steps.version.outputs.version }}"
+          TYPE="${{ steps.release-type.outputs.type }}"
+          TAG="${{ steps.version.outputs.tag }}"
           
           if [ "$TYPE" = "stable" ]; then
             echo "🚀 Successfully released stable version v$VERSION!"

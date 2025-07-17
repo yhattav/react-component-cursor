@@ -120,10 +120,11 @@ This PR sets up the infrastructure for the first stable release (`1.0.0`). To cr
 
 1. Merge this PR to `main`
 2. Wait for the beta release to complete
-3. Go to GitHub Actions → **Release Stable Version**
+3. Go to GitHub Actions → **Release Package**
 4. Run workflow with:
-   - Version type: `major` (to go from 1.0.0 to 1.0.0 stable)
-   - Or custom version: `1.0.0`
+   - Release type: `stable`
+   - Version type: Use **custom version** (since we want `1.0.0` exactly)
+   - Custom version: `1.0.0`
 
 ## Rollback Process
 
