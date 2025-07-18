@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "1.0.0",
   "license": "MIT",
   "exports": {
     ".": {
@@ -62,7 +62,13 @@
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
     "e2e:debug": "playwright test --debug",
-    "e2e:report": "playwright show-report"
+    "e2e:report": "playwright show-report",
+    "release:patch": "echo 'Use GitHub Actions workflow_dispatch to release'",
+    "release:minor": "echo 'Use GitHub Actions workflow_dispatch to release'",
+    "release:major": "echo 'Use GitHub Actions workflow_dispatch to release'",
+    "version:check": "npm view @yhattav/react-component-cursor dist-tags",
+    "version:beta": "npm view @yhattav/react-component-cursor@beta version",
+    "version:latest": "npm view @yhattav/react-component-cursor@latest version"
   },
   "peerDependencies": {
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0",

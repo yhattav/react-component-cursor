@@ -14,11 +14,21 @@ A flexible and customizable React component for creating smooth, interactive cus
 
 ## Installation
 
+### Stable Release (Recommended)
 ```bash
 npm install @yhattav/react-component-cursor
-or
+# or
 yarn add @yhattav/react-component-cursor
 ```
+
+### Beta Release (Latest Features)
+```bash
+npm install @yhattav/react-component-cursor@beta
+# or  
+yarn add @yhattav/react-component-cursor@beta
+```
+
+> **Note**: Beta releases contain the latest features but may have breaking changes. For production use, we recommend the stable release.
 
 **Note:** If you wish to, You'll need to hide the native cursor with CSS (like `cursor: none` in the example above). See our [styling guide](docs/CURSOR_STYLING.md) for different approaches.
 

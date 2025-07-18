@@ -1,0 +1,228 @@
+name: Release Package
+
+on:
+  # Automatic beta releases on main branch
+  workflow_run:
+    workflows: ['CI']
+    types:
+      - completed
+    branches:
+      - main
+  
+  # Manual stable releases
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'beta'
+        type: choice
+        options:
+          - beta
+          - stable
+      version_type:
+        description: 'Version bump type (for stable releases)'
+        required: false
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      custom_version:
+        description: 'Custom version (optional - overrides version_type)'
+        required: false
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    # For workflow_run, only proceed if CI was successful
+    # For workflow_dispatch, always proceed
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Determine release type
+        id: release-type
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "type=beta" >> $GITHUB_OUTPUT
+            echo "🔄 Automatic beta release triggered by main branch CI"
+          elif [ "${{ github.event.inputs.release_type }}" = "stable" ]; then
+            echo "type=stable" >> $GITHUB_OUTPUT
+            echo "🚀 Manual stable release triggered"
+          else
+            echo "type=beta" >> $GITHUB_OUTPUT
+            echo "🔄 Manual beta release triggered"
+          fi
+
+      - name: Run appropriate test suite
+        run: |
+          if [ "${{ steps.release-type.outputs.type }}" = "stable" ]; then
+            echo "Running full test suite for stable release..."
+            npm run test:run
+            npm run test:coverage
+            npm run e2e
+            npm run perf:ci
+          else
+            echo "Running basic tests for beta release..."
+            npm run test:run
+          fi
+
+      - name: Build package
+        run: npm run build
+
+      - name: Determine version
+        id: version
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          
+          if [ "${{ steps.release-type.outputs.type }}" = "stable" ]; then
+            echo "Calculating stable version..."
+            
+            if [ -n "${{ github.event.inputs.custom_version }}" ]; then
+              NEW_VERSION="${{ github.event.inputs.custom_version }}"
+              echo "Using custom version: $NEW_VERSION"
+            else
+              # Get current version and bump it
+              CURRENT_VERSION=$(node -p "require('./package.json').version")
+              echo "Current version: $CURRENT_VERSION"
+              
+              # Remove any beta suffix for version calculation
+              BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'-' -f1)
+              echo "Base version: $BASE_VERSION"
+              
+              # Calculate new version based on type using semantic versioning
+             case "${{ github.event.inputs.version_type }}" in
+               "major")
+                 # Extract major, minor, patch from base version
+                 MAJOR=$(echo $BASE_VERSION | cut -d'.' -f1)
+                 NEW_VERSION="$((MAJOR + 1)).0.0"
+                 ;;
+               "minor")
+                 MAJOR=$(echo $BASE_VERSION | cut -d'.' -f1)
+                 MINOR=$(echo $BASE_VERSION | cut -d'.' -f2)
+                 NEW_VERSION="${MAJOR}.$((MINOR + 1)).0"
+                 ;;
+               "patch")
+                 MAJOR=$(echo $BASE_VERSION | cut -d'.' -f1)
+                 MINOR=$(echo $BASE_VERSION | cut -d'.' -f2)
+                 PATCH=$(echo $BASE_VERSION | cut -d'.' -f3)
+                 NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
+                 ;;
+             esac
+            fi
+            
+            echo "tag=latest" >> $GITHUB_OUTPUT
+            
+          else
+            echo "Calculating beta version..."
+            
+            # Get current base version from package.json
+            BASE_VERSION=$(node -p "require('./package.json').version")
+            echo "Base version from package.json: $BASE_VERSION"
+
+            # Get latest beta version from npm
+            LATEST_BETA=$(npm view "${PACKAGE_NAME}@beta" version 2>/dev/null || echo "")
+            
+            if [ -z "$LATEST_BETA" ] || [ "$LATEST_BETA" = "null" ]; then
+              # No beta exists, create first beta from base version
+              NEW_VERSION="${BASE_VERSION}-beta.1"
+            else
+              echo "Current beta version: $LATEST_BETA"
+              # Extract beta number and increment
+              BETA_NUM=$(echo $LATEST_BETA | grep -o 'beta\.[0-9]*' | cut -d'.' -f2)
+              NEXT_BETA=$((BETA_NUM + 1))
+              NEW_VERSION="${BASE_VERSION}-beta.${NEXT_BETA}"
+            fi
+            
+            echo "tag=beta" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "New version will be: $NEW_VERSION"
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          
+          # Set the version in package.json
+          npm version "$NEW_VERSION" --no-git-tag-version
+
+      - name: Verify package integrity
+        if: steps.release-type.outputs.type == 'stable'
+        run: |
+          npm run build
+          npm pack --dry-run
+
+      - name: Create release commit and tag
+        if: steps.release-type.outputs.type == 'stable'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git add package.json package-lock.json
+          git commit -m "Release v$VERSION"
+          git tag -a "v$VERSION" -m "Release v$VERSION"
+
+      - name: Publish to npm
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_AUTOMATION_TOKEN }}" > .npmrc
+          npm publish --access public --tag ${{ steps.version.outputs.tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTOMATION_TOKEN }}
+
+      - name: Push changes and tags
+        if: steps.release-type.outputs.type == 'stable'
+        run: |
+          git push origin main
+          git push origin --tags
+
+      - name: Create GitHub Release
+        if: steps.release-type.outputs.type == 'stable'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
+          body: |
+            ## Release v${{ steps.version.outputs.version }}
+            
+            This is a stable release of @yhattav/react-component-cursor.
+            
+            ### Installation
+            ```bash
+            npm install @yhattav/react-component-cursor@latest
+            ```
+          draft: false
+          prerelease: false
+
+      - name: Release summary
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TYPE="${{ steps.release-type.outputs.type }}"
+          TAG="${{ steps.version.outputs.tag }}"
+          
+          if [ "$TYPE" = "stable" ]; then
+            echo "🚀 Successfully released stable version v$VERSION!"
+            echo "📦 Package: @yhattav/react-component-cursor@$VERSION"
+            echo "🏷️ npm tag: latest"
+            echo "📥 Install: npm install @yhattav/react-component-cursor"
+          else
+            echo "🔄 Successfully released beta version v$VERSION!"
+            echo "📦 Package: @yhattav/react-component-cursor@$VERSION"
+            echo "🏷️ npm tag: beta"
+            echo "📥 Install: npm install @yhattav/react-component-cursor@beta"
+          fi
