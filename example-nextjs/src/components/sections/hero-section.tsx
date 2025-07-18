@@ -36,7 +36,7 @@ function HeroSection() {
   const [currentCursorIndex, setCurrentCursorIndex] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
 
-  const statsBadges = ['Small bundle', '0 Dependencies', 'TypeScript Ready'];
+  const statsBadges = ['TypeScript', 'Zero Dependencies', '<10KB', 'Enterprise Ready'];
 
   // Handle cursor movement to trigger state changes
   const handleCursorMove = useCallback((position: { x: number; y: number }) => {
@@ -94,14 +94,14 @@ function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: ANIMATION_DURATIONS.hero / 1000 }}
           >
-            <h1 className="text-6xl md:text-8xl font-bold mb-6">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6">
               <span className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                Transform Your React App&apos;s
+                Professional Cursor Enhancement
               </span>
             </h1>
-            <h2 className="text-4xl md:text-6xl font-bold mb-8">
+            <h2 className="text-3xl md:text-5xl font-bold mb-8">
               <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                Cursor Into Anything
+                for React Applications
               </span>
             </h2>
             
@@ -111,7 +111,7 @@ function HeroSection() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.8 }}
             >
-              Lightweight. Performant. Infinitely Customizable.
+              Production-ready • SSR Compatible • Performance Optimized • Design-First
             </motion.p>
 
             <StatsBadges badges={statsBadges} delay={0.8} />
@@ -125,28 +125,28 @@ function HeroSection() {
             >
               <MagneticButton 
                 onClick={() => {
-                  // Navigate to the Quick Start section
-                  const quickStartSection = document.getElementById('quick-start-section');
-                  if (quickStartSection) {
-                    quickStartSection.scrollIntoView({ behavior: 'smooth' });
+                  // Navigate to the Playground section
+                  const playgroundSection = document.getElementById('playground-section');
+                  if (playgroundSection) {
+                    playgroundSection.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                data-testid="get-started-magnetic"
+                data-testid="explore-playground-magnetic"
               >
-                Get Started in 2 Minutes
+                Explore Playground
               </MagneticButton>
               <MagneticButton 
                 variant="outline"
                 onClick={() => {
-                  // Navigate to the Interactive Examples section
-                  const examplesSection = document.getElementById('interactive-examples-section');
+                  // Navigate to the Examples section
+                  const examplesSection = document.getElementById('examples-section');
                   if (examplesSection) {
                     examplesSection.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                data-testid="see-examples-magnetic"
+                data-testid="view-examples-magnetic"
               >
-                See Live Examples ↓
+                View Examples ↓
               </MagneticButton>
             </motion.div>
 
