@@ -138,15 +138,15 @@ function HeroSection() {
               <MagneticButton 
                 variant="outline"
                 onClick={() => {
-                  // Navigate to the Production Applications section
-                  const applicationsSection = document.getElementById('production-applications-section');
-                  if (applicationsSection) {
-                    applicationsSection.scrollIntoView({ behavior: 'smooth' });
+                  // Navigate to the Examples section
+                  const examplesSection = document.getElementById('examples-section');
+                  if (examplesSection) {
+                    examplesSection.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                data-testid="view-implementations-magnetic"
+                data-testid="view-examples-magnetic"
               >
-                View Implementation Examples ↓
+                View Examples ↓
               </MagneticButton>
             </motion.div>
 
