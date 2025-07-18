@@ -34,7 +34,7 @@ function AnimatedGrid({
   className = '',
   overlayClassName = '',
 }: AnimatedGridProps) {
-  const gridWrapperRef = useRef<HTMLDivElement>(null!);
+  const gridWrapperRef = useRef<HTMLDivElement>(null);
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
 
   // Generate Tailwind grid classes from columns config

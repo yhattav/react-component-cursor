@@ -12,15 +12,14 @@ interface ExampleCardProps {
 }
 
 function ExampleCard({ cursor, title }: ExampleCardProps) {
-  const containerRef = React.useRef<HTMLDivElement>(null!);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   return (
     <div className="relative group flex items-center justify-center min-h-[350px] md:min-h-[400px] bg-gray-800/40 transition-colors duration-300 overflow-hidden">
       {/* Cursor for interactive cards */}
       {cursor ? (
         <CustomCursor containerRef={containerRef} className="z-50">
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {cursor as any}
+          <>{cursor}</>
         </CustomCursor>
       ) : null}
 
@@ -41,7 +40,7 @@ function ExampleCard({ cursor, title }: ExampleCardProps) {
 
 // Simplified section using AnimatedGrid
 function InteractiveExamplesSection() {
-  const sectionRef = useRef<HTMLElement>(null!);
+  const sectionRef = useRef<HTMLElement>(null);
 
   return (
     <section
