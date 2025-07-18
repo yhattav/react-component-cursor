@@ -26,11 +26,11 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   
-  // ESLint configuration
+    // ESLint configuration
   eslint: {
     dirs: ['src'],
   },
-  
+
   // TypeScript configuration
   typescript: {
     ignoreBuildErrors: false,
