@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef } from 'react';
 import { CustomCursor } from '@yhattav/react-component-cursor';
 import { OrganicCloudCursor } from '../cursor-designs/organic-cloud-cursor';
+import { AnimatedGrid } from '../ui';
 
 // Simple card component without border effects (back to original)
 interface ExampleCardProps {
@@ -38,17 +39,9 @@ function ExampleCard({ cursor, title }: ExampleCardProps) {
   );
 }
 
-// Original dual-grid approach
+// Simplified section using AnimatedGrid
 function InteractiveExamplesSection() {
   const sectionRef = useRef<HTMLElement>(null!);
-  const gridWrapperRef = useRef<HTMLDivElement>(null!);
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
-
-  const handleCursorMove = useCallback((position: { x: number; y: number }) => {
-    const rect = gridWrapperRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    setCursorPos({ x: position.x - rect.left, y: position.y - rect.top });
-  }, []);
 
   return (
     <section
@@ -69,44 +62,23 @@ function InteractiveExamplesSection() {
         </p>
       </div>
 
-      {/* Grid wrapper with CSS variables for cursor position */}
-      <div 
-        ref={gridWrapperRef} 
-        className="relative px-6"
-        style={{
-          '--cursor-x': `${cursorPos.x}px`,
-          '--cursor-y': `${cursorPos.y}px`,
-        } as React.CSSProperties}
+      {/* AnimatedGrid with border reveal effect */}
+      <AnimatedGrid 
+        cols={{ base: 1, sm: 2, lg: 3 }}
+        borderColor="rgba(168, 85, 247, 0.9)"
+        glowRadius={300}
+        smoothness={20}
+        className="px-6"
       >
-        {/* Overlay grid that reveals borders */}
-        <div
-          className="pointer-events-none absolute inset-0 z-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0"
-          style={{
-            color: 'rgba(168, 85, 247, 0.9)',
-            maskImage: 'radial-gradient(circle 300px at var(--cursor-x) var(--cursor-y), #000 0%, transparent 65%)',
-            WebkitMaskImage: 'radial-gradient(circle 300px at var(--cursor-x) var(--cursor-y), #000 0%, transparent 65%)',
-          }}
-        >
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="border border-current" />
-          ))}
-        </div>
+        {/* Example 1 – Organic Cloud Cursor */}
+        <ExampleCard title="Organic Cloud Cursor" cursor={<OrganicCloudCursor />} />
 
-        {/* Content Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0">
-          {/* Example 1 – Organic Cloud Cursor */}
-          <ExampleCard title="Organic Cloud Cursor" cursor={<OrganicCloudCursor />} />
+        {/* Example 2 – Placeholder */}
+        <ExampleCard title="Coming Soon" />
 
-          {/* Example 2 – Placeholder */}
-          <ExampleCard title="Coming Soon" />
-
-          {/* Example 3 – Placeholder */}
-          <ExampleCard title="Coming Soon" />
-        </div>
-      </div>
-      
-      {/* CustomCursor to drive the effect */}
-      <CustomCursor containerRef={gridWrapperRef} smoothness={2} onMove={handleCursorMove} />
+        {/* Example 3 – Placeholder */}
+        <ExampleCard title="Coming Soon" />
+      </AnimatedGrid>
     </section>
   );
 }
