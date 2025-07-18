@@ -81,7 +81,7 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
     
     switch (variant) {
       case 'outline':
-        return `${baseStyles} border-2 border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white`;
+        return `${baseStyles} text-purple-400 hover:bg-purple-400 hover:text-white shadow-[inset_0_0_0_2px_rgb(168_85_247)] hover:shadow-[inset_0_0_0_2px_rgb(168_85_247)]`;
       default:
         return `${baseStyles} bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-xl`;
     }
