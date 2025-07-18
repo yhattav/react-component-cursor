@@ -50,30 +50,15 @@ function AnimatedGrid({
     return classes.join(' ');
   }, [cols]);
 
-  // Generate gap classes - ensure we use valid Tailwind gap values
-  const generateGapClass = useCallback(() => {
-    if (gap === 0) return 'gap-0';
-    if (gap <= 1) return 'gap-1';
-    if (gap <= 2) return 'gap-2'; 
-    if (gap <= 3) return 'gap-3';
-    if (gap <= 4) return 'gap-4';
-    if (gap <= 6) return 'gap-6';
-    if (gap <= 8) return 'gap-8';
-    if (gap <= 10) return 'gap-10';
-    if (gap <= 12) return 'gap-12';
-    return 'gap-4'; // Default fallback
-  }, [gap]);
+  // Use CSS properties directly for full flexibility
+  const gridStyles = {
+    gap: gap > 0 ? `${gap}px` : '0px',
+  };
 
-  const gapClass = generateGapClass();
-  
-  // Generate border thickness class
-  const getBorderClass = useCallback(() => {
-    if (borderThickness === 1) return 'border';
-    if (borderThickness === 2) return 'border-2';
-    if (borderThickness === 4) return 'border-4';
-    if (borderThickness === 8) return 'border-8';
-    return 'border'; // Default fallback
-  }, [borderThickness]);
+  const borderStyles = {
+    borderWidth: `${borderThickness}px`,
+    borderStyle: 'solid',
+  };
   
   // Count children to create matching overlay cells
   const childCount = React.Children.count(children);
@@ -84,7 +69,7 @@ function AnimatedGrid({
     setCursorPos({ x: position.x - rect.left, y: position.y - rect.top });
   }, []);
 
-  const gridClasses = `grid ${generateGridClasses()} ${gapClass}`;
+  const gridClasses = `grid ${generateGridClasses()}`;
 
   return (
     <div 
@@ -104,22 +89,25 @@ function AnimatedGrid({
             color: borderColor,
             maskImage: `radial-gradient(circle ${glowRadius}px at var(--cursor-x) var(--cursor-y), #000 0%, transparent 65%)`,
             WebkitMaskImage: `radial-gradient(circle ${glowRadius}px at var(--cursor-x) var(--cursor-y), #000 0%, transparent 65%)`,
+            ...gridStyles,
           }}
         >
           {[...Array(childCount)].map((_, i) => (
             <div 
               key={i} 
-              className={`${getBorderClass()} border-current ${gap > 0 ? 'rounded-sm' : ''}`}
-              style={gap > 0 ? { 
+              className={`border-current ${gap > 0 ? 'rounded-sm' : ''}`}
+              style={{
+                ...borderStyles,
+                borderColor: 'currentColor',
                 backgroundColor: 'transparent',
                 boxSizing: 'border-box'
-              } : undefined}
+              }}
             />
           ))}
         </div>
 
         {/* Content Grid */}
-        <div className={gridClasses}>
+        <div className={gridClasses} style={gridStyles}>
           {children}
         </div>
       </div>

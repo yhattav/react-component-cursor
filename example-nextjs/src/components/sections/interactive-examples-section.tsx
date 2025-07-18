@@ -66,11 +66,11 @@ function InteractiveExamplesSection() {
       <AnimatedGrid 
         cols={{ base: 1, sm: 2, lg: 3 }}
         borderColor="rgba(168, 85, 247, 0.9)"
-        borderThickness={2}
-        gap={4}
+        borderThickness={1}
+        gap={16}
         glowRadius={300}
         smoothness={20}
-        className="px-6 bg-red-500/10"
+        className="px-6"
       >
         {/* Example 1 – Organic Cloud Cursor */}
         <ExampleCard title="Organic Cloud Cursor" cursor={<OrganicCloudCursor />} />
