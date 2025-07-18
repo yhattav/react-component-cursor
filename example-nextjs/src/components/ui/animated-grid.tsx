@@ -118,7 +118,7 @@ function AnimatedGrid({
       </div>
 
       {/* CustomCursor to drive the effect */}
-      <CustomCursor containerRef={gridWrapperRef} smoothness={smoothness} onMove={handleCursorMove} />
+      <CustomCursor smoothness={smoothness} onMove={handleCursorMove} />
     </div>
   );
 }
