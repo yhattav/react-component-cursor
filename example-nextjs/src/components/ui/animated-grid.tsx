@@ -71,23 +71,26 @@ function AnimatedGrid({
         '--cursor-y': `${cursorPos.y}px`,
       } as React.CSSProperties}
     >
-      {/* Overlay grid that reveals borders */}
-      <div
-        className={`pointer-events-none absolute inset-0 z-20 ${gridClasses} ${overlayClassName}`}
-        style={{
-          color: borderColor,
-          maskImage: `radial-gradient(circle ${glowRadius}px at var(--cursor-x) var(--cursor-y), #000 0%, transparent 65%)`,
-          WebkitMaskImage: `radial-gradient(circle ${glowRadius}px at var(--cursor-x) var(--cursor-y), #000 0%, transparent 65%)`,
-        }}
-      >
-        {[...Array(childCount)].map((_, i) => (
-          <div key={i} className="border border-current" />
-        ))}
-      </div>
+      {/* Content area wrapper - this defines the exact area we want to overlay */}
+      <div className="relative">
+        {/* Overlay grid that reveals borders - positioned exactly over content grid */}
+        <div
+          className={`pointer-events-none absolute inset-0 z-20 ${gridClasses} ${overlayClassName}`}
+          style={{
+            color: borderColor,
+            maskImage: `radial-gradient(circle ${glowRadius}px at var(--cursor-x) var(--cursor-y), #000 0%, transparent 65%)`,
+            WebkitMaskImage: `radial-gradient(circle ${glowRadius}px at var(--cursor-x) var(--cursor-y), #000 0%, transparent 65%)`,
+          }}
+        >
+          {[...Array(childCount)].map((_, i) => (
+            <div key={i} className="border border-current" />
+          ))}
+        </div>
 
-      {/* Content Grid */}
-      <div className={gridClasses}>
-        {children}
+        {/* Content Grid */}
+        <div className={gridClasses}>
+          {children}
+        </div>
       </div>
 
       {/* CustomCursor to drive the effect */}
