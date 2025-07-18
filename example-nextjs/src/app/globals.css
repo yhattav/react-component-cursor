@@ -96,8 +96,8 @@ html {
 }
 
 /* Hide native cursor on all elements and children */
-.hide-all-cursors,
-.hide-all-cursors * {
+.hide-cursor,
+.hide-cursor * {
   cursor: none !important;
 }
 
