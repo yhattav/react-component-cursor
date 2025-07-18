@@ -80,6 +80,32 @@
     "trailingComma": "es5"
   },
   "name": "@yhattav/react-component-cursor",
+  "description": "A lightweight, TypeScript-first React library for creating beautiful custom cursors with SSR support, smooth animations, and zero dependencies. Perfect for interactive websites, games, and creative applications.",
+  "keywords": [
+    "react",
+    "cursor",
+    "custom-cursor",
+    "typescript",
+    "component",
+    "interactive",
+    "mouse-tracker",
+    "animation",
+    "ssr",
+    "nextjs",
+    "ui-components",
+    "frontend",
+    "react-hooks",
+    "smooth-animation",
+    "pointer-events"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yhattav/react-component-cursor.git"
+  },
+  "homepage": "https://yhattav.github.io/react-component-cursor",
+  "bugs": {
+    "url": "https://github.com/yhattav/react-component-cursor/issues"
+  },
   "publishConfig": {
     "access": "public"
   },

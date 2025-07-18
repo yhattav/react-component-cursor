@@ -32,41 +32,68 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Get latest beta version
+      - name: Determine release version
         id: get-version
         run: |
-          # Get package name from package.json
+          # Get package name and current version from package.json
           PACKAGE_NAME=$(node -p "require('./package.json').name")
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
           echo "Package name: $PACKAGE_NAME"
+          echo "Current version in package.json: $CURRENT_VERSION"
 
-          # Get all versions and filter for latest beta
-          LATEST_VERSION=$(npm view "${PACKAGE_NAME}@beta" version 2>/dev/null || echo "0.1.0-beta.0")
-          if [ -z "$LATEST_VERSION" ] || [ "$LATEST_VERSION" = "null" ]; then
-            LATEST_VERSION="0.1.0-beta.0"
+          # Check if current version is already 1.0.0 or higher (stable release)
+          if [[ "$CURRENT_VERSION" =~ ^[1-9][0-9]*\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Publishing stable release: $CURRENT_VERSION"
+            echo "is_stable=true" >> $GITHUB_OUTPUT
+            echo "next_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+            echo "npm_tag=latest" >> $GITHUB_OUTPUT
+          else
+            echo "Publishing beta release based on current version"
+            # Get latest beta version
+            LATEST_VERSION=$(npm view "${PACKAGE_NAME}@beta" version 2>/dev/null || echo "0.1.0-beta.0")
+            if [ -z "$LATEST_VERSION" ] || [ "$LATEST_VERSION" = "null" ]; then
+              LATEST_VERSION="0.1.0-beta.0"
+            fi
+            echo "Latest beta version: $LATEST_VERSION"
+
+            # Extract the base version and beta number
+            BASE_VERSION=$(echo $LATEST_VERSION | cut -d'-' -f1)
+            BETA_NUM=$(echo $LATEST_VERSION | grep -o 'beta\.[0-9]*' | cut -d'.' -f2)
+            NEXT_BETA=$((BETA_NUM + 1))
+            NEXT_VERSION="${BASE_VERSION}-beta.${NEXT_BETA}"
+
+            echo "is_stable=false" >> $GITHUB_OUTPUT
+            echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+            echo "npm_tag=beta" >> $GITHUB_OUTPUT
           fi
-          echo "Current version: $LATEST_VERSION"
 
-          # Extract the base version and beta number
-          BASE_VERSION=$(echo $LATEST_VERSION | cut -d'-' -f1)
-          BETA_NUM=$(echo $LATEST_VERSION | grep -o 'beta\.[0-9]*' | cut -d'.' -f2)
-          NEXT_BETA=$((BETA_NUM + 1))
-          NEXT_VERSION="${BASE_VERSION}-beta.${NEXT_BETA}"
-
-          echo "Next version will be: $NEXT_VERSION"
-          echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          echo "Final version will be: $(cat $GITHUB_OUTPUT | grep next_version | cut -d'=' -f2)"
+          echo "NPM tag will be: $(cat $GITHUB_OUTPUT | grep npm_tag | cut -d'=' -f2)"
 
       - name: Update package.json version
         run: |
-          npm version ${{ steps.get-version.outputs.next_version }} --no-git-tag-version
+          # Only update version if it's a beta release (stable releases use existing version)
+          if [ "${{ steps.get-version.outputs.is_stable }}" = "false" ]; then
+            npm version ${{ steps.get-version.outputs.next_version }} --no-git-tag-version
+          fi
 
       - name: Publish to npm
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_AUTOMATION_TOKEN }}" > .npmrc
-          # Publish the package with beta tag
-          npm publish --access public --tag beta
-          # Update the beta tag to point to this version
-          PACKAGE_NAME=$(node -p "require('./package.json').name")
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          npm dist-tag add ${PACKAGE_NAME}@${PACKAGE_VERSION} beta
+          # Publish the package with appropriate tag (latest for stable, beta for beta)
+          npm publish --access public --tag ${{ steps.get-version.outputs.npm_tag }}
+          
+          # For stable releases, also update the latest tag
+          if [ "${{ steps.get-version.outputs.is_stable }}" = "true" ]; then
+            PACKAGE_NAME=$(node -p "require('./package.json').name")
+            PACKAGE_VERSION=$(node -p "require('./package.json').version")
+            echo "Published stable release ${PACKAGE_NAME}@${PACKAGE_VERSION} with latest tag"
+          else
+            # For beta releases, ensure beta tag points to this version
+            PACKAGE_NAME=$(node -p "require('./package.json').name")
+            PACKAGE_VERSION=$(node -p "require('./package.json').version")
+            npm dist-tag add ${PACKAGE_NAME}@${PACKAGE_VERSION} beta
+            echo "Published beta release ${PACKAGE_NAME}@${PACKAGE_VERSION} with beta tag"
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTOMATION_TOKEN }}
