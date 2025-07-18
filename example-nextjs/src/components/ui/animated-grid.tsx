@@ -50,8 +50,21 @@ function AnimatedGrid({
     return classes.join(' ');
   }, [cols]);
 
-  // Generate gap classes
-  const gapClass = gap > 0 ? `gap-${gap}` : 'gap-0';
+  // Generate gap classes - ensure we use valid Tailwind gap values
+  const generateGapClass = useCallback(() => {
+    if (gap === 0) return 'gap-0';
+    if (gap <= 1) return 'gap-1';
+    if (gap <= 2) return 'gap-2'; 
+    if (gap <= 3) return 'gap-3';
+    if (gap <= 4) return 'gap-4';
+    if (gap <= 6) return 'gap-6';
+    if (gap <= 8) return 'gap-8';
+    if (gap <= 10) return 'gap-10';
+    if (gap <= 12) return 'gap-12';
+    return 'gap-4'; // Default fallback
+  }, [gap]);
+
+  const gapClass = generateGapClass();
   
   // Generate border thickness class
   const getBorderClass = useCallback(() => {
@@ -94,7 +107,14 @@ function AnimatedGrid({
           }}
         >
           {[...Array(childCount)].map((_, i) => (
-            <div key={i} className={`${getBorderClass()} border-current`} />
+            <div 
+              key={i} 
+              className={`${getBorderClass()} border-current ${gap > 0 ? 'rounded-sm' : ''}`}
+              style={gap > 0 ? { 
+                backgroundColor: 'transparent',
+                boxSizing: 'border-box'
+              } : undefined}
+            />
           ))}
         </div>
 

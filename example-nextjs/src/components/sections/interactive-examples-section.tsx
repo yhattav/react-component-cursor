@@ -67,10 +67,10 @@ function InteractiveExamplesSection() {
         cols={{ base: 1, sm: 2, lg: 3 }}
         borderColor="rgba(168, 85, 247, 0.9)"
         borderThickness={2}
-        gap={10}
+        gap={4}
         glowRadius={300}
         smoothness={20}
-        className="px-6"
+        className="px-6 bg-red-500/10"
       >
         {/* Example 1 – Organic Cloud Cursor */}
         <ExampleCard title="Organic Cloud Cursor" cursor={<OrganicCloudCursor />} />
