@@ -16,6 +16,7 @@ interface AnimatedGridProps {
   cols?: GridColumns;
   gap?: number;
   borderColor?: string;
+  borderThickness?: number;
   glowRadius?: number;
   smoothness?: number;
   className?: string;
@@ -27,6 +28,7 @@ function AnimatedGrid({
   cols = { base: 1, sm: 2, lg: 3 },
   gap = 0,
   borderColor = 'rgba(168, 85, 247, 0.9)',
+  borderThickness = 1,
   glowRadius = 300,
   smoothness = 2,
   className = '',
@@ -50,6 +52,15 @@ function AnimatedGrid({
 
   // Generate gap classes
   const gapClass = gap > 0 ? `gap-${gap}` : 'gap-0';
+  
+  // Generate border thickness class
+  const getBorderClass = useCallback(() => {
+    if (borderThickness === 1) return 'border';
+    if (borderThickness === 2) return 'border-2';
+    if (borderThickness === 4) return 'border-4';
+    if (borderThickness === 8) return 'border-8';
+    return 'border'; // Default fallback
+  }, [borderThickness]);
   
   // Count children to create matching overlay cells
   const childCount = React.Children.count(children);
@@ -83,7 +94,7 @@ function AnimatedGrid({
           }}
         >
           {[...Array(childCount)].map((_, i) => (
-            <div key={i} className="border border-current" />
+            <div key={i} className={`${getBorderClass()} border-current`} />
           ))}
         </div>
 

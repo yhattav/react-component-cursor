@@ -66,6 +66,8 @@ function InteractiveExamplesSection() {
       <AnimatedGrid 
         cols={{ base: 1, sm: 2, lg: 3 }}
         borderColor="rgba(168, 85, 247, 0.9)"
+        borderThickness={2}
+        gap={10}
         glowRadius={300}
         smoothness={20}
         className="px-6"
