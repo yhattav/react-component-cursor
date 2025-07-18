@@ -35,7 +35,7 @@ function AnimatedGrid({
   overlayClassName = '',
 }: AnimatedGridProps) {
   const gridWrapperRef = useRef<HTMLDivElement>(null!);
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
+  const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
 
   // Generate Tailwind grid classes from columns config
   const generateGridClasses = useCallback(() => {
@@ -71,40 +71,45 @@ function AnimatedGrid({
 
   const gridClasses = `grid ${generateGridClasses()}`;
 
+  // Only show effect when we have a valid cursor position
+  const hasValidCursor = cursorPos !== null;
+
   return (
     <div 
       ref={gridWrapperRef} 
       className={`relative ${className}`}
       style={{
-        '--cursor-x': `${cursorPos.x}px`,
-        '--cursor-y': `${cursorPos.y}px`,
+        '--cursor-x': hasValidCursor ? `${cursorPos.x}px` : '0px',
+        '--cursor-y': hasValidCursor ? `${cursorPos.y}px` : '0px',
       } as React.CSSProperties}
     >
       {/* Content area wrapper - this defines the exact area we want to overlay */}
       <div className="relative">
-        {/* Overlay grid that reveals borders - positioned exactly over content grid */}
-        <div
-          className={`pointer-events-none absolute inset-0 z-20 ${gridClasses} ${overlayClassName}`}
-          style={{
-            color: borderColor,
-            maskImage: `radial-gradient(circle ${glowRadius}px at var(--cursor-x) var(--cursor-y), #000 0%, transparent 65%)`,
-            WebkitMaskImage: `radial-gradient(circle ${glowRadius}px at var(--cursor-x) var(--cursor-y), #000 0%, transparent 65%)`,
-            ...gridStyles,
-          }}
-        >
-          {[...Array(childCount)].map((_, i) => (
-            <div 
-              key={i} 
-              className={`border-current ${gap > 0 ? 'rounded-sm' : ''}`}
-              style={{
-                ...borderStyles,
-                borderColor: 'currentColor',
-                backgroundColor: 'transparent',
-                boxSizing: 'border-box'
-              }}
-            />
-          ))}
-        </div>
+        {/* Overlay grid that reveals borders - only render when cursor is active */}
+        {hasValidCursor && (
+          <div
+            className={`pointer-events-none absolute inset-0 z-20 ${gridClasses} ${overlayClassName}`}
+            style={{
+              color: borderColor,
+              maskImage: `radial-gradient(circle ${glowRadius}px at var(--cursor-x) var(--cursor-y), #000 0%, transparent 65%)`,
+              WebkitMaskImage: `radial-gradient(circle ${glowRadius}px at var(--cursor-x) var(--cursor-y), #000 0%, transparent 65%)`,
+              ...gridStyles,
+            }}
+          >
+            {[...Array(childCount)].map((_, i) => (
+              <div 
+                key={i} 
+                className={`border-current ${gap > 0 ? 'rounded-sm' : ''}`}
+                style={{
+                  ...borderStyles,
+                  borderColor: 'currentColor',
+                  backgroundColor: 'transparent',
+                  boxSizing: 'border-box'
+                }}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Content Grid */}
         <div className={gridClasses} style={gridStyles}>
