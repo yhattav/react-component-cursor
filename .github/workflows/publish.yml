@@ -42,8 +42,17 @@ jobs:
           echo "Current version in package.json: $CURRENT_VERSION"
 
           # Check if current version is already 1.0.0 or higher (stable release)
+          # Regex explanation: ^[1-9][0-9]*\.[0-9]+\.[0-9]+$
+          # - ^[1-9]      = starts with digit 1-9 (not 0.x.x versions)
+          # - [0-9]*      = followed by zero or more digits (handles 1.0.0, 10.0.0, etc.)
+          # - \.[0-9]+    = dot followed by one or more digits (minor version)
+          # - \.[0-9]+$   = dot followed by one or more digits (patch version)
+          # This correctly matches: 1.0.0, 2.5.3, 10.15.22 but rejects: 0.1.0, 0.99.99
           if [[ "$CURRENT_VERSION" =~ ^[1-9][0-9]*\.[0-9]+\.[0-9]+$ ]]; then
             echo "Publishing stable release: $CURRENT_VERSION"
+            IS_STABLE="true"
+            NEXT_VERSION="$CURRENT_VERSION"
+            NPM_TAG="latest"
             echo "is_stable=true" >> $GITHUB_OUTPUT
             echo "next_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
             echo "npm_tag=latest" >> $GITHUB_OUTPUT
@@ -62,13 +71,15 @@ jobs:
             NEXT_BETA=$((BETA_NUM + 1))
             NEXT_VERSION="${BASE_VERSION}-beta.${NEXT_BETA}"
 
+            IS_STABLE="false"
+            NPM_TAG="beta"
             echo "is_stable=false" >> $GITHUB_OUTPUT
             echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
             echo "npm_tag=beta" >> $GITHUB_OUTPUT
           fi
 
-          echo "Final version will be: $(cat $GITHUB_OUTPUT | grep next_version | cut -d'=' -f2)"
-          echo "NPM tag will be: $(cat $GITHUB_OUTPUT | grep npm_tag | cut -d'=' -f2)"
+          echo "Final version will be: $NEXT_VERSION"
+          echo "NPM tag will be: $NPM_TAG"
 
       - name: Update package.json version
         run: |
