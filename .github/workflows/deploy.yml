@@ -1,4 +1,4 @@
-name: Deploy Example to GitHub Pages
+name: Deploy Next.js Example to GitHub Pages
 
 on:
   push:
@@ -22,20 +22,25 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        # Install dependencies in both root and examples directory
+        # Install dependencies in both root and example-nextjs directory
         run: |
           npm ci
-          cd example
+          cd example-nextjs
           npm ci
 
       - name: Build
-        # Build the example app
+        # Build the Next.js example app
         run: |
-          cd example
+          cd example-nextjs
           npm run build
+
+      - name: Add .nojekyll file
+        # Prevent Jekyll processing for GitHub Pages
+        run: |
+          touch example-nextjs/out/.nojekyll
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: example/dist # Changed to example/build
+          folder: example-nextjs/out
           branch: gh-pages

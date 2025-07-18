@@ -108,7 +108,7 @@ export const ArchitecturePerformanceSection: React.FC = () => {
           ...prev,
           fps,
           renderTime: renderTime % 1000,
-          memoryUsage: Math.round(performance.memory?.usedJSHeapSize / 1024 / 1024) || 0
+          memoryUsage: 0 // Simplified for deployment - memory tracking removed
         }));
         
         frameCount = 0;

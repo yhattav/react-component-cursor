@@ -4,16 +4,12 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CustomCursor } from '@yhattav/react-component-cursor';
 
-interface ProductionApplicationsSectionProps {
-  // Props interface for future extensibility
-}
-
 interface ApplicationDemo {
   id: string;
   title: string;
   description: string;
   category: string;
-  cursorElement: React.ReactNode;
+  cursorElement: JSX.Element;
   cursorConfig: {
     smoothness?: number;
     offset?: { x: number; y: number };
@@ -151,7 +147,7 @@ const applicationDemos: ApplicationDemo[] = [
   }
 ];
 
-export const ProductionApplicationsSection: React.FC<ProductionApplicationsSectionProps> = () => {
+export const ProductionApplicationsSection: React.FC = () => {
   const [activeDemo, setActiveDemo] = useState(0);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [performanceMetrics, setPerformanceMetrics] = useState({
