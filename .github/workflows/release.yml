@@ -111,7 +111,7 @@ jobs:
               BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'-' -f1)
               echo "Base version: $BASE_VERSION"
               
-                           # Calculate new version based on type using semantic versioning
+              # Calculate new version based on type using semantic versioning
              case "${{ github.event.inputs.version_type }}" in
                "major")
                  # Extract major, minor, patch from base version
