@@ -61,7 +61,7 @@ The project uses a **unified release workflow** that handles both beta and stabl
 ## Version Management
 
 ### Current State
-- **Latest Beta**: `0.1.0-beta.76`
+- **Latest Beta**: `0.1.0-beta.76` (example version; check npm or GitHub releases for the latest version)
 - **Latest Stable**: None yet (this PR introduces stable releases)
 - **Next Stable**: `1.0.0` (first stable release)
 
