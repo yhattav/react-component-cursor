@@ -1,0 +1,7 @@
+User-Agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+
+Host: https://yhattav.github.io/react-component-cursor
+Sitemap: https://yhattav.github.io/react-component-cursor/sitemap.xml
