@@ -111,14 +111,14 @@ function IconCursorExample() {
   return (
     <>
       <WarpCursor
-        amount={6}
+        amount={10}
         start={1}
         offset={1}
         containerRef={containerRef}
         cursorOffset={{ x: 5, y: 5 }}
       >
         <div className="flex items-center justify-center w-6 h-6 text-white">
-          <GrCursor size={20} className="drop-shadow-lg opacity-50" />
+          <GrCursor size={20} className="drop-shadow-lg opacity-30" />
         </div>
       </WarpCursor>
       <div 
@@ -126,10 +126,7 @@ function IconCursorExample() {
         className="relative w-full h-full flex items-center justify-center"
         style={{ cursor: 'none' }}
       >
-        <div className="text-center text-gray-300">
-          <div className="text-lg font-medium mb-2">Warp cursor effect</div>
-          <div className="text-sm">6 trailing cursor icons with varying smoothness</div>
-        </div>
+
       </div>
     </>
   );
@@ -179,7 +176,7 @@ function InteractiveExamplesSection() {
         </ExampleCard>
 
         {/* Example 3 – Icon Cursor */}
-        <ExampleCard title="Icon Cursor">
+        <ExampleCard title="Warp Cursor">
           <IconCursorExample />
         </ExampleCard>
       </AnimatedGrid>
