@@ -265,37 +265,7 @@ import { CustomCursor } from '@yhattav/react-component-cursor';
 
 **📖 [Complete SSR Guide →](docs/SSR.md)**
 
-## TypeScript Support
 
-The library is written in TypeScript and includes built-in type definitions. No additional @types packages are required.
-
-Example with TypeScript:
-
-```tsx
-import {
-  CustomCursor,
-  CustomCursorProps,
-  CursorVisibilityReason,
-} from '@yhattav/react-component-cursor';
-
-// All props are properly typed
-const MyComponent: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  return (
-    <CustomCursor
-      containerRef={containerRef}
-      smoothness={2}
-      onMove={(position: { x: number, y: number }) => console.log(position.x, position.y)}
-      onVisibilityChange={(isVisible: boolean, reason: CursorVisibilityReason) =>
-        console.log('Visible:', isVisible, 'Reason:', reason)
-      }
-    >
-      {/* Your cursor content */}
-    </CustomCursor>
-  );
-};
-```
 
 ## Development vs Production Builds
 
