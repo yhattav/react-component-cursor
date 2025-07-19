@@ -76,8 +76,9 @@ function Header({ className = '' }: HeaderProps) {
         >
           <AnimatedGrid
             cols={{ base: 1 }}
-            borderColor="rgba(59, 130, 246, 0.9)"
+            borderColor="rgba(59, 130, 246, 1)"
             borderThickness={1}
+            borderSides={['bottom']}
             glowRadius={250}
             smoothness={3}
             className="w-full"
@@ -145,9 +146,6 @@ function Header({ className = '' }: HeaderProps) {
               </div>
             </div>
           </AnimatedGrid>
-
-          {/* Subtle bottom gradient line */}
-          {/* <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" /> */}
         </motion.header>
       )}
     </AnimatePresence>
