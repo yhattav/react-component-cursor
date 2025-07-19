@@ -85,7 +85,7 @@ function HeroSection() {
         </motion.div>
       </CustomCursor>
 
-      <section className="hero-section relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="hero-section relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
         <AnimatedParticles count={20} />
 
         <div className="container mx-auto px-6 py-20 text-center relative z-10">
