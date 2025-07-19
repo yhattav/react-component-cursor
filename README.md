@@ -66,30 +66,29 @@ The main component for creating custom cursors.
 
 #### Props
 
-| Prop                  | Type                             | Default | Description                                              | Performance Impact |
-| --------------------- | -------------------------------- | ------- | -------------------------------------------------------- | -------------------|
-| `id`                  | `string`                         | auto-generated UUID | Unique identifier for the cursor instance. Auto-generated if not provided. Used for DOM element IDs and cleanup. | None |
-| `enabled`             | `boolean`                        | `true`  | Whether the cursor is enabled and visible. When `false`, cursor is hidden but still tracks mouse. | None |
-| `children`            | `ReactNode`                      | -       | The React component/element to use as cursor content. Can be any valid React node. | Varies by content complexity |
-| `className`           | `string`                         | `''`    | Additional CSS classes applied to the cursor container element. | None |
-| `style`               | `CSSProperties`                  | `{}`    | Additional inline styles applied to the cursor container. Use for custom positioning, size, etc. | None |
-| `offset`              | `CursorOffset`                   | `{ x: 0, y: 0 }` | Pixel offset from the actual mouse position. Applied before centering. | None |
-| `zIndex`              | `number`                         | `9999`  | CSS z-index of the cursor container (all custom cursors elements on the page use the same single container). Ensures cursor appears above other content. | None |
-| `smoothness`          | `number`                         | `1`     | Movement smoothing factor. `1` = instant movement, higher values = smoother but with lag. | **High** when > 1 |
-| `containerRef`        | `RefObject<HTMLElement>`         | -       | Reference to container element. When provided, cursor only appears within this element. | None |
-| `centered`            | `boolean`                        | `true`  | Automatically center cursor content on mouse position. Set to `false` for top-left positioning. | None |
-
-| `throttleMs`          | `number`                         | `0`     | Throttle mouse events in milliseconds. `0` = native refresh rate. Values >16ms may affect responsiveness. | **Minimal** impact in practice |
-| `showDevIndicator`    | `boolean`                        | `true`  | **[Dev Only]** Show red debug ring around cursor in development. Automatically removed in production builds. | None in production |
-| `onMove`              | `CursorMoveHandler`              | -       | Callback fired on cursor movement. Receives `{ x, y }` position object. | **Low** per callback |
-| `onVisibilityChange`  | `CursorVisibilityHandler`        | -       | Callback fired when cursor visibility changes. Receives `(isVisible, reason)` parameters. | **Low** per callback |
-| `data-testid`         | `string`                         | -       | Test ID for automated testing. Applied to cursor element. | None |
-| `role`                | `string`                         | -       | ARIA role for accessibility. Applied to cursor element. | None |
-| `aria-label`          | `string`                         | -       | ARIA label for accessibility. Applied to cursor element. | None |
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The React component/element to use as cursor content |
+| `enabled` | `boolean` | `true` | Whether the cursor is enabled and visible |
+| `smoothness` | `number` | `1` | Movement smoothing factor (1=instant, higher=smoother) |
+| `containerRef` | `RefObject<HTMLElement>` | - | Limit cursor to specific container element |
+| `offset` | `CursorOffset` | `{ x: 0, y: 0 }` | Pixel offset from mouse position |
+| `centered` | `boolean` | `true` | Auto-center cursor content on mouse position |
+| `throttleMs` | `number` | `0` | Throttle mouse events in milliseconds |
+| `className` | `string` | `''` | Additional CSS classes for cursor container |
+| `style` | `CSSProperties` | `{}` | Additional inline styles for cursor container |
+| `zIndex` | `number` | `9999` | CSS z-index for cursor container |
+| `onMove` | `CursorMoveHandler` | - | Callback fired on cursor movement |
+| `onVisibilityChange` | `CursorVisibilityHandler` | - | Callback fired when cursor visibility changes |
+| `id` | `string` | auto-generated | Unique identifier for cursor instance |
+| `showDevIndicator` | `boolean` | `true` | **[Dev Only]** Show debug ring in development |
+| `data-testid` | `string` | - | Test ID for automated testing |
+| `role` | `string` | - | ARIA role for accessibility |
+| `aria-label` | `string` | - | ARIA label for accessibility |
 
 ### 📦 TypeScript Types
 
-#### Core Types
+The library is written in TypeScript and includes built-in type definitions.
 
 ```tsx
 import type {
@@ -102,82 +101,9 @@ import type {
 } from '@yhattav/react-component-cursor';
 ```
 
-##### `CursorPosition`
-```tsx
-type CursorPosition = {
-  x: number;
-  y: number;
-};
-```
-Represents a cursor position with x and y coordinates in pixels.
+**📖 [Complete TypeScript Reference →](docs/TYPES.md)**
 
-##### `CursorOffset`
-```tsx
-type CursorOffset = {
-  x: number;
-  y: number;
-};
-```
-Offset values applied to cursor position. Positive values move right/down, negative values move left/up.
-
-##### `CursorMoveHandler`
-```tsx
-type CursorMoveHandler = (position: CursorPosition) => void;
-```
-Function type for the `onMove` callback.
-
-##### `CursorVisibilityHandler`
-```tsx
-type CursorVisibilityHandler = (
-  isVisible: boolean, 
-  reason: CursorVisibilityReason
-) => void;
-```
-Function type for the `onVisibilityChange` callback.
-
-##### `CursorVisibilityReason`
-```tsx
-type CursorVisibilityReason = 
-  | 'container'      // Cursor hidden/shown due to container bounds
-  | 'disabled'       // Cursor hidden due to enabled=false
-  | 'touch'          // Cursor hidden on touch devices
-  | 'reducedMotion'  // Cursor hidden due to accessibility preferences
-  | 'accessibility'  // Cursor hidden due to accessibility features
-  | string;          // Future reasons (forward compatible)
-```
-Indicates why cursor visibility changed.
-
-#### Future-Ready Types (Reserved for v2+)
-
-```tsx
-import type {
-  CursorState,
-  CursorMode,
-} from '@yhattav/react-component-cursor';
-```
-
-##### `CursorState`
-```tsx
-type CursorState = 
-  | 'idle' 
-  | 'hover' 
-  | 'click' 
-  | 'drag' 
-  | string;
-```
-**Reserved for future versions.** Will enable cursor state management.
-
-##### `CursorMode`
-```tsx
-type CursorMode = 
-  | 'default' 
-  | 'pointer' 
-  | 'text' 
-  | 'grab' 
-  | 'grabbing' 
-  | string;
-```
-**Reserved for future versions.** Will enable predefined cursor shapes/modes.
+All prop types, interfaces, and future-ready types with usage examples.
 
 ### 🔧 SSR Utilities (Advanced)
 
