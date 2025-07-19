@@ -122,12 +122,14 @@ function Header({ className = '' }: HeaderProps) {
                          transition: { duration: 0.2 }
                        }}
                        whileTap={{ scale: 0.9 }}
-                       className="
-                         p-2 text-gray-300 hover:text-white
-                         transition-colors duration-200
+                                              className="
+                          p-2 text-gray-300 hover:text-white
+                          transition-colors duration-200
                        "
                      >
-                       <IconComponent className="w-5 h-5" />
+                        <IconComponent className={
+                          link.label === 'NPM' ? "w-10 h-10" : "w-5 h-5"
+                        } />
                      </motion.a>
                   );
                 })}
