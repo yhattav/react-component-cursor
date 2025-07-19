@@ -4,6 +4,7 @@ import React from 'react';
 
 // Section Components
 import { HeroSection } from '../components/sections/hero-section';
+import { QuickStartSection } from '../components/sections/quick-start-section';
 import { PlaygroundSection } from '../components/sections/playground-section';
 import { InteractiveExamplesSection } from '../components/sections/interactive-examples-section';
 import { Footer } from '../components/sections/footer';
@@ -14,13 +15,16 @@ function HomePage() {
       {/* 1. HERO SECTION */}
       <HeroSection />
 
-      {/* 2. PLAYGROUND SECTION */}
+      {/* 2. QUICK START SECTION */}
+      <QuickStartSection />
+
+      {/* 3. PLAYGROUND SECTION */}
       <PlaygroundSection />
 
-      {/* 3. EXAMPLES SECTION */}
+      {/* 4. EXAMPLES SECTION */}
       <InteractiveExamplesSection />
 
-      {/* 4. FOOTER */}
+      {/* 5. FOOTER */}
       <Footer />
     </main>
   );
