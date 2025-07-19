@@ -3,7 +3,9 @@
 import React, { useRef } from 'react';
 import { CustomCursor } from '@yhattav/react-component-cursor';
 import { OrganicCloudCursor } from '../cursor-designs/organic-cloud-cursor';
+import { WarpCursor } from '../cursor-designs/warp-cursor';
 import { AnimatedGrid } from '../ui';
+import { GrCursor } from "react-icons/gr";
 
 // Simple card component - pure layout, no cursor knowledge
 interface ExampleCardProps {
@@ -102,6 +104,37 @@ function ClickCounterExample() {
   );
 }
 
+// Example 3: Icon Cursor Replacement
+function IconCursorExample() {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  return (
+    <>
+      <WarpCursor
+        amount={6}
+        start={1}
+        offset={1}
+        containerRef={containerRef}
+        cursorOffset={{ x: 5, y: 5 }}
+      >
+        <div className="flex items-center justify-center w-6 h-6 text-white">
+          <GrCursor size={20} className="drop-shadow-lg opacity-50" />
+        </div>
+      </WarpCursor>
+      <div 
+        ref={containerRef} 
+        className="relative w-full h-full flex items-center justify-center"
+        style={{ cursor: 'none' }}
+      >
+        <div className="text-center text-gray-300">
+          <div className="text-lg font-medium mb-2">Warp cursor effect</div>
+          <div className="text-sm">6 trailing cursor icons with varying smoothness</div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 // Simplified section using AnimatedGrid
 function InteractiveExamplesSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -145,8 +178,10 @@ function InteractiveExamplesSection() {
           <ClickCounterExample />
         </ExampleCard>
 
-        {/* Example 3 – Placeholder */}
-        <ExampleCard title="Coming Soon" />
+        {/* Example 3 – Icon Cursor */}
+        <ExampleCard title="Icon Cursor">
+          <IconCursorExample />
+        </ExampleCard>
       </AnimatedGrid>
     </section>
   );
