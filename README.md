@@ -1,16 +1,23 @@
 # React Component Cursor
 
-A flexible and customizable React component for creating smooth, interactive custom cursors. This library allows you to replace the default cursor with any React component, supporting both global and container-specific cursor behaviors.
+[![npm version](https://img.shields.io/npm/v/@yhattav/react-component-cursor.svg)](https://www.npmjs.com/package/@yhattav/react-component-cursor)
+[![npm downloads](https://img.shields.io/npm/dm/@yhattav/react-component-cursor.svg)](https://www.npmjs.com/package/@yhattav/react-component-cursor)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@yhattav/react-component-cursor.svg)](https://bundlephobia.com/package/@yhattav/react-component-cursor)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/yhattav/react-component-cursor/blob/main/LICENSE)
+[![Demo](https://img.shields.io/badge/demo-live-brightgreen.svg)](https://yhattav.github.io/react-component-cursor/)
+[![GitHub stars](https://img.shields.io/github/stars/yhattav/react-component-cursor.svg?style=social&label=Star)](https://github.com/yhattav/react-component-cursor)
+
+A flexible and customizable React component for creating smooth, interactive custom cursors and enhancements.
 
 ## Features
 
-- 🎯 Use any React component as a cursor
-- 🔄 Smooth cursor movement with configurable smoothing
-- 📦 Container-specific cursors
-- 🎨 Fully customizable styling
-- ⚡ Lightweight (<10KB)
-- 🔧 TypeScript support
-- 📱 Zero dependencies (except React)
+- Use any React component
+- Smooth cursor movement with configurable smoothing
+- Global and Container-specific cursors
+- Supports Multiple instances
+- Lightweight (<10KB)
+- Zero dependencies (except React)
 
 ## Installation
 
@@ -59,30 +66,29 @@ The main component for creating custom cursors.
 
 #### Props
 
-| Prop                  | Type                             | Default | Description                                              | Performance Impact |
-| --------------------- | -------------------------------- | ------- | -------------------------------------------------------- | -------------------|
-| `id`                  | `string`                         | auto-generated UUID | Unique identifier for the cursor instance. Auto-generated if not provided. Used for DOM element IDs and cleanup. | None |
-| `enabled`             | `boolean`                        | `true`  | Whether the cursor is enabled and visible. When `false`, cursor is hidden but still tracks mouse. | None |
-| `children`            | `ReactNode`                      | -       | The React component/element to use as cursor content. Can be any valid React node. | Varies by content complexity |
-| `className`           | `string`                         | `''`    | Additional CSS classes applied to the cursor container element. | None |
-| `style`               | `CSSProperties`                  | `{}`    | Additional inline styles applied to the cursor container. Use for custom positioning, size, etc. | None |
-| `offset`              | `CursorOffset`                   | `{ x: 0, y: 0 }` | Pixel offset from the actual mouse position. Applied before centering. | None |
-| `zIndex`              | `number`                         | `9999`  | CSS z-index of the cursor container (all custom cursors elements on the page use the same single container). Ensures cursor appears above other content. | None |
-| `smoothness`          | `number`                         | `1`     | Movement smoothing factor. `1` = instant movement, higher values = smoother but with lag. | **High** when > 1 |
-| `containerRef`        | `RefObject<HTMLElement>`         | -       | Reference to container element. When provided, cursor only appears within this element. | None |
-| `centered`            | `boolean`                        | `true`  | Automatically center cursor content on mouse position. Set to `false` for top-left positioning. | None |
-
-| `throttleMs`          | `number`                         | `0`     | Throttle mouse events in milliseconds. `0` = native refresh rate. Values >16ms may affect responsiveness. | **Minimal** impact in practice |
-| `showDevIndicator`    | `boolean`                        | `true`  | **[Dev Only]** Show red debug ring around cursor in development. Automatically removed in production builds. | None in production |
-| `onMove`              | `CursorMoveHandler`              | -       | Callback fired on cursor movement. Receives `{ x, y }` position object. | **Low** per callback |
-| `onVisibilityChange`  | `CursorVisibilityHandler`        | -       | Callback fired when cursor visibility changes. Receives `(isVisible, reason)` parameters. | **Low** per callback |
-| `data-testid`         | `string`                         | -       | Test ID for automated testing. Applied to cursor element. | None |
-| `role`                | `string`                         | -       | ARIA role for accessibility. Applied to cursor element. | None |
-| `aria-label`          | `string`                         | -       | ARIA label for accessibility. Applied to cursor element. | None |
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The React component/element to use as cursor content |
+| `enabled` | `boolean` | `true` | Whether the cursor is enabled and visible |
+| `smoothness` | `number` | `1` | Movement smoothing factor (1=instant, higher=smoother) |
+| `containerRef` | `RefObject<HTMLElement>` | - | Limit cursor to specific container element |
+| `offset` | `CursorOffset` | `{ x: 0, y: 0 }` | Pixel offset from mouse position |
+| `centered` | `boolean` | `true` | Auto-center cursor content on mouse position |
+| `throttleMs` | `number` | `0` | Throttle mouse events in milliseconds |
+| `className` | `string` | `''` | Additional CSS classes for cursor container |
+| `style` | `CSSProperties` | `{}` | Additional inline styles for cursor container |
+| `zIndex` | `number` | `9999` | CSS z-index for cursor container |
+| `onMove` | `CursorMoveHandler` | - | Callback fired on cursor movement |
+| `onVisibilityChange` | `CursorVisibilityHandler` | - | Callback fired when cursor visibility changes |
+| `id` | `string` | auto-generated | Unique identifier for cursor instance |
+| `showDevIndicator` | `boolean` | `true` | **[Dev Only]** Show debug ring in development |
+| `data-testid` | `string` | - | Test ID for automated testing |
+| `role` | `string` | - | ARIA role for accessibility |
+| `aria-label` | `string` | - | ARIA label for accessibility |
 
 ### 📦 TypeScript Types
 
-#### Core Types
+The library is written in TypeScript and includes built-in type definitions.
 
 ```tsx
 import type {
@@ -95,233 +101,55 @@ import type {
 } from '@yhattav/react-component-cursor';
 ```
 
-##### `CursorPosition`
-```tsx
-type CursorPosition = {
-  x: number;
-  y: number;
-};
-```
-Represents a cursor position with x and y coordinates in pixels.
+**📖 [Complete TypeScript Reference →](docs/TYPES.md)**
 
-##### `CursorOffset`
-```tsx
-type CursorOffset = {
-  x: number;
-  y: number;
-};
-```
-Offset values applied to cursor position. Positive values move right/down, negative values move left/up.
+All prop types, interfaces, and future-ready types with usage examples.
 
-##### `CursorMoveHandler`
-```tsx
-type CursorMoveHandler = (position: CursorPosition) => void;
-```
-Function type for the `onMove` callback.
+### 🔧 SSR Utilities
 
-##### `CursorVisibilityHandler`
-```tsx
-type CursorVisibilityHandler = (
-  isVisible: boolean, 
-  reason: CursorVisibilityReason
-) => void;
-```
-Function type for the `onVisibilityChange` callback.
-
-##### `CursorVisibilityReason`
-```tsx
-type CursorVisibilityReason = 
-  | 'container'      // Cursor hidden/shown due to container bounds
-  | 'disabled'       // Cursor hidden due to enabled=false
-  | 'touch'          // Cursor hidden on touch devices
-  | 'reducedMotion'  // Cursor hidden due to accessibility preferences
-  | 'accessibility'  // Cursor hidden due to accessibility features
-  | string;          // Future reasons (forward compatible)
-```
-Indicates why cursor visibility changed.
-
-#### Future-Ready Types (Reserved for v2+)
+Optional utility functions for advanced SSR scenarios:
 
 ```tsx
-import type {
-  CursorState,
-  CursorMode,
-} from '@yhattav/react-component-cursor';
+import { isSSR, isBrowser, browserOnly, safeDocument, safeWindow } from '@yhattav/react-component-cursor';
 ```
 
-##### `CursorState`
-```tsx
-type CursorState = 
-  | 'idle' 
-  | 'hover' 
-  | 'click' 
-  | 'drag' 
-  | string;
-```
-**Reserved for future versions.** Will enable cursor state management.
+**📖 [Complete SSR Guide →](docs/SSR.md)**
 
-##### `CursorMode`
-```tsx
-type CursorMode = 
-  | 'default' 
-  | 'pointer' 
-  | 'text' 
-  | 'grab' 
-  | 'grabbing' 
-  | string;
-```
-**Reserved for future versions.** Will enable predefined cursor shapes/modes.
+### ⚡ Performance
 
-### 🔧 SSR Utilities (Advanced)
+Optimized for performance with advanced control for complex use cases.
 
-For advanced server-side rendering scenarios:
+**📖 [Complete Performance Guide →](docs/PERFORMANCE.md)**
+
+Optimization strategies, settings matrix, and advanced techniques.
+
+### 🌍 Server-Side Rendering (SSR)
+
+Works out of the box with Next.js, Gatsby, Remix, and other SSR frameworks.
 
 ```tsx
-import {
-  isSSR,
-  isBrowser,
-  browserOnly,
-  safeDocument,
-  safeWindow,
-} from '@yhattav/react-component-cursor';
-```
+// Zero configuration needed - SSR handled automatically
+import { CustomCursor } from '@yhattav/react-component-cursor';
 
-#### `isSSR(): boolean`
-Returns `true` if running in a server-side environment.
-
-#### `isBrowser(): boolean`
-Returns `true` if running in a browser environment.
-
-#### `browserOnly<T>(fn: () => T): T | null`
-Executes function only in browser environment, returns `null` during SSR.
-
-#### `safeDocument(): Document | null`
-Safely accesses `document` object, returns `null` during SSR.
-
-#### `safeWindow(): Window | null`
-Safely accesses `window` object, returns `null` during SSR.
-
-### ⚡ Performance Guidelines
-
-#### Optimal Settings for Different Use Cases
-
-**🎮 Gaming/Interactive Apps**
-```tsx
-<CustomCursor
-  smoothness={1}        // Instant response
-  throttleMs={0}        // No throttling
-  showDevIndicator={false}
->
-  <GameCursor />
+<CustomCursor>
+  <div className="cursor">✨</div>
 </CustomCursor>
 ```
 
-**🎨 Creative/Portfolio Sites**
-```tsx
-<CustomCursor
-  smoothness={3}        // Smooth, elegant movement
-  throttleMs={8}        // Light throttling for style
-  onMove={trackAnalytics}
->
-  <ArtisticCursor />
-</CustomCursor>
+**📖 [Complete SSR Guide →](docs/SSR.md)**
+
+### 🎮 Examples & Demos
+
+**Live Demo**: [Interactive Examples & Showcase →](https://yhattav.github.io/react-component-cursor/)
+
+**Local Examples** (clone and run):
+```bash
+# Vite React example with multiple cursor demos
+cd example && npm install && npm run dev
+
+# Next.js example with SSR and advanced patterns  
+cd example-nextjs && npm install && npm run dev
 ```
-
-**📱 Mobile-Friendly Apps**
-```tsx
-<CustomCursor
-  smoothness={1}        // Direct positioning
-  throttleMs={16}       // Optional: cap at 60fps (minimal impact)
-  // Component automatically hides on touch devices
->
-  <DesktopOnlyCursor />
-</CustomCursor>
-```
-
-#### Performance Impact Matrix
-
-| Setting | CPU Impact | Memory Impact | Battery Impact | Visual Quality | Notes |
-|---------|------------|---------------|----------------|----------------|-------|
-| `smoothness={1}` | ✅ None | ✅ None | ✅ None | ⚡ Instant | Direct positioning, no animation loop |
-| `smoothness={2-5}` | 🟡 Low | ✅ None | 🟡 Low | 🎨 Smooth | Light RAF usage for interpolation |
-| `smoothness={5+}` | 🟠 Medium | ✅ None | 🟠 Medium | 🎭 Very Smooth | Continuous RAF, slower convergence |
-| `throttleMs={0}` | 🟡 Low | ✅ None | 🟡 Low | ⚡ Native Refresh | Runs at display rate (60-144Hz) |
-| `throttleMs={8-16}` | 🟡 Low | ✅ None | 🟡 Low | 🎯 Smooth 60fps | Minimal difference from native |
-| `throttleMs={16+}` | ✅ Lower | ✅ None | ✅ Lower | 🐌 <60fps | Noticeable responsiveness reduction |
-
-**Reality Check:** The difference between `throttleMs={0}` and `throttleMs={16}` is minimal in practice. Modern displays run at 60-144Hz (6-16ms), so the CPU impact difference is negligible. Mouse events are typically OS-limited to ~125-1000Hz anyway.
-
-### 🎯 Best Practices
-
-#### 1. **Choose Appropriate Smoothness**
-```tsx
-// ✅ Good: Light smoothing for elegance
-<CustomCursor smoothness={2}>
-
-// ❌ Avoid: Excessive smoothing causes lag
-<CustomCursor smoothness={20}>
-```
-
-#### 2. **Use Throttling for Performance**
-```tsx
-// ✅ Good: 60fps throttling for complex cursors
-<CustomCursor throttleMs={16}>
-  <ComplexAnimatedCursor />
-</CustomCursor>
-
-// ❌ Avoid: No throttling with heavy cursors
-<CustomCursor throttleMs={0}>
-  <HeavyVideoCursor />
-</CustomCursor>
-```
-
-#### 3. **Optimize Callback Functions**
-```tsx
-// ✅ Good: Memoized callback
-const handleMove = useCallback((pos) => {
-  // Handle movement
-}, []);
-
-<CustomCursor onMove={handleMove} />
-
-// ❌ Avoid: Inline functions (cause re-renders)
-<CustomCursor onMove={(pos) => console.log(pos)} />
-```
-
-#### 4. **Container Scoping for Performance**
-```tsx
-// ✅ Good: Scope cursor to specific areas
-<InteractiveSection ref={containerRef}>
-  <CustomCursor containerRef={containerRef}>
-    <SectionCursor />
-  </CustomCursor>
-</InteractiveSection>
-
-// ❌ Avoid: Global cursor for small interactive areas
-```
-
-#### 5. **Accessibility Considerations**
-```tsx
-// ✅ Good: Accessibility support
-<CustomCursor
-  role="presentation"
-  aria-label="Custom cursor indicator"
-  // Automatically respects prefers-reduced-motion
->
-  <AccessibleCursor />
-</CustomCursor>
-```
-
-### 🎮 Interactive Examples
-
-For working examples and live demos, see:
-
-- **Live Demo**: [react-component-cursor.vercel.app](https://react-component-cursor.vercel.app)
-- **CodeSandbox Examples**: 
-  - [Basic Usage](https://codesandbox.io/s/react-component-cursor-basic)
-  - [Container Scoping](https://codesandbox.io/s/react-component-cursor-container)
-  - [Interactive States](https://codesandbox.io/s/react-component-cursor-interactive)
-- **Storybook**: [Component Documentation](https://yhattav.github.io/react-component-cursor/storybook)
 
 ### 📚 Usage Guidelines
 
@@ -332,43 +160,7 @@ For working examples and live demos, see:
 - ✅ **Vite/CRA** - Client-side rendering with optimal performance
 - ✅ **Astro** - Partial hydration compatible
 
-#### Troubleshooting Common Issues
 
-**Cursor not appearing:**
-```tsx
-// ✅ Check if on mobile device (automatically hidden)
-// ✅ Verify enabled={true} prop
-// ✅ Check browser console for validation errors
-// ✅ If desired, hide native cursor with CSS for cleaner look
-```
-
-**Performance issues:**
-```tsx
-// ✅ Reduce smoothness for better performance
-<CustomCursor smoothness={1}>  // Direct positioning
-
-// ✅ Add throttling for complex cursors
-<CustomCursor throttleMs={16}>  // 60fps limit
-```
-
-**Performance issues:**
-```tsx
-// ✅ Reduce smoothness for better performance
-<CustomCursor smoothness={1}>  // Direct positioning
-
-// ✅ Add throttling for complex cursors
-<CustomCursor throttleMs={16}>  // 60fps limit
-
-// ✅ Use container scoping for targeted areas
-<CustomCursor containerRef={sectionRef}>
-```
-
-**Hydration mismatches:**
-```tsx
-// ✅ SSR is handled automatically - no action needed
-// ✅ Avoid conditional rendering - let component handle SSR
-// ✅ Don't wrap in dynamic imports unless specific needs
-```
 
 ## Advanced Usage
 
@@ -457,256 +249,18 @@ function VisibilityAwareCursor() {
 }
 ```
 
-## Development
 
-To start development, you can run both the component and the example app concurrently using:
 
-```bash
-npm run dev
-```
 
-This project is using [tsup](https://github.com/egoist/tsup) for building the library.
 
-This project was bootstrapped with [TSDX](https://github.com/jaredpalmer/tsdx). Unfortunately, I had to remove the TSDX configuration because it was causing issues with the build process, being unmaintained and not being compatible with the latest versions key packages.
-
-## License
-
-MIT © [yhattav](https://github.com/yhattav)
-
-## Server-Side Rendering (SSR) Support
-
-This library works seamlessly with all SSR frameworks including Next.js, Gatsby, Remix, and more.
-
-### ✅ Zero Configuration
-
-The component automatically handles SSR by returning `null` during server-side rendering, preventing hydration mismatches:
-
-```tsx
-// Works out of the box in Next.js, Gatsby, etc.
-import { CustomCursor } from '@yhattav/react-component-cursor';
-
-export default function App() {
-  return (
-    <>
-      <YourPageContent />
-      <CustomCursor>
-        <div className="cursor">✨</div>
-      </CustomCursor>
-    </>
-  );
-}
-```
-
-### Key SSR Features
-
-- **Graceful Degradation**: Returns `null` during SSR, no browser APIs called
-- **No Hydration Issues**: Prevents client/server mismatches
-- **Minimal Bundle Impact**: ~250 bytes for SSR utilities, often offset by tree-shaking
-- **Framework Agnostic**: Works with any React SSR framework
-
-### Framework Examples
-
-**Next.js** (recommended approach):
-```tsx
-import { CustomCursor } from '@yhattav/react-component-cursor';
-
-// Direct usage - SSR handled automatically
-<CustomCursor>
-  <div className="cursor">🎯</div>
-</CustomCursor>
-```
-
-**Gatsby**:
-```tsx
-// gatsby-browser.js
-export const wrapRootElement = ({ element }) => (
-  <>
-    {element}
-    <CustomCursor>
-      <div className="cursor">🌟</div>
-    </CustomCursor>
-  </>
-);
-```
-
-For detailed SSR integration guides, see our [SSR Documentation](docs/SSR.md).
-
-## TypeScript Support
-
-The library is written in TypeScript and includes built-in type definitions. No additional @types packages are required.
-
-Example with TypeScript:
-
-```tsx
-import {
-  CustomCursor,
-  CustomCursorProps,
-  CursorVisibilityReason,
-} from '@yhattav/react-component-cursor';
-
-// All props are properly typed
-const MyComponent: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  return (
-    <CustomCursor
-      containerRef={containerRef}
-      smoothness={2}
-      onMove={(position: { x: number, y: number }) => console.log(position.x, position.y)}
-      onVisibilityChange={(isVisible: boolean, reason: CursorVisibilityReason) =>
-        console.log('Visible:', isVisible, 'Reason:', reason)
-      }
-    >
-      {/* Your cursor content */}
-    </CustomCursor>
-  );
-};
-```
-
-## Development vs Production Builds
-
-This library uses **conditional exports** to provide optimized builds for different environments:
-
-### 🔧 Development Build
-- **Enhanced Developer Experience**: Includes helpful debugging features
-- **Visual Debug Indicator**: Red ring around custom cursors for easy identification
-- **Prop Validation**: Runtime validation with helpful error messages
-- **Development Warnings**: Console warnings for common issues
-- **Bundle Size**: ~3KB (includes debug features)
-
-### ⚡ Production Build  
-- **Optimized Performance**: All debug code eliminated via tree-shaking
-- **Minimal Bundle**: Debug features completely removed
-- **Best User Experience**: No visual indicators or validation overhead
-- **Bundle Size**: ~2.2KB (production optimized)
-
-### How It Works
-
-The library automatically selects the appropriate build based on your environment:
-
-```tsx
-// This single import automatically chooses the right build
-import { CustomCursor } from '@yhattav/react-component-cursor';
-
-// In development (NODE_ENV=development):
-// - Gets debug features, validation, red ring indicator
-// - Larger bundle with helpful developer tools
-
-// In production (NODE_ENV=production):  
-// - Gets optimized build with debug code eliminated
-// - Smaller bundle focused on performance
-```
-
-### Manual Build Selection
-
-You can also manually select builds if needed (advanced usage):
-
-```tsx
-// Force development build (includes debug features)
-import { CustomCursor } from '@yhattav/react-component-cursor/dist/index.dev.mjs';
-
-// Force production build (optimized, no debug features)
-import { CustomCursor } from '@yhattav/react-component-cursor/dist/index.mjs';
-```
-
-### Debug Features in Development
-
-When running in development mode, you'll see:
-
-1. **Red Ring Indicator**: A red border around custom cursors for visual debugging
-   - **Toggle off**: Use `showDevIndicator={false}` to hide the debug ring when needed
-   - **Production**: Automatically removed in production builds (zero overhead)
-2. **Console Validation**: Helpful error messages for invalid props:
-   ```
-   CustomCursor: smoothness must be a non-negative number, got: -1
-   CustomCursor: id must be a non-empty string, got: ""
-   ```
-3. **Development Warnings**: Guidance for common setup issues
-
-### Controlling Debug Features
-
-```tsx
-// Hide debug ring for clean screenshots or design work
-<CustomCursor showDevIndicator={false}>
-  <MyCustomCursor />
-</CustomCursor>
-
-// Show debug ring (default behavior in development)
-<CustomCursor showDevIndicator={true}>
-  <MyCustomCursor />
-</CustomCursor>
-
-// In production builds, showDevIndicator has no effect - debug features are completely removed
-```
-
-### Build Configuration
-
-Popular bundlers automatically handle conditional exports:
-
-**Vite** (automatically configured):
-```js
-// vite.config.js - no special configuration needed
-export default defineConfig({
-  // Vite automatically uses conditional exports
-});
-```
-
-**Webpack** (v5+):
-```js
-// webpack.config.js - automatic in most cases
-module.exports = {
-  // Webpack 5+ supports conditional exports out of the box
-  mode: process.env.NODE_ENV, // 'development' or 'production'
-};
-```
-
-**Next.js** (v12+):
-```js
-// next.config.js - automatic support
-module.exports = {
-  // Next.js automatically handles conditional exports
-};
-```
-
-## Bundle Size
-
-The library is lightweight (<10KB) and is monitored using size-limit. You can check the current bundle size by running:
-
-```bash
-npm run size
-```
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! See our guides:
 
-## Code of Conduct
+- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute
+- **[Development Guide](DEVELOPMENT.md)** - Complete development setup and workflow
 
-Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
+## License
 
-## Testing
-
-```bash
-npm run test
-```
-
-We maintain 100% test coverage for all new features. Please ensure your contributions include appropriate tests.
-
-## Commit Convention
-
-We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification. This helps us automatically generate changelogs and determine semantic version bumps.
-
-Examples:
-
-- feat: add new cursor animation option
-- fix: resolve smoothing calculation issue
-- docs: update installation instructions
-- test: add tests for container bounds
-
-## Issue Templates
-
-Please use our issue templates when creating new issues:
-
-- Bug Report
-- Feature Request
-- Documentation Update
+MIT © [Yonatan Hattav](https://github.com/yhattav)

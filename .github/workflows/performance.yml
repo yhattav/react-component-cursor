@@ -114,16 +114,8 @@ jobs:
       run: node scripts/generate-dashboard.js
       if: always()
 
-    - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@v4
-      if: github.ref == 'refs/heads/main'
-      with:
-        folder: docs
-        branch: gh-pages
-        target-folder: performance
-        clean-exclude: |
-          index.html
-          .nojekyll
+    # Performance data is now integrated into the Next.js app
+    # The separate dashboard deployment is disabled to avoid conflicts
         
     - name: Create performance issue on regression
       if: steps.monitoring.outcome == 'failure' && github.event_name != 'schedule'
