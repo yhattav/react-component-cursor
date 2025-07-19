@@ -70,7 +70,7 @@ function AnimatedGrid({
     }
 
     // Handle array of sides
-    const sides = Array.isArray(borderSides) ? borderSides : [];
+    const sides = borderSides as ('top' | 'bottom' | 'left' | 'right')[];
     const borderStyle: React.CSSProperties = { ...baseStyle };
 
     if (sides.includes('top')) {

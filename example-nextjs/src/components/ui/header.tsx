@@ -42,18 +42,21 @@ function Header({ className = '' }: HeaderProps) {
       href: 'https://github.com/yhattav/react-component-cursor',
       icon: FaGithub,
       tooltip: 'View source code',
+      iconSize: 'w-5 h-5',
     },
     {
       label: 'NPM',
       href: 'https://www.npmjs.com/package/@yhattav/react-component-cursor',
       icon: FaNpm,
       tooltip: 'Install package',
+      iconSize: 'w-10 h-10',
     },
     {
       label: 'Issues',
       href: 'https://github.com/yhattav/react-component-cursor/issues',
       icon: FaBug,
       tooltip: 'Report issues',
+      iconSize: 'w-5 h-5',
     },
   ];
 
@@ -136,9 +139,7 @@ function Header({ className = '' }: HeaderProps) {
                           transition-colors duration-200
                         "
                       >
-                        <IconComponent className={
-                          link.label === 'NPM' ? "w-10 h-10" : "w-5 h-5"
-                        } />
+                        <IconComponent className={link.iconSize} />
                       </motion.a>
                     );
                   })}
