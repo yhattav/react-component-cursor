@@ -12,17 +12,30 @@ interface HeaderProps {
 function Header({ className = '' }: HeaderProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [showMobileIndicator, setShowMobileIndicator] = useState(true);
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768); // md breakpoint
+    const checkTouchDevice = () => {
+      // Multiple checks for better cross-browser compatibility
+      const hasTouchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const hasCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+      const isTouchScreen = hasTouchSupport || hasCoarsePointer;
+      
+      setIsTouchDevice(isTouchScreen);
     };
 
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    checkTouchDevice();
+    
+    // Listen for media query changes (e.g., when docking/undocking tablet)
+    const pointerMediaQuery = window.matchMedia('(pointer: coarse)');
+    const handlePointerChange = () => checkTouchDevice();
+    
+    pointerMediaQuery.addEventListener('change', handlePointerChange);
+    
+    return () => {
+      pointerMediaQuery.removeEventListener('change', handlePointerChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -162,9 +175,9 @@ function Header({ className = '' }: HeaderProps) {
                 </motion.nav>
               </div>
 
-              {/* Mobile Desktop Indicator */}
+              {/* Touch Device Desktop Indicator */}
               <AnimatePresence>
-                {isMobile && showMobileIndicator && (
+                {isTouchDevice && showMobileIndicator && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
