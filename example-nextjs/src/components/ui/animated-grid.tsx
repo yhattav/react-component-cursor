@@ -17,6 +17,7 @@ interface AnimatedGridProps {
   gap?: number;
   borderColor?: string;
   borderThickness?: number;
+  borderSides?: 'all' | ('top' | 'bottom' | 'left' | 'right')[];
   glowRadius?: number;
   smoothness?: number;
   className?: string;
@@ -29,6 +30,7 @@ function AnimatedGrid({
   gap = 0,
   borderColor = 'rgba(168, 85, 247, 0.9)',
   borderThickness = 1,
+  borderSides = 'all',
   glowRadius = 300,
   smoothness = 2,
   className = '',
@@ -55,10 +57,39 @@ function AnimatedGrid({
     gap: gap > 0 ? `${gap}px` : '0px',
   };
 
-  const borderStyles = {
-    borderWidth: `${borderThickness}px`,
-    borderStyle: 'solid',
+  const getBorderStyles = () => {
+    const baseStyle = {
+      borderStyle: 'solid',
+    };
+
+    if (borderSides === 'all') {
+      return {
+        ...baseStyle,
+        borderWidth: `${borderThickness}px`,
+      };
+    }
+
+    // Handle array of sides
+    const sides = borderSides as ('top' | 'bottom' | 'left' | 'right')[];
+    const borderStyle: React.CSSProperties = { ...baseStyle };
+
+    if (sides.includes('top')) {
+      borderStyle.borderTopWidth = `${borderThickness}px`;
+    }
+    if (sides.includes('bottom')) {
+      borderStyle.borderBottomWidth = `${borderThickness}px`;
+    }
+    if (sides.includes('left')) {
+      borderStyle.borderLeftWidth = `${borderThickness}px`;
+    }
+    if (sides.includes('right')) {
+      borderStyle.borderRightWidth = `${borderThickness}px`;
+    }
+
+    return borderStyle;
   };
+
+  const borderStyles = getBorderStyles();
   
   // Count children to create matching overlay cells
   const childCount = React.Children.count(children);
