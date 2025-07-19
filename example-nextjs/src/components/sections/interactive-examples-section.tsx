@@ -38,6 +38,65 @@ function ExampleCard({ cursor, title }: ExampleCardProps) {
   );
 }
 
+// Counter cursor that displays the click count
+function CounterCursor({ count, isAnimating }: { count: number; isAnimating: boolean }) {
+  return (
+    <div className="relative">
+      {/* Glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-md opacity-60" />
+      
+      {/* Main counter badge */}
+      <div className="relative bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full shadow-xl backdrop-blur-sm border border-white/20">
+        <div className={`font-bold text-xl tabular-nums transition-all duration-200 ${
+          isAnimating ? 'scale-125 text-yellow-200' : 'scale-100'
+        }`}>
+          {count}
+        </div>
+        
+        {/* Subtle inner highlight */}
+        <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/10 to-white/20 rounded-full pointer-events-none" />
+      </div>
+    </div>
+  );
+}
+
+// Clickable counter card wrapper
+function ClickableCounterCard() {
+  const [count, setCount] = React.useState(0);
+  const [isAnimating, setIsAnimating] = React.useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  const incrementCounter = React.useCallback(() => {
+    setCount(prevCount => prevCount + 1);
+    setIsAnimating(true);
+    setTimeout(() => setIsAnimating(false), 200);
+  }, []);
+
+  return (
+    <div className="relative group flex items-center justify-center min-h-[350px] md:min-h-[400px] bg-gray-800/40 transition-colors duration-300 overflow-hidden">
+      <CustomCursor 
+        containerRef={containerRef} 
+        className="z-50"
+        offset={{ x: 30, y: -30 }}
+      >
+        <CounterCursor count={count} isAnimating={isAnimating} />
+      </CustomCursor>
+
+      <div 
+        ref={containerRef} 
+        className="relative w-full h-full flex items-center justify-center cursor-pointer"
+        onClick={incrementCounter}
+      >
+        {/* Card content goes here */}
+      </div>
+
+      <span className="absolute bottom-3 left-3 text-sm font-medium text-gray-300 group-hover:text-white transition-colors duration-300">
+        Click Counter
+      </span>
+    </div>
+  );
+}
+
 // Simplified section using AnimatedGrid
 function InteractiveExamplesSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -74,8 +133,8 @@ function InteractiveExamplesSection() {
         {/* Example 1 – Organic Cloud Cursor */}
         <ExampleCard title="Organic Cloud Cursor" cursor={<OrganicCloudCursor />} />
 
-        {/* Example 2 – Placeholder */}
-        <ExampleCard title="Coming Soon" />
+        {/* Example 2 – Click Counter */}
+        <ClickableCounterCard />
 
         {/* Example 3 – Placeholder */}
         <ExampleCard title="Coming Soon" />
