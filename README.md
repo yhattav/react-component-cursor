@@ -1,5 +1,13 @@
 # React Component Cursor
 
+[![npm version](https://img.shields.io/npm/v/@yhattav/react-component-cursor.svg)](https://www.npmjs.com/package/@yhattav/react-component-cursor)
+[![npm downloads](https://img.shields.io/npm/dm/@yhattav/react-component-cursor.svg)](https://www.npmjs.com/package/@yhattav/react-component-cursor)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@yhattav/react-component-cursor.svg)](https://bundlephobia.com/package/@yhattav/react-component-cursor)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/yhattav/react-component-cursor/blob/main/LICENSE)
+[![Demo](https://img.shields.io/badge/demo-live-brightgreen.svg)](https://yhattav.github.io/react-component-cursor/)
+[![GitHub stars](https://img.shields.io/github/stars/yhattav/react-component-cursor.svg?style=social&label=Star)](https://github.com/yhattav/react-component-cursor)
+
 A flexible and customizable React component for creating smooth, interactive custom cursors. This library allows you to replace the default cursor with any React component, supporting both global and container-specific cursor behaviors.
 
 ## Features
