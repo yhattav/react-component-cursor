@@ -115,116 +115,13 @@ import { isSSR, isBrowser, browserOnly, safeDocument, safeWindow } from '@yhatta
 
 **📖 [Complete SSR Guide →](docs/SSR.md)**
 
-### ⚡ Performance Guidelines
+### ⚡ Performance
 
-#### Optimal Settings for Different Use Cases
+Optimized for performance with advanced control for complex use cases.
 
-**🎮 Gaming/Interactive Apps**
-```tsx
-<CustomCursor
-  smoothness={1}        // Instant response
-  throttleMs={0}        // No throttling
-  showDevIndicator={false}
->
-  <GameCursor />
-</CustomCursor>
-```
+**📖 [Complete Performance Guide →](docs/PERFORMANCE.md)**
 
-**🎨 Creative/Portfolio Sites**
-```tsx
-<CustomCursor
-  smoothness={3}        // Smooth, elegant movement
-  throttleMs={8}        // Light throttling for style
-  onMove={trackAnalytics}
->
-  <ArtisticCursor />
-</CustomCursor>
-```
-
-**📱 Mobile-Friendly Apps**
-```tsx
-<CustomCursor
-  smoothness={1}        // Direct positioning
-  throttleMs={16}       // Optional: cap at 60fps (minimal impact)
-  // Component automatically hides on touch devices
->
-  <DesktopOnlyCursor />
-</CustomCursor>
-```
-
-#### Performance Impact Matrix
-
-| Setting | CPU Impact | Memory Impact | Battery Impact | Visual Quality | Notes |
-|---------|------------|---------------|----------------|----------------|-------|
-| `smoothness={1}` | ✅ None | ✅ None | ✅ None | ⚡ Instant | Direct positioning, no animation loop |
-| `smoothness={2-5}` | 🟡 Low | ✅ None | 🟡 Low | 🎨 Smooth | Light RAF usage for interpolation |
-| `smoothness={5+}` | 🟠 Medium | ✅ None | 🟠 Medium | 🎭 Very Smooth | Continuous RAF, slower convergence |
-| `throttleMs={0}` | 🟡 Low | ✅ None | 🟡 Low | ⚡ Native Refresh | Runs at display rate (60-144Hz) |
-| `throttleMs={8-16}` | 🟡 Low | ✅ None | 🟡 Low | 🎯 Smooth 60fps | Minimal difference from native |
-| `throttleMs={16+}` | ✅ Lower | ✅ None | ✅ Lower | 🐌 <60fps | Noticeable responsiveness reduction |
-
-**Reality Check:** The difference between `throttleMs={0}` and `throttleMs={16}` is minimal in practice. Modern displays run at 60-144Hz (6-16ms), so the CPU impact difference is negligible. Mouse events are typically OS-limited to ~125-1000Hz anyway.
-
-### 🎯 Best Practices
-
-#### 1. **Choose Appropriate Smoothness**
-```tsx
-// ✅ Good: Light smoothing for elegance
-<CustomCursor smoothness={2}>
-
-// ❌ Avoid: Excessive smoothing causes lag
-<CustomCursor smoothness={20}>
-```
-
-#### 2. **Use Throttling for Performance**
-```tsx
-// ✅ Good: 60fps throttling for complex cursors
-<CustomCursor throttleMs={16}>
-  <ComplexAnimatedCursor />
-</CustomCursor>
-
-// ❌ Avoid: No throttling with heavy cursors
-<CustomCursor throttleMs={0}>
-  <HeavyVideoCursor />
-</CustomCursor>
-```
-
-#### 3. **Optimize Callback Functions**
-```tsx
-// ✅ Good: Memoized callback
-const handleMove = useCallback((pos) => {
-  // Handle movement
-}, []);
-
-<CustomCursor onMove={handleMove} />
-
-// ❌ Avoid: Inline functions (cause re-renders)
-<CustomCursor onMove={(pos) => console.log(pos)} />
-```
-
-#### 4. **Container Scoping for Performance**
-```tsx
-// ✅ Good: Scope cursor to specific areas
-<InteractiveSection ref={containerRef}>
-  <CustomCursor containerRef={containerRef}>
-    <SectionCursor />
-  </CustomCursor>
-</InteractiveSection>
-
-// ❌ Avoid: Global cursor for small interactive areas
-```
-
-#### 5. **Accessibility Considerations**
-```tsx
-// ✅ Good: Accessibility support
-<CustomCursor
-  role="presentation"
-  aria-label="Custom cursor indicator"
-  // Automatically respects prefers-reduced-motion
->
-  <AccessibleCursor />
-</CustomCursor>
-```
+Optimization strategies, settings matrix, and advanced techniques.
 
 ### 🎮 Examples & Demos
 
