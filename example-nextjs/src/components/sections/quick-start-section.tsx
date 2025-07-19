@@ -49,7 +49,7 @@ function QuickStartSection() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2, duration: 0.8 }}
             viewport={{ once: true }}
-            className="bg-gray-800/50 rounded-xl p-8 border border-gray-700"
+            className="bg-gray-800/50 rounded-xl p-8 border border-gray-700 flex flex-col"
           >
             <h3 className="text-2xl font-semibold text-white mb-6 flex items-center gap-3">
               <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,7 +90,7 @@ function QuickStartSection() {
               </button>
             </div>
             
-            <div className="text-gray-300 text-sm space-y-1">
+            <div className="text-gray-300 text-sm space-y-1 mt-auto">
               <p>✅ Zero dependencies • Works with React 16.8+</p>
               <p>✅ TypeScript ready • SSR compatible</p>
             </div>
@@ -101,7 +101,7 @@ function QuickStartSection() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
             viewport={{ once: true }}
-            className="bg-gray-800/50 rounded-xl p-8 border border-gray-700"
+            className="bg-gray-800/50 rounded-xl p-8 border border-gray-700 flex flex-col"
           >
             <h3 className="text-2xl font-semibold text-white mb-6 flex items-center gap-3">
               <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -115,7 +115,7 @@ function QuickStartSection() {
 function App() {
   return (
     <CustomCursor>
-      <div className="w-4 h-4 bg-blue-500 rounded-full" />
+      {/* Run wild! Any React component works */}
     </CustomCursor>
 
     <main>
@@ -126,10 +126,8 @@ function App() {
               className="mb-6"
             />
             
-            <div className="text-gray-300 text-sm space-y-1">
-              <p>✅ Replace your cursor globally</p>
-              <p>✅ Use any React component as cursor</p>
-              <p>✅ Automatic smooth movement</p>
+            <div className="text-gray-300 text-sm space-y-1 mt-auto">
+              <p>✅ Use any React component</p>
             </div>
           </motion.div>
         </div>
@@ -142,7 +140,7 @@ function App() {
           viewport={{ once: true }}
           className="text-center mt-12"
         >
-          <div className="inline-flex items-center gap-6 px-6 py-3 bg-gray-800/30 rounded-full border border-gray-700">
+          {/* <div className="inline-flex items-center gap-6 px-6 py-3 bg-gray-800/30 rounded-full border border-gray-700">
             <span className="text-sm text-gray-300">Ready for production:</span>
             <div className="flex items-center gap-4 text-xs">
               <span className="text-green-400">✓ SSR Support</span>
@@ -150,7 +148,7 @@ function App() {
               <span className="text-purple-400">✓ {'<'}10KB</span>
               <span className="text-yellow-400">✓ 60fps</span>
             </div>
-          </div>
+          </div> */}
         </motion.div>
       </div>
     </section>
