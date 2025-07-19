@@ -80,7 +80,7 @@
     "trailingComma": "es5"
   },
   "name": "@yhattav/react-component-cursor",
-  "description": "A lightweight, TypeScript-first React library for creating beautiful custom cursors with SSR support, smooth animations, and zero dependencies. Perfect for interactive websites, games, and creative applications.",
+  "description": "Replace or enhance your default cursor with ANYTHING.",
   "keywords": [
     "react",
     "cursor",
