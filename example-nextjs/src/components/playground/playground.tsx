@@ -178,7 +178,7 @@ export const Playground: React.FC<PlaygroundProps> = ({
                 </div>
               )}
 
-              {shouldShowProp('showDevIndicator') && (
+              {shouldShowProp('showDevIndicator') && process.env.NODE_ENV === 'development' && (
                 <div>
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input
@@ -189,6 +189,7 @@ export const Playground: React.FC<PlaygroundProps> = ({
                     />
                     <span className="text-sm font-medium text-gray-300">Show Dev Indicator</span>
                   </label>
+                  <p className="text-xs text-gray-500 mt-1">Development only feature</p>
                 </div>
               )}
 
