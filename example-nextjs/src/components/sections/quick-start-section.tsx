@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { CodeBlock } from '../ui';
 
 interface PackageManager {
   name: string;
@@ -108,9 +109,8 @@ function QuickStartSection() {
               </svg>
               Basic Usage
             </h3>
-            <div className="bg-gray-900/50 backdrop-blur-sm rounded-xl p-4 mb-6 overflow-x-auto relative group border border-gray-700">
-              <pre className="text-xs text-gray-300 bg-black/30 p-3 rounded-lg overflow-x-auto pr-12 scrollbar-hide">
-                <code>{`import { CustomCursor } from '@yhattav/react-component-cursor';
+            <CodeBlock 
+              code={`import { CustomCursor } from '@yhattav/react-component-cursor';
 
 function App() {
   return (
@@ -122,30 +122,9 @@ function App() {
       <h1>Welcome to my app!</h1>
     </main>
   );
-}`}</code>
-              </pre>
-              <button
-                onClick={() => copyToClipboard(`import { CustomCursor } from '@yhattav/react-component-cursor';
-
-function App() {
-  return (
-    <CustomCursor>
-      <div className="w-4 h-4 bg-blue-500 rounded-full" />
-    </CustomCursor>
-
-    <main>
-      <h1>Welcome to my app!</h1>
-    </main>
-  );
-}`)}
-                className="absolute top-3 right-3 p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-800/50"
-                title="Copy to clipboard"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-              </button>
-            </div>
+}`}
+              className="mb-6"
+            />
             
             <div className="text-gray-300 text-sm space-y-1">
               <p>✅ Replace your cursor globally</p>
