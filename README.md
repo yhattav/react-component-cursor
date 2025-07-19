@@ -105,34 +105,15 @@ import type {
 
 All prop types, interfaces, and future-ready types with usage examples.
 
-### 🔧 SSR Utilities (Advanced)
+### 🔧 SSR Utilities
 
-For advanced server-side rendering scenarios:
+Optional utility functions for advanced SSR scenarios:
 
 ```tsx
-import {
-  isSSR,
-  isBrowser,
-  browserOnly,
-  safeDocument,
-  safeWindow,
-} from '@yhattav/react-component-cursor';
+import { isSSR, isBrowser, browserOnly, safeDocument, safeWindow } from '@yhattav/react-component-cursor';
 ```
 
-#### `isSSR(): boolean`
-Returns `true` if running in a server-side environment.
-
-#### `isBrowser(): boolean`
-Returns `true` if running in a browser environment.
-
-#### `browserOnly<T>(fn: () => T): T | null`
-Executes function only in browser environment, returns `null` during SSR.
-
-#### `safeDocument(): Document | null`
-Safely accesses `document` object, returns `null` during SSR.
-
-#### `safeWindow(): Window | null`
-Safely accesses `window` object, returns `null` during SSR.
+**📖 [Complete SSR Guide →](docs/SSR.md)**
 
 ### ⚡ Performance Guidelines
 
@@ -410,61 +391,18 @@ MIT © [yhattav](https://github.com/yhattav)
 
 ## Server-Side Rendering (SSR) Support
 
-This library works seamlessly with all SSR frameworks including Next.js, Gatsby, Remix, and more.
-
-### ✅ Zero Configuration
-
-The component automatically handles SSR by returning `null` during server-side rendering, preventing hydration mismatches:
+Works out of the box with Next.js, Gatsby, Remix, and other SSR frameworks.
 
 ```tsx
-// Works out of the box in Next.js, Gatsby, etc.
+// Zero configuration needed - SSR handled automatically
 import { CustomCursor } from '@yhattav/react-component-cursor';
 
-export default function App() {
-  return (
-    <>
-      <YourPageContent />
-      <CustomCursor>
-        <div className="cursor">✨</div>
-      </CustomCursor>
-    </>
-  );
-}
-```
-
-### Key SSR Features
-
-- **Graceful Degradation**: Returns `null` during SSR, no browser APIs called
-- **No Hydration Issues**: Prevents client/server mismatches
-- **Minimal Bundle Impact**: ~250 bytes for SSR utilities, often offset by tree-shaking
-- **Framework Agnostic**: Works with any React SSR framework
-
-### Framework Examples
-
-**Next.js** (recommended approach):
-```tsx
-import { CustomCursor } from '@yhattav/react-component-cursor';
-
-// Direct usage - SSR handled automatically
 <CustomCursor>
-  <div className="cursor">🎯</div>
+  <div className="cursor">✨</div>
 </CustomCursor>
 ```
 
-**Gatsby**:
-```tsx
-// gatsby-browser.js
-export const wrapRootElement = ({ element }) => (
-  <>
-    {element}
-    <CustomCursor>
-      <div className="cursor">🌟</div>
-    </CustomCursor>
-  </>
-);
-```
-
-For detailed SSR integration guides, see our [SSR Documentation](docs/SSR.md).
+**📖 [Complete SSR Guide →](docs/SSR.md)**
 
 ## TypeScript Support
 
