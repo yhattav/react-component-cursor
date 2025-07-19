@@ -102,7 +102,7 @@ export const Playground: React.FC<PlaygroundProps> = ({
 
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto">
+    <div className="relative w-full max-w-5xl mx-auto px-2 sm:px-4">
       {/* Fallback cursor - always visible at lower z-index */}
       <CustomCursor
         enabled={config.hideNativeCursor}
@@ -134,14 +134,14 @@ export const Playground: React.FC<PlaygroundProps> = ({
       {/* Single Settings Container */}
       <div 
         ref={containerRef}
-        className={`bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700 ${
+        className={`bg-gray-800/50 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-gray-700 ${
           config.enabled && config.hideNativeCursor ? 'hide-cursor' : ''
         }`}
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
             
           {/* Left Column - Controls */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4 order-2 xl:order-1">
               {shouldShowProp('enabled') && (
                 <div>
                   <label className="flex items-center gap-3 cursor-pointer">
@@ -149,9 +149,9 @@ export const Playground: React.FC<PlaygroundProps> = ({
                       type="checkbox"
                       checked={config.enabled}
                       onChange={(e) => updateConfig('enabled', e.target.checked)}
-                      className="w-5 h-5 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+                      className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
                     />
-                    <span className="text-sm font-medium text-gray-300">Enabled</span>
+                    <span className="text-xs sm:text-sm font-medium text-gray-300">Enabled</span>
                   </label>
                 </div>
               )}
@@ -163,9 +163,9 @@ export const Playground: React.FC<PlaygroundProps> = ({
                       type="checkbox"
                       checked={config.centered}
                       onChange={(e) => updateConfig('centered', e.target.checked)}
-                      className="w-5 h-5 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+                      className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
                     />
-                    <span className="text-sm font-medium text-gray-300">Centered</span>
+                    <span className="text-xs sm:text-sm font-medium text-gray-300">Centered</span>
                   </label>
                 </div>
               )}
@@ -177,9 +177,9 @@ export const Playground: React.FC<PlaygroundProps> = ({
                       type="checkbox"
                       checked={config.showDevIndicator}
                       onChange={(e) => updateConfig('showDevIndicator', e.target.checked)}
-                      className="w-5 h-5 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+                      className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
                     />
-                    <span className="text-sm font-medium text-gray-300">Show Dev Indicator</span>
+                    <span className="text-xs sm:text-sm font-medium text-gray-300">Show Dev Indicator</span>
                   </label>
                   <p className="text-xs text-gray-500 mt-1">Development only feature</p>
                 </div>
@@ -191,9 +191,9 @@ export const Playground: React.FC<PlaygroundProps> = ({
                     type="checkbox"
                     checked={config.hideNativeCursor}
                     onChange={(e) => updateConfig('hideNativeCursor', e.target.checked)}
-                    className="w-5 h-5 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
                   />
-                  <span className="text-sm font-medium text-gray-300">Hide Native Cursor</span>
+                  <span className="text-xs sm:text-sm font-medium text-gray-300">Hide Native Cursor</span>
                 </label>
               </div>
 
@@ -201,7 +201,7 @@ export const Playground: React.FC<PlaygroundProps> = ({
               {/* Advanced Controls */}
               {shouldShowProp('smoothness') && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
                     Smoothness: {config.smoothness}
                   </label>
                   <input
@@ -217,9 +217,9 @@ export const Playground: React.FC<PlaygroundProps> = ({
               )}
 
               {shouldShowProp('offset') && (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
                       Offset X: {config.offset.x}px
                     </label>
                     <input
@@ -232,7 +232,7 @@ export const Playground: React.FC<PlaygroundProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
                       Offset Y: {config.offset.y}px
                     </label>
                     <input
@@ -249,7 +249,7 @@ export const Playground: React.FC<PlaygroundProps> = ({
 
               {shouldShowProp('throttleMs') && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
                     Throttle: {config.throttleMs}ms
                   </label>
                   <input
@@ -266,7 +266,7 @@ export const Playground: React.FC<PlaygroundProps> = ({
 
               {shouldShowProp('zIndex') && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
                     Z-Index: {config.zIndex}
                   </label>
                   <input
@@ -283,7 +283,7 @@ export const Playground: React.FC<PlaygroundProps> = ({
             </div>
             
           {/* Right Column - Generated Code */}
-          <div>
+          <div className="order-1 xl:order-2">
             <CodeBlock code={generateCodeString()} />
           </div>
         </div>

@@ -140,17 +140,17 @@ function InteractiveExamplesSection() {
     <section
       id="examples-section"
       ref={sectionRef}
-      className="relative py-24 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 group"
+      className="relative py-16 sm:py-20 md:py-24 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 group"
     >
       {/* Subtle top border that becomes visible on hover */}
       <div className="pointer-events-none absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
       {/* Section Header */}
-      <div className="text-center mb-16 px-6">
-        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+      <div className="text-center mb-12 md:mb-16 px-4 sm:px-6">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 md:mb-6">
           Interactive Examples
         </h2>
-        <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+        <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
           Explore real-time cursor designs. More examples coming soon.
         </p>
       </div>
@@ -163,7 +163,7 @@ function InteractiveExamplesSection() {
         gap={16}
         glowRadius={300}
         smoothness={20}
-        className="px-6"
+        className="px-4 sm:px-6"
       >
         {/* Example 1 – Organic Cloud Cursor */}
         <ExampleCard title="Organic Cloud Cursor">
