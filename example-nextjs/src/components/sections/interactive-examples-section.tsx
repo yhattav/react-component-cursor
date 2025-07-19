@@ -5,28 +5,16 @@ import { CustomCursor } from '@yhattav/react-component-cursor';
 import { OrganicCloudCursor } from '../cursor-designs/organic-cloud-cursor';
 import { AnimatedGrid } from '../ui';
 
-// Simple card component without border effects (back to original)
+// Simple card component - pure layout, no cursor knowledge
 interface ExampleCardProps {
-  cursor?: React.ReactElement;
   title?: string;
+  children?: React.ReactNode;
 }
 
-function ExampleCard({ cursor, title }: ExampleCardProps) {
-  const containerRef = React.useRef<HTMLDivElement>(null);
-
+function ExampleCard({ title, children }: ExampleCardProps) {
   return (
     <div className="relative group flex items-center justify-center min-h-[350px] md:min-h-[400px] bg-gray-800/40 transition-colors duration-300 overflow-hidden">
-      {/* Cursor for interactive cards */}
-      {cursor ? (
-        <CustomCursor containerRef={containerRef} className="z-50">
-          <>{cursor}</>
-        </CustomCursor>
-      ) : null}
-
-      {/* Content container */}
-      <div ref={containerRef} className="relative w-full h-full flex items-center justify-center">
-        {/* Card content goes here */}
-      </div>
+      {children}
 
       {/* Title overlay */}
       {title ? (
@@ -60,8 +48,30 @@ function CounterCursor({ count, isAnimating }: { count: number; isAnimating: boo
   );
 }
 
-// Clickable counter card wrapper
-function ClickableCounterCard() {
+// Example 1: Organic Cloud Cursor
+function OrganicCloudExample() {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  return (
+    <>
+      <CustomCursor containerRef={containerRef} smoothness={20} className="z-50">
+        <OrganicCloudCursor amount={4}/>
+      </CustomCursor>
+      <CustomCursor containerRef={containerRef} smoothness={17} className="z-50">
+        <OrganicCloudCursor amount={2}/>
+      </CustomCursor>
+      <CustomCursor containerRef={containerRef} smoothness={15} className="z-50">
+        <OrganicCloudCursor amount={3}/>
+      </CustomCursor>
+      <div ref={containerRef} className="relative w-full h-full flex items-center justify-center">
+        {/* Content area */}
+      </div>
+    </>
+  );
+}
+
+// Example 2: Click Counter
+function ClickCounterExample() {
   const [count, setCount] = React.useState(0);
   const [isAnimating, setIsAnimating] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -73,27 +83,22 @@ function ClickableCounterCard() {
   }, []);
 
   return (
-    <div className="relative group flex items-center justify-center min-h-[350px] md:min-h-[400px] bg-gray-800/40 transition-colors duration-300 overflow-hidden">
+    <>
       <CustomCursor 
         containerRef={containerRef} 
         className="z-50"
-        offset={{ x: 30, y: -30 }}
+        offset={{ x: 20, y: -20 }}
       >
         <CounterCursor count={count} isAnimating={isAnimating} />
       </CustomCursor>
-
       <div 
         ref={containerRef} 
         className="relative w-full h-full flex items-center justify-center cursor-pointer"
         onClick={incrementCounter}
       >
-        {/* Card content goes here */}
+        {/* Clickable content area */}
       </div>
-
-      <span className="absolute bottom-3 left-3 text-sm font-medium text-gray-300 group-hover:text-white transition-colors duration-300">
-        Click Counter
-      </span>
-    </div>
+    </>
   );
 }
 
@@ -131,10 +136,14 @@ function InteractiveExamplesSection() {
         className="px-6"
       >
         {/* Example 1 – Organic Cloud Cursor */}
-        <ExampleCard title="Organic Cloud Cursor" cursor={<OrganicCloudCursor />} />
+        <ExampleCard title="Organic Cloud Cursor">
+          <OrganicCloudExample />
+        </ExampleCard>
 
         {/* Example 2 – Click Counter */}
-        <ClickableCounterCard />
+        <ExampleCard title="Click Counter">
+          <ClickCounterExample />
+        </ExampleCard>
 
         {/* Example 3 – Placeholder */}
         <ExampleCard title="Coming Soon" />
