@@ -145,43 +145,7 @@ cd example-nextjs && npm install && npm run dev
 - ✅ **Vite/CRA** - Client-side rendering with optimal performance
 - ✅ **Astro** - Partial hydration compatible
 
-#### Troubleshooting Common Issues
 
-**Cursor not appearing:**
-```tsx
-// ✅ Check if on mobile device (automatically hidden)
-// ✅ Verify enabled={true} prop
-// ✅ Check browser console for validation errors
-// ✅ If desired, hide native cursor with CSS for cleaner look
-```
-
-**Performance issues:**
-```tsx
-// ✅ Reduce smoothness for better performance
-<CustomCursor smoothness={1}>  // Direct positioning
-
-// ✅ Add throttling for complex cursors
-<CustomCursor throttleMs={16}>  // 60fps limit
-```
-
-**Performance issues:**
-```tsx
-// ✅ Reduce smoothness for better performance
-<CustomCursor smoothness={1}>  // Direct positioning
-
-// ✅ Add throttling for complex cursors
-<CustomCursor throttleMs={16}>  // 60fps limit
-
-// ✅ Use container scoping for targeted areas
-<CustomCursor containerRef={sectionRef}>
-```
-
-**Hydration mismatches:**
-```tsx
-// ✅ SSR is handled automatically - no action needed
-// ✅ Avoid conditional rendering - let component handle SSR
-// ✅ Don't wrap in dynamic imports unless specific needs
-```
 
 ## Advanced Usage
 
