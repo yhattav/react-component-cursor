@@ -312,16 +312,18 @@ const handleMove = useCallback((pos) => {
 </CustomCursor>
 ```
 
-### 🎮 Interactive Examples
+### 🎮 Examples & Demos
 
-For working examples and live demos, see:
+**Live Demo**: [Interactive Examples & Showcase →](https://yhattav.github.io/react-component-cursor/)
 
-- **Live Demo**: [react-component-cursor.vercel.app](https://react-component-cursor.vercel.app)
-- **CodeSandbox Examples**: 
-  - [Basic Usage](https://codesandbox.io/s/react-component-cursor-basic)
-  - [Container Scoping](https://codesandbox.io/s/react-component-cursor-container)
-  - [Interactive States](https://codesandbox.io/s/react-component-cursor-interactive)
-- **Storybook**: [Component Documentation](https://yhattav.github.io/react-component-cursor/storybook)
+**Local Examples** (clone and run):
+```bash
+# Vite React example with multiple cursor demos
+cd example && npm install && npm run dev
+
+# Next.js example with SSR and advanced patterns  
+cd example-nextjs && npm install && npm run dev
+```
 
 ### 📚 Usage Guidelines
 
