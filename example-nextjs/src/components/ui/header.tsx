@@ -136,7 +136,7 @@ function Header({ className = '' }: HeaderProps) {
                       React Component Cursor
                     </h1>
                     <p className="text-gray-400 text-xs">
-                      Professional cursor enhancement
+                      Professional mouse cursor enhancement
                     </p>
                   </div>
                 </motion.div>

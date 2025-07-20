@@ -96,7 +96,7 @@ function HeroSection() {
           >
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
               <span className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                Professional Cursor Enhancement
+                Professional Mouse Cursor Enhancement
               </span>
             </h1>
             <h2 className="text-3xl md:text-5xl font-bold mb-8">
