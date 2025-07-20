@@ -26,45 +26,45 @@ function QuickStartSection() {
   };
 
   return (
-    <section id="quick-start-section" className="py-20 bg-gradient-to-b from-gray-900/50 to-black">
-      <div className="container mx-auto px-6">
+    <section id="quick-start-section" className="py-12 sm:py-16 md:py-20 bg-gradient-to-b from-gray-900/50 to-black">
+      <div className="container mx-auto px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-12 md:mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 md:mb-6">
             Get Started in Minutes
           </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+          <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto px-4">
             Simple installation, intuitive API, and comprehensive TypeScript support.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2, duration: 0.8 }}
             viewport={{ once: true }}
-            className="bg-gray-800/50 rounded-xl p-8 border border-gray-700 flex flex-col"
+            className="bg-gray-800/50 rounded-xl p-6 md:p-8 border border-gray-700 flex flex-col"
           >
-            <h3 className="text-2xl font-semibold text-white mb-6 flex items-center gap-3">
-              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <h3 className="text-xl md:text-2xl font-semibold text-white mb-4 md:mb-6 flex items-center gap-3">
+              <svg className="w-5 h-5 md:w-6 md:h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0l-4 4m4-4v12" />
               </svg>
               Installation
             </h3>
             
             {/* Package Manager Tabs */}
-            <div className="flex gap-2 mb-4">
+            <div className="flex gap-1 sm:gap-2 mb-4 overflow-x-auto">
               {packageManagers.map((pm, index) => (
                 <button
                   key={pm.name}
                   onClick={() => setSelectedPackageManager(index)}
-                  className={`px-3 py-1 rounded text-sm font-medium transition-all ${
+                  className={`px-2 sm:px-3 py-1 rounded text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                     selectedPackageManager === index
                       ? 'bg-gray-700 text-white'
                       : 'text-gray-400 hover:text-white'
@@ -75,22 +75,26 @@ function QuickStartSection() {
               ))}
             </div>
 
-            <div className="bg-gray-900 rounded-lg p-4 mb-6 relative group">
-              <code className={`text-sm font-mono ${packageManagers[selectedPackageManager].color}`}>
+            <div className="bg-gray-900 rounded-lg p-3 sm:p-4 mb-4 md:mb-6 relative group overflow-hidden">
+              <code className={`
+                text-xs sm:text-sm font-mono 
+                ${packageManagers[selectedPackageManager].color}
+                block overflow-x-auto whitespace-nowrap
+              `}>
                 {packageManagers[selectedPackageManager].command}
               </code>
               <button
                 onClick={() => copyToClipboard(packageManagers[selectedPackageManager].command)}
-                className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-gray-700 rounded text-gray-400 hover:text-white"
+                className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 sm:p-2 hover:bg-gray-700 rounded text-gray-400 hover:text-white"
                 title="Copy to clipboard"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
               </button>
             </div>
             
-            <div className="text-gray-300 text-sm space-y-1 mt-auto">
+            <div className="text-gray-300 text-xs sm:text-sm space-y-1 mt-auto">
               <p>✅ Zero dependencies • Works with React 16.8+</p>
               <p>✅ TypeScript ready • SSR compatible</p>
             </div>
@@ -101,10 +105,10 @@ function QuickStartSection() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
             viewport={{ once: true }}
-            className="bg-gray-800/50 rounded-xl p-8 border border-gray-700 flex flex-col"
+            className="bg-gray-800/50 rounded-xl p-6 md:p-8 border border-gray-700 flex flex-col"
           >
-            <h3 className="text-2xl font-semibold text-white mb-6 flex items-center gap-3">
-              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <h3 className="text-xl md:text-2xl font-semibold text-white mb-4 md:mb-6 flex items-center gap-3">
+              <svg className="w-5 h-5 md:w-6 md:h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               Basic Usage
@@ -123,10 +127,10 @@ function App() {
     </main>
   );
 }`}
-              className="mb-6"
+              className="mb-4 md:mb-6"
             />
             
-            <div className="text-gray-300 text-sm space-y-1 mt-auto">
+            <div className="text-gray-300 text-xs sm:text-sm space-y-1 mt-auto">
               <p>✅ Use any React component</p>
             </div>
           </motion.div>
@@ -138,7 +142,7 @@ function App() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mt-12"
+          className="text-center mt-8 md:mt-12"
         >
           {/* <div className="inline-flex items-center gap-6 px-6 py-3 bg-gray-800/30 rounded-full border border-gray-700">
             <span className="text-sm text-gray-300">Ready for production:</span>
