@@ -65,6 +65,13 @@ function Header({ className = '' }: HeaderProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY, isVisible, showMobileIndicator]);
 
+  const getResponsiveIconClasses = (label: string) => {
+    if (label === 'NPM') {
+      return 'w-8 h-8 sm:w-10 sm:h-10';
+    }
+    return 'w-4 h-4 sm:w-5 sm:h-5';
+  };
+
   const navigationLinks = [
     {
       label: 'GitHub',
@@ -168,7 +175,7 @@ function Header({ className = '' }: HeaderProps) {
                           transition-colors duration-200
                         "
                       >
-                        <IconComponent className={`${link.iconSize} ${link.label === 'NPM' ? 'w-8 h-8 sm:w-10 sm:h-10' : 'w-4 h-4 sm:w-5 sm:h-5'}`} />
+                        <IconComponent className={getResponsiveIconClasses(link.label)} />
                       </motion.a>
                     );
                   })}

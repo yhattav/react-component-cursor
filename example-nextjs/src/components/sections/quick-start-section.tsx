@@ -76,7 +76,11 @@ function QuickStartSection() {
             </div>
 
             <div className="bg-gray-900 rounded-lg p-3 sm:p-4 mb-4 md:mb-6 relative group overflow-hidden">
-              <code className={`text-xs sm:text-sm font-mono ${packageManagers[selectedPackageManager].color} block overflow-x-auto whitespace-nowrap`}>
+              <code className={`
+                text-xs sm:text-sm font-mono 
+                ${packageManagers[selectedPackageManager].color}
+                block overflow-x-auto whitespace-nowrap
+              `}>
                 {packageManagers[selectedPackageManager].command}
               </code>
               <button

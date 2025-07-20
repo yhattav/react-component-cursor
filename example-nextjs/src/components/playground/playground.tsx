@@ -138,10 +138,10 @@ export const Playground: React.FC<PlaygroundProps> = ({
           config.enabled && config.hideNativeCursor ? 'hide-cursor' : ''
         }`}
       >
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             
           {/* Left Column - Controls */}
-          <div className="space-y-3 sm:space-y-4 order-2 xl:order-1">
+          <div className="space-y-3 sm:space-y-4 order-2 lg:order-1">
               {shouldShowProp('enabled') && (
                 <div>
                   <label className="flex items-center gap-3 cursor-pointer">
@@ -283,7 +283,7 @@ export const Playground: React.FC<PlaygroundProps> = ({
             </div>
             
           {/* Right Column - Generated Code */}
-          <div className="order-1 xl:order-2">
+          <div className="order-1 lg:order-2">
             <CodeBlock code={generateCodeString()} />
           </div>
         </div>
