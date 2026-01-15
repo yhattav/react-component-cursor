@@ -6,6 +6,7 @@ import { EntryAnimationSection } from './EntryAnimationSection';
 import { PaintSection } from './PaintSection';
 import { GallerySection } from './GallerySection';
 import CursorHierarchy from './CursorHierarchy';
+import { AnimatedBorderSection } from './AnimatedBorderSection';
 
 export interface SectionConfig {
   id: string;
@@ -73,6 +74,14 @@ export const SECTIONS: Record<string, SectionConfig> = {
     title: 'Gallery',
     description: 'Image gallery with cursor interactions',
     component: GallerySection,
+    enabled: true,
+  },
+  'animated-border': {
+    id: 'animated-border',
+    name: 'Animated Border',
+    title: 'Animated Border',
+    description: 'Animated perimeter light effect for any element',
+    component: AnimatedBorderSection,
     enabled: true,
   },
 };

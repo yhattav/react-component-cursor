@@ -1,6 +1,12 @@
 export { default as CustomCursor } from './CustomCursor';
 export type { CustomCursorProps } from './CustomCursor';
 
+export { CursorSpotlight } from './CursorSpotlight';
+export type { CursorSpotlightProps } from './CursorSpotlight';
+
+export { AnimatedBorder } from './AnimatedBorder';
+export type { AnimatedBorderProps } from './AnimatedBorder';
+
 // New API types
 export type {
   CursorPosition,
